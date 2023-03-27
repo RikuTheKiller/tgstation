@@ -2,7 +2,9 @@
     name = "Sentient Blood"
     antagpanel_category = ANTAG_GROUP_BIOHAZARDS
     show_to_ghosts = TRUE
+
     var/subjugations = 0
+    var/mob/living/basic/sentient_blood/main_body //Used when it subjugates someone. Stores a reference to the basic mob body for returning.
 
 /datum/antagonist/sentient_blood/on_gain()
     . = ..()
@@ -35,7 +37,8 @@
     var/subjugations = 0
     for(var/datum/mind/owner in get_owners())
         var/datum/antagonist/sentient_blood/sentient_blood = owner.has_antag_datum(/datum/antagonist/sentient_blood)
-        subjugations += sentient_blood.subjugations
+        if(istype(sentient_blood))
+            subjugations += sentient_blood.subjugations
     if(subjugations >= target_amount)
         return TRUE
     return FALSE
