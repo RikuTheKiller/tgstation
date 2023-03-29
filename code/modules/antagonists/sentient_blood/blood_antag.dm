@@ -4,7 +4,7 @@
     show_to_ghosts = TRUE
 
     var/subjugations = 0
-    var/mob/living/basic/sentient_blood/main_body //Used when it subjugates someone. Stores a reference to the basic mob body for returning.
+    var/main_body //Stores the original body of the sentient blood while it's in a host.
 
 /datum/antagonist/sentient_blood/on_gain()
     . = ..()
@@ -16,6 +16,8 @@
     objective = new /datum/objective/survive()
     objective.owner = owner
     objectives += objective
+    var/mob/living/basic/sentient_blood/blood_mob = new(src)
+    owner.transfer_to(blood_mob, TRUE)
 
 /datum/antagonist/sentient_blood/greet()
 	. = ..()
@@ -25,7 +27,7 @@
 /datum/objective/subjugate_hosts
     name = "subjugate"
 
-/datum/objective/subjugate_hosts/proc/generate_target_amount()
+/datum/objective/subjugate_hosts/New(text)
     target_amount = rand(1, 5)
     update_explanation_text()
 

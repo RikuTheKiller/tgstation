@@ -11,27 +11,28 @@
     layer = BELOW_MOB_LAYER
     health = INFINITY //We use the amount of blood we have as a metric for health, so the health variable is useless.
     maxHealth = INFINITY
-    speed = 1
+    speed = 1.5
 
     damage_coeff = list(BRUTE = 1, BURN = 1, TOX = 0, OXY = 0, STAMINA = 0, CLONE = 0) //Even though it doesn't use health, these still apply.
     unsuitable_atmos_damage = 0
     unsuitable_heat_damage = 0
     unsuitable_cold_damage = 0
 
-    var/blood_amount = SENTIENT_BLOOD_MAX //Blood amount, handled by abilities and other conditions.
+    var/blood_amount = SENTIENT_BLOOD_MAX //Blood amount, handled by abilities and such.
     var/current_size = RESIZE_DEFAULT_SIZE
-    var/pause_size_updates = FALSE
+    var/pause_life_updates = FALSE
 
-//Here we store all of the variables associated with the host when we swap with them. Handled very similarly to split_personality.dm, I'm not reinventing the wheel.
-    var/mob/living/carbon/human/host_body
-    var/datum/mind/host_mind
-    var/host_ckey
-    var/host_ip
-    var/host_computer_id
+    var/datum/mind/host_mind //References the mind of our host, if we're inhabiting one.
+    var/datum/mind/own_mind //References the original mind of this mob, such as when they're inhabiting someone.
 
-    var/datum/mind/actual_mind //References the original mind when they're outside of this mob, such as when they're inhabiting someone.
+    var/datum/antagonist/sentient_blood/blood_antag //Stores our antag datum for ease of access.
 
     var/datum/movespeed_modifier/blood_speed_modifier/blood_speed_modifier
+
+/mob/living/basic/sentient_blood/New(datum/antagonist/sentient_blood/antag_datum)
+    . = ..()
+
+    blood_antag = antag_datum
 
 /mob/living/basic/sentient_blood/Initialize(mapload)
     . = ..()
@@ -42,7 +43,7 @@
     ADD_TRAIT(src, TRAIT_MUTE, src) //Handled via traits since there is no other way to stop emotes and doing one of them via a proc and the other via a trait would be stupid.
     ADD_TRAIT(src, TRAIT_EMOTEMUTE, src)
 
-    var/datum/action/innate/sentient_blood_subjugate/subjugate = new()
+    var/datum/action/cooldown/sentient_blood_subjugate/subjugate = new()
     subjugate.Grant(src)
 
 /mob/living/basic/sentient_blood/Destroy()
@@ -81,13 +82,16 @@
         if(!(chest.biological_state & BIO_FLESH) || !IS_ORGANIC_LIMB(chest) || HAS_TRAIT(target, TRAIT_NEVER_WOUNDED))
             return
 
-        if(wound_to_replace)
-            wound_to_replace.replace_wound(/datum/wound/slash/critical)
-        else
-            var/datum/wound/slash/critical/wound_to_add = new()
-            wound_to_add.apply_wound(chest)
+        var/datum/wound/slash/critical/wound_to_add = new()
+        wound_to_add.occur_text = "is sliced wide open, spraying blood wildly"
+        wound_to_add.apply_wound(chest, old_wound = wound_to_replace)
 
 /mob/living/basic/sentient_blood/Life(delta_time, times_fired)
+    . = ..()
+
+    if(pause_life_updates)
+        return
+
     change_blood(-0.1 * delta_time)
 
 /mob/living/basic/sentient_blood/adjust_health(amount, updating_health = TRUE, forced = FALSE)
@@ -127,50 +131,38 @@
         death()
         return
     
-    add_or_update_variable_movespeed_modifier(blood_speed_modifier, TRUE, min(-0.6 + blood_amount / SENTIENT_BLOOD_MAX * 0.6, 0)) //0-60% speed boost based on blood amount.
-
-    if(pause_size_updates)
-        return
+    add_or_update_variable_movespeed_modifier(blood_speed_modifier, TRUE, min(-0.5 + blood_amount / SENTIENT_BLOOD_MAX * 0.5, 0)) //0-50% speed boost based on blood amount.
     var/newsize = 0.5 + blood_amount / SENTIENT_BLOOD_MAX * 0.5 //Near-zero blood makes it absolutely tiny.
     resize = newsize / current_size
     current_size = newsize
     update_transform()
 
-///Actually subjugate a target. This is where the magic happens.
+///Actually subjugate a target. Returns whether or not it was successful.
 /mob/living/basic/sentient_blood/proc/subjugate(mob/living/carbon/human/target)
-    var/datum/antagonist/sentient_blood/blood_antag = mind.has_antag_datum(/datum/antagonist/sentient_blood)
-
     if(!blood_antag)
-        return
+        return FALSE
 
-    if(target.mind)
-        if(target.mind.active)
-            blood_antag.subjugations += 1 //WOOOOO you took a sentient person over... on second thought that's pretty horrible. What have I made?
-        target.ghostize(FALSE)
-
-//Saving all of the host's variables.
-    host_body = target
     host_mind = target.mind
-    host_ip = target.lastKnownIP
-    host_ckey = target.ckey
-    host_computer_id = target.computer_id
-
-//Moving our variables into the host's body.
+    own_mind = mind
     blood_antag.main_body = src
-    actual_mind = mind
-    target.mind = mind
-    target.ckey = src.ckey
-    target.computer_id = computer_id
-    target.lastKnownIP = lastKnownIP
-
-//Nulling our variables, these are returned if and when we come back. The only one left is lastKnownIP.
-    mind = null
-    src.ckey = null
-    computer_id = null
-
-//Moving the mob into the target to await it's reawakening.
-    forceMove(target)
+    mind.transfer_to(target, TRUE)
+    pause_life_updates = TRUE //We don't want to lose blood over time or anything like that while inside.
+    blood_amount = SENTIENT_BLOOD_MAX //This should be handled when we are ejected, but just in case it isn't we fill it up beforehand.
+    forceMove(target) //Moving the mob into the target to await it's reawakening.
     RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(on_eject))
+
+    if(host_mind)
+        if(host_mind.active)
+            blood_antag.subjugations += 1 //WOOOOO you took a sentient person over... on second thought that's pretty horrible. What have I made?
+            var/list/target_datums = host_mind.antag_datums
+            for(var/datum/antagonist/antag_datum in target_datums) //This works because the body doesn't change and the mind doesn't matter.
+                host_mind.antag_datums.Remove(antag_datum)
+                antag_datum.owner = mind
+                var/datum/team/antag_team = antag_datum.get_team()
+                antag_team.remove_member(host_mind)
+                antag_team.add_member(mind)
+
+    return TRUE
 
 /datum/movespeed_modifier/blood_speed_modifier
     variable = TRUE

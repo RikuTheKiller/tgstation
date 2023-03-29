@@ -1,27 +1,43 @@
-/datum/action/innate/sentient_blood_subjugate
+/datum/action/cooldown/sentient_blood_subjugate
     name = "Subjugate"
     desc = "Attempt to enter the bloodstream of a target to subjugate them."
-    click_action = TRUE
-    enable_text = "You start looking around for targets to subjugate. Click on a nearby wounded target to proceed."
-    disable_text = "You resist your hunger for blood."
     ranged_mousepointer = 'icons/effects/mouse_pointers/blood_target.dmi'
+    click_to_activate = TRUE
+    unset_after_click = FALSE //We handle it ourselves since we transfer minds if we're successful.
 
-/datum/action/innate/sentient_blood_subjugate/do_ability(mob/living/caller, atom/clicked_on)
-    var/mob/living/basic/sentient_blood/user = caller
-    var/mob/living/carbon/human/target = clicked_on
+/datum/action/cooldown/sentient_blood_subjugate/Activate(atom/target)
+    . = ..()
 
-    if(!istype(user) || !istype(target))
+    var/mob/living/basic/sentient_blood/user = owner
+    var/mob/living/carbon/human/human_target = target
+
+    if(!istype(user) || !istype(human_target) || !user.Adjacent(target) || !user.blood_antag)
+        unset_click_ability(owner, refund_cooldown = TRUE)
         return FALSE
-    if(!user.Adjacent(target))
+    if(human_target.mind.has_antag_datum(/datum/antagonist/sentient_blood))
+        to_chat(user, span_danger("That host is already inhabited by one of your own."))
         return FALSE
-    var/datum/wound/largest_wound = get_most_bleeding_wound(target)
+
+    var/datum/wound/largest_wound = get_most_bleeding_wound(human_target)
+
     if(!largest_wound || !largest_wound.blood_flow) //We're pretty sure that it has some blood flow, but better safe than dividing by 0, yeah?
-        return FALSE
-    if(!do_after(user, 20 SECONDS / largest_wound.blood_flow)) //Weeping avulsions, by default, have a bloow flow of 4. That means that if you land a melee, this only takes 5 seconds. On a conscious person this totals to 11 seconds.
+        unset_click_ability(owner, refund_cooldown = TRUE)
         return FALSE
 
-    user.subjugate(target) //Finally, we turn them into our host.
-    return TRUE
+    target.visible_message("\The [user] is trying to enter [target]!", "\The [user] is trying to enter \the [largest_wound] on your [largest_wound.limb]!")
+    unset_click_ability(owner, refund_cooldown = TRUE)
+
+    if(!do_after(user, 20 SECONDS / largest_wound.blood_flow)) //Weeping avulsions, by default, have a blood flow of 4. That means that if you land a melee, this only takes 5 seconds. On a conscious person this totals to 11 seconds.
+        return FALSE
+    if(!largest_wound) //Did someone heal the wound while we were trying to enter? Rude, but we can't enter what isn't there.
+        return FALSE
+    if(human_target.mind.has_antag_datum(/datum/antagonist/sentient_blood))
+        to_chat(user, span_danger("You attempt to enter [target], but are met by another member of your species and evicted."))
+        return FALSE
+
+    target.visible_message("\The [user] enters [target]!", "You feel your consciousness fade as \the [user] enters your body...")
+    human_target.emote("scream")
+    return user.subjugate(human_target) //Finally, we turn them into our host.
 
 ///Gets the wound that is bleeding the most on the target.
 /proc/get_most_bleeding_wound(mob/living/carbon/human/target)
@@ -31,6 +47,4 @@
             continue
         if(!largest || largest.blood_flow < wound.blood_flow)
             largest = wound
-    if(!largest)
-        return FALSE
     return largest
