@@ -229,15 +229,14 @@
 
 ///Returns death message for mob examine text
 /mob/living/carbon/human/proc/generate_death_examine_text()
-	var/mob/dead/observer/ghost = get_ghost(TRUE, TRUE)
-	var/t_He = p_they(TRUE)
-	var/t_his = p_their()
-	var/t_is = p_are()
+	var/mob/dead/observer/ghost = get_ghost(even_if_they_cant_reenter = TRUE, ghosts_with_clients = TRUE)
+	if(IS_SUBJUGATED(src))
+		return span_deadsay("[p_their(capitalized = TRUE)] body is moving unnaturally.") //We make it obvious when sentient blood is in a dead host.
 	//This checks to see if the body is revivable
 	if(key || !get_organ_by_type(/obj/item/organ/internal/brain) || ghost?.can_reenter_corpse)
-		return span_deadsay("[t_He] [t_is] limp and unresponsive; there are no signs of life...")
+		return span_deadsay("[p_they(capitalized = TRUE)] [p_are()] limp and unresponsive; there are no signs of life...")
 	else
-		return span_deadsay("[t_He] [t_is] limp and unresponsive; there are no signs of life and [t_his] soul has departed...")
+		return span_deadsay("[p_they(capitalized = TRUE)] [p_are()] limp and unresponsive; there are no signs of life and [p_their()] soul has departed...")
 
 ///copies over clothing preferences like underwear to another human
 /mob/living/carbon/human/proc/copy_clothing_prefs(mob/living/carbon/human/destination)
@@ -288,3 +287,13 @@
 		return HUMAN_HEIGHT_DWARF
 
 	return mob_height
+
+/// Returns the instance of the wound that is bleeding the most. Returns null if there are no bleeding wounds.
+/mob/living/carbon/human/proc/get_most_bleeding_wound()
+    var/datum/wound/largest
+    for(var/datum/wound/wound in all_wounds)
+        if(wound.wound_type != WOUND_SLASH && wound.wound_type != WOUND_PIERCE)
+            continue
+        if(!largest || largest.blood_flow < wound.blood_flow)
+            largest = wound
+    return largest

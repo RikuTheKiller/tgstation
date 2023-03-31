@@ -1544,7 +1544,7 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/e
 					var/list/new_entry = list(list(user.name, "tried equipping you with [equipping]", world.time))
 					LAZYADD(victim_human.afk_thefts, new_entry)
 
-			else if(victim_human.is_blind())
+			else if(victim_human.is_blind_currently())
 				to_chat(target, span_userdanger("You feel someone trying to put something on you."))
 	user.do_item_attack_animation(target, used_item = equipping)
 

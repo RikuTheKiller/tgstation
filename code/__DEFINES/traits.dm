@@ -181,6 +181,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// Anti Dual-baton cooldown bypass exploit.
 #define TRAIT_IWASBATONED "iwasbatoned"
 #define TRAIT_SLEEPIMMUNE "sleep_immunity"
+/// The mob doesn't pass out from oxyloss.
+#define TRAIT_NOPASSOUT "nopassout"
 #define TRAIT_PUSHIMMUNE "push_immunity"
 /// Are we immune to shocks?
 #define TRAIT_SHOCKIMMUNE "shock_immunity"
@@ -327,8 +329,16 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// Is a medbot healing you
 #define TRAIT_MEDIBOTCOMINGTHROUGH "medbot"
 #define TRAIT_PASSTABLE "passtable"
+/// Makes the mob unable to be blinded.
+#define TRAIT_NOBLIND "noblind"
+/// Makes the mob unable to be deafened.
+#define TRAIT_NODEAF "nodeaf"
 /// Makes you immune to flashes
 #define TRAIT_NOFLASH "noflash"
+/// Makes you immune to loud noises
+#define TRAIT_NOBANG "nobang"
+/// Makes you immune to eye blur
+#define TRAIT_NOEYEBLUR "noeyeblur"
 /// prevents xeno huggies implanting skeletons
 #define TRAIT_XENO_IMMUNE "xeno_immune"
 /// Allows the species to equip items that normally require a jumpsuit without having one equipped. Used by golems.

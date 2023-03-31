@@ -66,7 +66,7 @@
 		if(C.canBeHandcuffed())
 			C.visible_message(span_danger("[user] is trying to put [src] on [C]!"), \
 								span_userdanger("[user] is trying to put [src] on you!"))
-			if(C.is_blind())
+			if(C.is_blind_currently())
 				to_chat(C, span_userdanger("As you feel someone grab your wrists, [src] start digging into your skin!"))
 			playsound(loc, cuffsound, 30, TRUE, -2)
 			log_combat(user, C, "attempted to handcuff")

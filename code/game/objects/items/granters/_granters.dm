@@ -25,7 +25,7 @@
 	if(reading)
 		to_chat(user, span_warning("You're already reading this!"))
 		return FALSE
-	if(user.is_blind())
+	if(user.is_blind_currently())
 		to_chat(user, span_warning("You are blind and can't read anything!"))
 		return FALSE
 	if(!isliving(user) || !user.can_read(src))

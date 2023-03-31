@@ -48,6 +48,14 @@
 #define is_blind(...) has_status_effect(/datum/status_effect/grouped/blindness)
 /// Is the mob blind from the passed source or sources?
 #define is_blind_from(sources) has_status_effect_from_source(/datum/status_effect/grouped/blindness, sources)
+/// Is the mob blind CURRENTLY?
+/// This check fails if the mob has TRAIT_NOBLIND
+/// While is_blind will succeed regardless
+/mob/proc/is_blind_currently()
+	var/datum/status_effect/grouped/blindness/blind = has_status_effect(/datum/status_effect/grouped/blindness)
+	if(isnull(blind))
+		return FALSE
+	return blind.should_be_blind()
 
 /// Causes the mob to become nearsighted via the passed source
 #define become_nearsighted(source) apply_status_effect(/datum/status_effect/grouped/nearsighted, source)

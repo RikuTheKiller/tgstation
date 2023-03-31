@@ -38,7 +38,7 @@
 	..()
 	if(HAS_TRAIT(owner, TRAIT_FEARLESS))
 		return
-	if(owner.is_blind())
+	if(owner.is_blind_currently())
 		return
 
 	if(!COOLDOWN_FINISHED(src, check_cooldown) || !COOLDOWN_FINISHED(src, scare_cooldown))

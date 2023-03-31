@@ -169,7 +169,7 @@
 
 /datum/brain_trauma/severe/monophobia/proc/check_alone()
 	var/check_radius = 7
-	if(owner.is_blind())
+	if(owner.is_blind_currently())
 		check_radius = 1
 	for(var/mob/M in oview(owner, check_radius))
 		if(!isliving(M)) //ghosts ain't people

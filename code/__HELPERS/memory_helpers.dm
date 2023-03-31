@@ -66,7 +66,7 @@
 		var/new_memory_flags = initial(memory_type.memory_flags)
 		if(!(new_memory_flags & MEMORY_SKIP_UNCONSCIOUS) && current.stat >= UNCONSCIOUS)
 			return
-		if(new_memory_flags & MEMORY_CHECK_BLINDNESS && current.is_blind())
+		if(new_memory_flags & MEMORY_CHECK_BLINDNESS && current.is_blind_currently())
 			return
 		if(new_memory_flags & MEMORY_CHECK_DEAFNESS && HAS_TRAIT(current, TRAIT_DEAF))
 			return

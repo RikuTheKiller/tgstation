@@ -40,7 +40,7 @@
 	return BRUTELOSS
 
 /obj/item/healthanalyzer/attack_self(mob/user)
-	if(!user.can_read(src) || user.is_blind())
+	if(!user.can_read(src) || user.is_blind_currently())
 		return
 
 	scanmode = (scanmode + 1) % SCANMODE_COUNT
@@ -51,7 +51,7 @@
 			to_chat(user, span_notice("You switch the health analyzer to report extra info on wounds."))
 
 /obj/item/healthanalyzer/attack(mob/living/M, mob/living/carbon/human/user)
-	if(!user.can_read(src) || user.is_blind())
+	if(!user.can_read(src) || user.is_blind_currently())
 		return
 
 	flick("[icon_state]-scan", src) //makes it so that it plays the scan animation upon scanning, including clumsy scanning
@@ -82,7 +82,7 @@
 	add_fingerprint(user)
 
 /obj/item/healthanalyzer/attack_secondary(mob/living/victim, mob/living/user, params)
-	if(!user.can_read(src) || user.is_blind())
+	if(!user.can_read(src) || user.is_blind_currently())
 		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 	chemscan(user, victim)
@@ -194,7 +194,7 @@
 
 		// Ear status
 		var/obj/item/organ/internal/ears/ears = carbontarget.get_organ_slot(ORGAN_SLOT_EARS)
-		if(istype(ears))
+		if(istype(ears) && !carbontarget.can_hear())
 			if(HAS_TRAIT_FROM(carbontarget, TRAIT_DEAF, GENETIC_MUTATION))
 				render_list = "<span class='alert ml-2'>Subject is genetically deaf.\n</span>"
 			else if(HAS_TRAIT_FROM(carbontarget, TRAIT_DEAF, EAR_DAMAGE))
@@ -210,7 +210,7 @@
 		// Eye status
 		var/obj/item/organ/internal/eyes/eyes = carbontarget.get_organ_slot(ORGAN_SLOT_EYES)
 		if(istype(eyes))
-			if(carbontarget.is_blind())
+			if(carbontarget.is_blind_currently())
 				render_list += "<span class='alert ml-2'>Subject is blind.\n</span>"
 			else if(carbontarget.is_nearsighted())
 				render_list += "<span class='alert ml-2'>Subject is nearsighted.\n</span>"
@@ -353,8 +353,15 @@
 			var/blood_percent = round((carbontarget.blood_volume / BLOOD_VOLUME_NORMAL)*100)
 			var/blood_type = carbontarget.dna.blood_type
 			if(blood_id != /datum/reagent/blood) // special blood substance
-				var/datum/reagent/R = GLOB.chemical_reagents_list[blood_id]
-				blood_type = R ? R.name : blood_id
+				if(blood_id == /datum/reagent/blood/sentient)
+					var/datum/status_effect/sentient_blood_conversion/conversion = carbontarget.has_status_effect(/datum/status_effect/sentient_blood_conversion)
+					if(!conversion)
+						blood_type = "Sentient [blood_type]"
+					else
+						blood_type = "[blood_type] ([clamp(round(conversion.converted / BLOOD_VOLUME_NORMAL * 100, 0.1), 0, 100)]% SENTIENT)"
+				else
+					var/datum/reagent/R = GLOB.chemical_reagents_list[blood_id]
+					blood_type = R ? R.name : blood_id
 			if(carbontarget.blood_volume <= BLOOD_VOLUME_SAFE && carbontarget.blood_volume > BLOOD_VOLUME_OKAY)
 				render_list += "<span class='alert ml-1'>Blood level: LOW [blood_percent] %, [carbontarget.blood_volume] cl,</span> [span_info("type: [blood_type]")]\n"
 			else if(carbontarget.blood_volume <= BLOOD_VOLUME_OKAY)
@@ -447,7 +454,7 @@
 /obj/item/healthanalyzer/AltClick(mob/user)
 	..()
 
-	if(!user.can_perform_action(src, NEED_LITERACY|NEED_LIGHT) || user.is_blind())
+	if(!user.can_perform_action(src, NEED_LITERACY|NEED_LIGHT) || user.is_blind_currently())
 		return
 
 	mode = !mode
@@ -510,7 +517,7 @@
 			L.dropItemToGround(src)
 
 /obj/item/healthanalyzer/wound/attack(mob/living/carbon/patient, mob/living/carbon/human/user)
-	if(!user.can_read(src) || user.is_blind())
+	if(!user.can_read(src) || user.is_blind_currently())
 		return
 
 	add_fingerprint(user)

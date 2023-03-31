@@ -131,7 +131,7 @@
 	icon_state = "book[rand(1, maximum_book_state)]"
 
 /obj/item/book/attack_self(mob/user)
-	if(user.is_blind())
+	if(user.is_blind_currently())
 		to_chat(user, span_warning("You are blind and can't read anything!"))
 		return
 	if(!user.can_read(src))
@@ -143,7 +143,7 @@
 	if(istype(I, /obj/item/pen))
 		if(!user.can_perform_action(src) || !user.can_write(I))
 			return
-		if(user.is_blind())
+		if(user.is_blind_currently())
 			to_chat(user, span_warning("As you are trying to write on the book, you suddenly feel very stupid!"))
 			return
 		if(unique)

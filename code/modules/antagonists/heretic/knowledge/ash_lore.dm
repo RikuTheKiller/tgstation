@@ -58,7 +58,7 @@
 /datum/heretic_knowledge/ashen_grasp/proc/on_mansus_grasp(mob/living/source, mob/living/target)
 	SIGNAL_HANDLER
 
-	if(target.is_blind())
+	if(target.is_blind_currently())
 		return
 
 	if(!target.get_organ_slot(ORGAN_SLOT_EYES))

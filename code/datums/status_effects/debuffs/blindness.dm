@@ -10,7 +10,7 @@
 	// This is not "remove on fullheal" as in practice,
 	// fullheal should instead remove all the sources and in turn cure this
 
-	/// Static list of signals that, when recieved, we force an update to our nearsighted overlay
+	/// Static list of signals that, when received, we force an update to our nearsighted overlay
 	var/static/list/update_signals = list(SIGNAL_ADDTRAIT(TRAIT_NEARSIGHTED_CORRECTED), SIGNAL_REMOVETRAIT(TRAIT_NEARSIGHTED_CORRECTED))
 	/// How severe is our nearsightedness right now
 	var/overlay_severity = 1
@@ -57,6 +57,8 @@
 	id = "blindness"
 	tick_interval = -1
 	alert_type = /atom/movable/screen/alert/status_effect/blind
+	/// Static list of signals that, when received, we force an update to whether or not the mob is actually blind
+	var/static/list/update_signals = list(SIGNAL_ADDTRAIT(TRAIT_NOBLIND), SIGNAL_REMOVETRAIT(TRAIT_NOBLIND))
 	// This is not "remove on fullheal" as in practice,
 	// fullheal should instead remove all the sources and in turn cure this
 
@@ -64,15 +66,29 @@
 	if(!CAN_BE_BLIND(owner))
 		return FALSE
 
-	owner.overlay_fullscreen(id, /atom/movable/screen/fullscreen/blind)
-	// You are blind - at most, able to make out shapes near you
-	owner.add_client_colour(/datum/client_colour/monochrome/blind)
+	RegisterSignals(owner, update_signals, PROC_REF(update_blindness))
+	update_blindness()
 	return ..()
 
 /datum/status_effect/grouped/blindness/on_remove()
+	UnregisterSignal(owner, update_signals)
 	owner.clear_fullscreen(id)
 	owner.remove_client_colour(/datum/client_colour/monochrome/blind)
 	return ..()
+
+/datum/status_effect/grouped/blindness/proc/should_be_blind()
+	return !HAS_TRAIT(owner, TRAIT_NOBLIND)
+
+/datum/status_effect/grouped/blindness/proc/update_blindness()
+	if(should_be_blind())
+		owner.overlay_fullscreen(id, /atom/movable/screen/fullscreen/blind)
+		owner.add_client_colour(/datum/client_colour/monochrome/blind)
+		linked_alert = owner.throw_alert(id, alert_type)
+		linked_alert.attached_effect = src
+	else
+		owner.clear_fullscreen(id)
+		owner.remove_client_colour(/datum/client_colour/monochrome/blind)
+		owner.clear_alert(id)
 
 /atom/movable/screen/alert/status_effect/blind
 	name = "Blind"

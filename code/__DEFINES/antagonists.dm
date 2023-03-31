@@ -230,6 +230,9 @@ GLOBAL_LIST_INIT(ai_employers, list(
 /// Checks if the given mob is a malf ai.
 #define IS_MALF_AI(mob) (mob?.mind?.has_antag_datum(/datum/antagonist/malf_ai))
 
+/// Checks if the given mob has been subjugated by sentient blood.
+#define IS_SUBJUGATED(mob) (ishuman(mob) && mob?.mind?.has_antag_datum(/datum/antagonist/sentient_blood))
+
 /// List of human antagonist types which don't spawn directly on the space station
 GLOBAL_LIST_INIT(human_invader_antagonists, list(
 	/datum/antagonist/abductor,

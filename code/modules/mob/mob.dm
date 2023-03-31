@@ -211,7 +211,7 @@
 	msg = copytext_char(msg, 1, MAX_MESSAGE_LEN)
 
 	if(type)
-		if(type & MSG_VISUAL && is_blind())//Vision related
+		if(type & MSG_VISUAL && is_blind_currently())//Vision related
 			if(!alt_msg)
 				return
 			else
@@ -224,7 +224,7 @@
 			else
 				msg = alt_msg
 				type = alt_type
-				if(type & MSG_VISUAL && is_blind())
+				if(type & MSG_VISUAL && is_blind_currently())
 					return
 	// voice muffling
 	if(stat == UNCONSCIOUS || stat == HARD_CRIT)
@@ -288,7 +288,7 @@
 		if(!msg)
 			continue
 
-		if(visible_message_flags & EMOTE_MESSAGE && runechat_prefs_check(M, visible_message_flags) && !M.is_blind())
+		if(visible_message_flags & EMOTE_MESSAGE && runechat_prefs_check(M, visible_message_flags) && !M.is_blind_currently())
 			M.create_chat_message(src, raw_message = raw_msg, runechat_flags = visible_message_flags)
 
 		M.show_message(msg, msg_type, blind_message, MSG_AUDIBLE)
@@ -538,7 +538,7 @@
 		return
 
 	var/turf/examine_turf = get_turf(examinify)
-	if(is_blind()) //blind people see things differently (through touch)
+	if(is_blind_currently()) //blind people see things differently (through touch)
 		if(!blind_examine_check(examinify))
 			return
 	else if(!(examine_turf.luminosity || examine_turf.dynamic_lumcount) && \

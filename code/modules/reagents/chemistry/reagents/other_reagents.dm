@@ -44,7 +44,7 @@
 	if(iscarbon(exposed_mob))
 		var/mob/living/carbon/exposed_carbon = exposed_mob
 		if(exposed_carbon.get_blood_id() == type && ((methods & INJECT) || ((methods & INGEST) && exposed_carbon.dna && exposed_carbon.dna.species && (DRINKSBLOOD in exposed_carbon.dna.species.species_traits))))
-			if(!data || !(data["blood_type"] in get_safe_blood(exposed_carbon.dna.blood_type)))
+			if((!data || !(data["blood_type"] in get_safe_blood(exposed_carbon.dna.blood_type))) && !istype(src, /datum/reagent/blood/sentient))
 				exposed_carbon.reagents.add_reagent(/datum/reagent/toxin, reac_volume * 0.5)
 			else
 				exposed_carbon.blood_volume = min(exposed_carbon.blood_volume + round(reac_volume, 0.1), BLOOD_VOLUME_MAXIMUM)
@@ -109,6 +109,30 @@
 			bloodsplatter.AddComponent(/datum/component/infective, viri_to_add)
 	if(data["blood_DNA"])
 		bloodsplatter.add_blood_DNA(list(data["blood_DNA"] = data["blood_type"]))
+
+/datum/reagent/blood/sentient
+	name = "Sentient Blood"
+	description = "It's looking at you."
+	metabolization_rate = 2 * REAGENTS_METABOLISM //Eh, sure, if they aren't human it'll stay around for a while.
+	self_consuming = TRUE
+	chemical_flags = REAGENT_INVISIBLE | REAGENT_DEAD_PROCESS //We don't want it to appear on scanners since it's presence in the bloodstream is just an intermediary step for what it actually does.
+
+/datum/reagent/blood/sentient/on_mob_add(mob/living/L, amount)
+	var/mob/living/carbon/human/human = L
+
+	if(!istype(human))
+		return
+
+	var/datum/status_effect/sentient_blood_conversion/effect = human.has_status_effect(/datum/status_effect/sentient_blood_conversion)
+
+	if(!IS_SUBJUGATED(human))
+		effect = human.apply_status_effect(/datum/status_effect/sentient_blood_conversion)
+		effect.converted += amount
+	else
+		human.remove_status_effect(/datum/status_effect/sentient_blood_conversion)
+		human.dna.species.exotic_blood = /datum/reagent/blood/sentient
+	
+	human.reagents.remove_reagent(/datum/reagent/blood/sentient, amount)
 
 /datum/reagent/consumable/liquidgibs
 	name = "Liquid Gibs"

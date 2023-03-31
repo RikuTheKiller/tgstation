@@ -144,7 +144,7 @@
 				var/list/new_entry = list(list(user.name, "tried unequipping your [item.name]", world.time))
 				LAZYADD(victim_human.afk_thefts, new_entry)
 
-		else if(victim_human.is_blind())
+		else if(victim_human.is_blind_currently())
 			to_chat(source, span_userdanger("You feel someone fumble with your belongings."))
 
 	return TRUE

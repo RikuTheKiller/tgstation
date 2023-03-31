@@ -77,7 +77,7 @@ GLOBAL_LIST_EMPTY(all_ongoing_hallucinations)
 		if(nearby_living.mob_biotypes & NO_HALLUCINATION_BIOTYPES)
 			continue
 
-		if(nearby_living.is_blind())
+		if(nearby_living.is_blind_currently())
 			continue
 
 		// Everyone else gets hallucinations.

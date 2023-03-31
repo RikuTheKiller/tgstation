@@ -7,7 +7,14 @@
 // Takes care blood loss and regeneration
 /mob/living/carbon/human/handle_blood(delta_time, times_fired)
 
-	if(HAS_TRAIT(src, TRAIT_NOBLOOD) || (HAS_TRAIT(src, TRAIT_FAKEDEATH)))
+	if(HAS_TRAIT(src, TRAIT_NOBLOOD))
+		return
+
+	if(IS_SUBJUGATED(src)) //Sentient blood handles this differently.
+		handle_bleeding(delta_time, times_fired)
+		return
+
+	if(HAS_TRAIT(src, TRAIT_FAKEDEATH))
 		return
 
 	if(bodytemperature < BLOOD_STOP_TEMP || (HAS_TRAIT(src, TRAIT_HUSK))) //cold or husked people do not pump the blood.
@@ -68,6 +75,9 @@
 				investigate_log("has died of bloodloss.", INVESTIGATE_DEATHS)
 				death()
 
+	handle_bleeding(delta_time, times_fired)
+
+/mob/living/carbon/proc/handle_bleeding(delta_time, times_fired)
 	var/temp_bleed = 0
 	//Bleeding out
 	for(var/obj/item/bodypart/iter_part as anything in bodyparts)

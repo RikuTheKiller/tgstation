@@ -14,11 +14,14 @@
     if(!istype(user) || !istype(human_target) || !user.Adjacent(target) || !user.blood_antag)
         unset_click_ability(owner, refund_cooldown = TRUE)
         return FALSE
-    if(human_target.mind.has_antag_datum(/datum/antagonist/sentient_blood))
-        to_chat(user, span_danger("That host is already inhabited by one of your own."))
+    if(IS_SUBJUGATED(human_target))
+        to_chat(user, span_danger("[target] is already inhabited by one of your own."))
         return FALSE
+    var/blood_id = human_target.get_blood_id()
+    if((blood_id != /datum/reagent/blood && blood_id != /datum/reagent/blood/sentient) || HAS_TRAIT(target, TRAIT_NOBLOOD))
+        to_chat(user, span_danger("[target]'s blood isn't compatible with you."))
 
-    var/datum/wound/largest_wound = get_most_bleeding_wound(human_target)
+    var/datum/wound/largest_wound = human_target.get_most_bleeding_wound()
 
     if(!largest_wound || !largest_wound.blood_flow) //We're pretty sure that it has some blood flow, but better safe than dividing by 0, yeah?
         unset_click_ability(owner, refund_cooldown = TRUE)
@@ -31,20 +34,27 @@
         return FALSE
     if(!largest_wound) //Did someone heal the wound while we were trying to enter? Rude, but we can't enter what isn't there.
         return FALSE
-    if(human_target.mind.has_antag_datum(/datum/antagonist/sentient_blood))
+    blood_id = human_target.get_blood_id()
+    if((blood_id != /datum/reagent/blood && blood_id != /datum/reagent/blood/sentient) || HAS_TRAIT(target, TRAIT_NOBLOOD))
+        to_chat(user, span_danger("[target]'s blood has somehow transformed while you were trying to enter. Curious."))
+    if(IS_SUBJUGATED(human_target))
         to_chat(user, span_danger("You attempt to enter [target], but are met by another member of your species and evicted."))
         return FALSE
 
     target.visible_message("\The [user] enters [target]!", "You feel your consciousness fade as \the [user] enters your body...")
     human_target.emote("scream")
-    return user.subjugate(human_target) //Finally, we turn them into our host.
+    return user.blood_antag.subjugate(human_target) //Finally, we turn them into our host.
 
-///Gets the wound that is bleeding the most on the target.
-/proc/get_most_bleeding_wound(mob/living/carbon/human/target)
-    var/datum/wound/largest
-    for(var/datum/wound/wound in target.all_wounds)
-        if(wound.wound_type != WOUND_SLASH && wound.wound_type != WOUND_PIERCE)
-            continue
-        if(!largest || largest.blood_flow < wound.blood_flow)
-            largest = wound
-    return largest
+/datum/action/innate/sentient_blood_emerge
+    name = "Emerge"
+    desc = "Tear your way out of your host."
+
+/datum/action/innate/sentient_blood_emerge/Activate()
+    var/mob/living/carbon/human/user = owner
+    var/datum/antagonist/sentient_blood/blood_antag = user?.mind?.has_antag_datum(/datum/antagonist/sentient_blood)
+
+    if(!blood_antag)
+        return
+
+    blood_antag.release_host(wound = TRUE)
+

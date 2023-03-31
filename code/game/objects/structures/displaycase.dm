@@ -215,7 +215,7 @@
 		if (!user.combat_mode)
 			if(!open && !autoexamine_while_closed)
 				return
-			if(!user.is_blind())
+			if(!user.is_blind_currently())
 				user.examinate(src)
 			return
 		user.visible_message(span_danger("[user] kicks the display case."), null, null, COMBAT_MESSAGE_RANGE)

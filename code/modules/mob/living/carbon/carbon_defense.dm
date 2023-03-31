@@ -2,7 +2,7 @@
 
 /mob/living/carbon/get_eye_protection()
 	. = ..()
-	if(is_blind() && !is_blind_from(list(UNCONSCIOUS_TRAIT, HYPNOCHAIR_TRAIT)))
+	if(is_blind_currently() && !is_blind_from(list(UNCONSCIOUS_TRAIT, HYPNOCHAIR_TRAIT)))
 		return INFINITY //For all my homies that can not see in the world
 	var/obj/item/organ/internal/eyes/eyes = get_organ_slot(ORGAN_SLOT_EYES)
 	if(eyes)
@@ -18,7 +18,7 @@
 
 /mob/living/carbon/get_ear_protection()
 	. = ..()
-	if(HAS_TRAIT(src, TRAIT_DEAF))
+	if(HAS_TRAIT(src, TRAIT_DEAF) || HAS_TRAIT(src, TRAIT_NOBANG))
 		return INFINITY //For all my homies that can not hear in the world
 	var/obj/item/organ/internal/ears/E = get_organ_slot(ORGAN_SLOT_EARS)
 	if(!E)
@@ -590,7 +590,7 @@
 					to_chat(src, span_warning("Your eyes start to burn badly!"))
 					eyes.apply_organ_damage(eyes.low_threshold)
 
-				else if(!is_blind() && prob(eyes.damage - eyes.high_threshold))
+				else if(!is_blind_currently() && prob(eyes.damage - eyes.high_threshold))
 					to_chat(src, span_warning("You can't see anything!"))
 					eyes.apply_organ_damage(eyes.maxHealth)
 
@@ -650,6 +650,8 @@
 /mob/living/carbon/can_hear()
 	. = FALSE
 	var/obj/item/organ/internal/ears/ears = get_organ_slot(ORGAN_SLOT_EARS)
+	if(HAS_TRAIT(src, TRAIT_NODEAF))
+		. = TRUE
 	if(ears && !HAS_TRAIT(src, TRAIT_DEAF))
 		. = TRUE
 	if(health <= hardcrit_threshold && !HAS_TRAIT(src, TRAIT_NOHARDCRIT))
@@ -673,6 +675,9 @@
 * Check to see if we should be passed out from oyxloss
 */
 /mob/living/carbon/proc/check_passout(oxyloss)
+	if(HAS_TRAIT(src, TRAIT_NOPASSOUT))
+		REMOVE_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+		return
 	if(!isnum(oxyloss))
 		return
 	if(oxyloss <= 50)

@@ -401,7 +401,7 @@
 
 /obj/singularity/proc/mezzer()
 	for(var/mob/living/carbon/stunned_mob in oviewers(8, src))
-		if(stunned_mob.stat == DEAD || stunned_mob.is_blind())
+		if(stunned_mob.stat == DEAD || stunned_mob.is_blind_currently())
 			continue
 
 		if(!ishuman(stunned_mob))

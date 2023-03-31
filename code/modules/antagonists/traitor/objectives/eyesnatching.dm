@@ -193,7 +193,7 @@
 	if(!do_after(user, 5 SECONDS, target = target, extra_checks = CALLBACK(src, PROC_REF(eyeballs_exist), eyeballies, head, target)))
 		return
 
-	if(!target.is_blind())
+	if(!target.is_blind_currently())
 		to_chat(target, span_userdanger("You suddenly go blind!"))
 	if(prob(1))
 		to_chat(target, span_notice("At least you got a new pirate-y look out of it..."))
