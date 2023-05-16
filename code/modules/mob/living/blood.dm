@@ -11,7 +11,7 @@
 		return
 
 	if(IS_SUBJUGATED(src)) //Sentient blood handles this differently.
-		handle_bleeding(delta_time, times_fired)
+		handle_bleeding(delta_time, times_fired, silent = TRUE)
 		return
 
 	if(HAS_TRAIT(src, TRAIT_FAKEDEATH))
@@ -77,7 +77,7 @@
 
 	handle_bleeding(delta_time, times_fired)
 
-/mob/living/carbon/proc/handle_bleeding(delta_time, times_fired)
+/mob/living/carbon/proc/handle_bleeding(delta_time, times_fired, silent = FALSE)
 	var/temp_bleed = 0
 	//Bleeding out
 	for(var/obj/item/bodypart/iter_part as anything in bodyparts)
@@ -89,7 +89,8 @@
 
 	if(temp_bleed)
 		bleed(temp_bleed)
-		bleed_warn(temp_bleed)
+		if(!silent)
+			bleed_warn(temp_bleed)
 
 /// Has each bodypart update its bleed/wound overlay icon states
 /mob/living/carbon/proc/update_bodypart_bleed_overlays()

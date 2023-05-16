@@ -1,6 +1,10 @@
 /datum/action/cooldown/sentient_blood_subjugate
     name = "Subjugate"
     desc = "Attempt to enter the bloodstream of a target to subjugate them."
+    button_icon = 'icons/mob/actions/actions_sentient_blood.dmi'
+    button_icon_state = "subjugate"
+    background_icon_state = "bg_demon"
+    overlay_icon_state = "bg_spell_border_active_red"
     ranged_mousepointer = 'icons/effects/mouse_pointers/blood_target.dmi'
     click_to_activate = TRUE
     unset_after_click = FALSE //We handle it ourselves since we transfer minds if we're successful.
@@ -48,13 +52,52 @@
 /datum/action/innate/sentient_blood_emerge
     name = "Emerge"
     desc = "Tear your way out of your host."
+    button_icon = 'icons/mob/actions/actions_sentient_blood.dmi'
+    button_icon_state = "emerge"
+    background_icon_state = "bg_demon"
+    overlay_icon_state = "bg_spell_border_active_red"
 
 /datum/action/innate/sentient_blood_emerge/Activate()
     var/mob/living/carbon/human/user = owner
     var/datum/antagonist/sentient_blood/blood_antag = user?.mind?.has_antag_datum(/datum/antagonist/sentient_blood)
 
-    if(!blood_antag)
-        return
+    if(!user || !blood_antag)
+        return FALSE
 
     blood_antag.release_host(wound = TRUE)
 
+/datum/action/cooldown/sentient_blood_boost
+    name = "Metabolic Boost"
+    desc = "Accelerate your metabolism, draining blood in exchange for healing."
+    button_icon = 'icons/mob/actions/actions_sentient_blood.dmi'
+    button_icon_state = "boost"
+    background_icon_state = "bg_demon"
+    overlay_icon_state = "bg_spell_border_active_red"
+    cooldown_rounding = 1
+    cooldown_time = 5 MINUTES
+    melee_cooldown_time = 0 SECONDS
+    var/cost = 200
+
+/datum/action/cooldown/sentient_blood_boost/update_button_status(atom/movable/screen/movable/action_button/button, force)
+    ..()
+
+    if(next_use_time > world.time)
+        return
+
+    button.maptext = MAPTEXT("<b>[cost]</b>")
+
+/datum/action/cooldown/sentient_blood_boost/Activate()
+    var/mob/living/carbon/human/user = owner
+    var/datum/antagonist/sentient_blood/blood_antag = user?.mind?.has_antag_datum(/datum/antagonist/sentient_blood)
+
+    if(!user || !blood_antag || user.health <= HEALTH_THRESHOLD_DEAD)
+        return FALSE
+
+    if(user.apply_status_effect(/datum/status_effect/sentient_blood_boost))
+        blood_antag.change_blood(-cost)
+        StartCooldown()
+
+/datum/action/cooldown/sentient_blood_boost/IsAvailable(feedback = FALSE)
+    var/mob/living/carbon/human/user = owner
+    var/datum/antagonist/sentient_blood/blood_antag = user?.mind?.has_antag_datum(/datum/antagonist/sentient_blood)
+    return ..() && blood_antag?.get_blood_amount() > cost

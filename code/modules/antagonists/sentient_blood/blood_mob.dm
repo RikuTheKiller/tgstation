@@ -54,18 +54,13 @@
     if(istype(human_target))
         var/obj/item/bodypart/chest = human_target.get_bodypart(BODY_ZONE_CHEST)
 
-        if(!chest)
-            return
-        if(!(chest.biological_state & BIO_FLESH) || !IS_ORGANIC_LIMB(chest) || HAS_TRAIT(target, TRAIT_NEVER_WOUNDED) || HAS_TRAIT(target, TRAIT_NOBLOOD))
+        if(!chest || !(chest.biological_state & BIO_FLESH) || !IS_ORGANIC_LIMB(chest) || HAS_TRAIT(target, TRAIT_NEVER_WOUNDED) || HAS_TRAIT(target, TRAIT_NOBLOOD))
             return
 
-        var/datum/wound/wound_to_replace
         for(var/datum/wound/existing_wound in chest.wounds)
             if(existing_wound.wound_type == WOUND_SLASH)
                 if(existing_wound.severity >= WOUND_SEVERITY_CRITICAL)
                     return
-                wound_to_replace = existing_wound
-                break
 
         target.visible_message(span_danger("\The [src] is trying to slice [target]'s chest wide open!"), span_userdanger("\The [src] is trying to slice your chest wide open!"), span_danger("You hear aggressive slicing!"))
         playsound(target, 'sound/surgery/scalpel1.ogg', 75, TRUE, falloff_exponent = 12, falloff_distance = 1) //Plays the sound made when you start an incision step.
@@ -73,9 +68,14 @@
 
         if(!do_after(src, human_target.stat == CONSCIOUS ? 6 SECONDS : 3 SECONDS, target))
             return
-        if(!chest || !(chest.biological_state & BIO_FLESH) || !IS_ORGANIC_LIMB(chest) || HAS_TRAIT(target, TRAIT_NEVER_WOUNDED))
+        if(!chest || !(chest.biological_state & BIO_FLESH) || !IS_ORGANIC_LIMB(chest) || HAS_TRAIT(target, TRAIT_NEVER_WOUNDED) || HAS_TRAIT(target, TRAIT_NOBLOOD))
             return
 
+        var/datum/wound/wound_to_replace
+        for(var/datum/wound/existing_wound in chest.wounds)
+            if(existing_wound.wound_type == WOUND_SLASH)
+                wound_to_replace = existing_wound
+                break
         var/datum/wound/slash/critical/wound_to_add = new()
         wound_to_add.occur_text = "is sliced wide open, spraying blood wildly"
         wound_to_add.apply_wound(chest, old_wound = wound_to_replace)
@@ -86,7 +86,7 @@
     if(pause_life_updates)
         return
 
-    blood_antag.change_blood(-0.1 * delta_time)
+    blood_antag.change_blood(BLOOD_VOLUME_NORMAL * -0.001 * delta_time)
 
     update_blood()
 

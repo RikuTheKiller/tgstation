@@ -7,11 +7,13 @@
 
     var/mob/living/basic/sentient_blood/main_body //Stores the original body of the sentient blood.
     var/mob/living/carbon/human/host //Stores the host while we're subjugating them.
-    var/datum/mind/host_mind //Stores the original mind of a host while we're subjugating them.
+    var/datum/mind/host_mind //Stores the original mind of the host while we're subjugating them.
 
-    var/datum/reagents/blood_holder //Used to gauge how much blood we have when we are NOT in a host. Use get_blood_amount() instead of reading it from this directly.
+    //Used to gauge how much blood we have when we are NOT in a host. Use get_blood_amount() instead of reading it from this directly.
+    var/datum/reagents/blood_holder
 
-    var/static/list/host_traits = list( //One hell of a cocktail.
+    //One hell of a cocktail.
+    var/static/list/host_traits = list(
         TRAIT_NODEATH,
         TRAIT_NOHARDCRIT,
         TRAIT_NOSOFTCRIT,
@@ -33,9 +35,11 @@
     var/static/list/host_dead_traits = list(
         TRAIT_FAKEDEATH,
         TRAIT_NOMETABOLISM,
+        TRAIT_EMOTEMUTE,
     )
 
     var/datum/action/innate/sentient_blood_emerge/emerge
+    var/datum/action/cooldown/sentient_blood_boost/boost
 
 /datum/antagonist/sentient_blood/on_gain()
     . = ..()
@@ -59,6 +63,7 @@
     objectives += objective
 
     emerge = new()
+    boost = new()
 
 /datum/antagonist/sentient_blood/greet()
 	. = ..()
@@ -77,16 +82,19 @@
 
     host = target
     host_mind = target.mind
-    owner.transfer_to(host, force_key_move = TRUE)
 
-    main_body.pause_life_updates = TRUE //We don't want to lose blood over time while inside.
-    main_body.forceMove(host) //Moving the mob into the host to await it's reawakening.
+    //We don't want to lose blood over time while inside.
+    main_body.pause_life_updates = TRUE
+    //Moving the mob into the host to await it's reawakening.
+    main_body.forceMove(host)
 
     emerge.Grant(host)
+    boost.Grant(host)
 
     host.add_traits(host_traits, src)
     if(host.stat == DEAD)
         host.add_traits(host_dead_traits, src)
+        host.apply_status_effect(/datum/status_effect/grouped/screwy_hud/fake_dead)
     host.set_stat(CONSCIOUS)
     host.updatehealth()
     host.update_sight()
@@ -101,33 +109,40 @@
 
     if(host_mind)
         if(host_mind.active)
-            subjugations += 1 //WOOOOO you took a sentient person over... on second thought that's pretty horrible. What have I made?
+            //WOOOOO you took a sentient person over... on second thought that's pretty horrible. What have I made?
+            subjugations += 1
+
+        //This only works because the body doesn't change and who owns the datum doesn't matter.
         var/list/antag_datums = host_mind.antag_datums
-        for(var/datum/antagonist/antag_datum in antag_datums) //This only works because the body doesn't change and who owns the datum doesn't matter.
+        for(var/datum/antagonist/antag_datum in antag_datums)
             host_mind.antag_datums.Remove(antag_datum)
             antag_datum.owner = owner
             var/datum/team/antag_team = antag_datum.get_team()
             antag_team.remove_member(host_mind)
             antag_team.add_member(owner)
 
+    owner.transfer_to(target, force_key_move = TRUE)
+
     return TRUE
 
 /datum/antagonist/sentient_blood/proc/release_host(death = FALSE, wound = FALSE)
     if(main_body && !death)
-        owner.transfer_to(main_body, force_key_move = TRUE)
-        main_body.pause_life_updates = FALSE
         if(host)
             main_body.forceMove(host.drop_location())
+        owner.transfer_to(main_body, force_key_move = TRUE)
+        main_body.pause_life_updates = FALSE
     else if(host)
-        owner.current.ghostize(FALSE)
+        owner.current.ghostize(can_reenter_corpse = FALSE)
 
     if(!host)
         return
 
     emerge.Remove(host)
+    boost.Remove(host)
 
     host.remove_traits(host_traits + host_dead_traits, src)
-    host.dna.species.exotic_blood = null
+    host.remove_status_effect(/datum/status_effect/grouped/screwy_hud/fake_dead)
+    convert_sentient_to_blood(host)
     blood_holder.add_reagent(/datum/reagent/blood/sentient, host.blood_volume)
     host.bleed(host.blood_volume)
 
@@ -159,6 +174,7 @@
         antag_team.remove_member(owner)
         antag_team.add_member(host_mind)
 
+    host_mind = null
     host = null
 
 ///Gets the amount of blood we have. Takes into account if we're in a host. Use this instead of reading it directly.
@@ -175,7 +191,7 @@
         if(amount > 0)
             blood_holder.add_reagent(/datum/reagent/blood/sentient, amount)
         else
-            blood_holder.remove_reagent(/datum/reagent/blood/sentient, amount)
+            blood_holder.remove_reagent(/datum/reagent/blood/sentient, -amount)
 
 ///Sets the amount of sentient blood to the given amount. Max only applies while in a host.
 /datum/antagonist/sentient_blood/proc/set_blood(amount, max = BLOOD_VOLUME_NORMAL)
@@ -206,14 +222,50 @@
 
     if(host.health > HEALTH_THRESHOLD_DEAD)
         host.remove_traits(host_dead_traits, src)
+        host.remove_status_effect(/datum/status_effect/grouped/screwy_hud/fake_dead)
         if(get_blood_amount() < BLOOD_VOLUME_NORMAL)
-            change_blood(BLOOD_VOLUME_NORMAL * 0.01 * delta_time) //You regenerate 1% of your maximum blood per second. Normal blood regeneration is disabled.
+            //You regenerate 1% of your maximum blood per second. Normal blood regeneration is disabled.
+            change_blood(BLOOD_VOLUME_NORMAL * 0.01 * delta_time)
         else
-            host.adjustBruteLoss(-1 * delta_time) //You heal your host slowly if your blood is full.
-            host.adjustFireLoss(-1 * delta_time)
-            host.adjustToxLoss(-1 * delta_time)
+            //You heal your host slowly if your blood is full.
+            host.adjustBruteLoss(-0.5 * delta_time)
+            host.adjustFireLoss(-0.5 * delta_time)
+            host.adjustToxLoss(-0.5 * delta_time)
+            host.adjustOxyLoss(-0.5 * delta_time)
     else
         host.add_traits(host_dead_traits, src)
+        if(!host.has_status_effect(/datum/status_effect/grouped/screwy_hud/fake_dead))
+            host.apply_status_effect(/datum/status_effect/grouped/screwy_hud/fake_dead)
+            to_chat(host, span_userdanger("Your host's life functions cease!"))
+
+///Converts the target's blood into sentient blood.
+/proc/convert_blood_to_sentient(mob/living/carbon/human/target, conversion_effect = FALSE)
+    var/blood_id = target.get_blood_id()
+
+    if(!istype(target) || (blood_id != /datum/reagent/blood && blood_id != /datum/reagent/blood/sentient) || HAS_TRAIT(target, TRAIT_NOBLOOD))
+        return
+
+    target.dna.species.exotic_blood = /datum/reagent/blood/sentient
+    var/effect = target.has_status_effect(/datum/status_effect/sentient_blood_conversion)
+
+    if(IS_SUBJUGATED(target))
+        conversion_effect = FALSE
+
+    if(effect)
+        if(conversion_effect)
+            return conversion_effect
+        else
+            target.remove_status_effect(/datum/status_effect/sentient_blood_conversion)
+    else
+        if(conversion_effect)
+            target.apply_status_effect(/datum/status_effect/sentient_blood_conversion)
+        else
+            return FALSE
+
+
+/proc/convert_sentient_to_blood(mob/living/carbon/human/target)
+    target.remove_status_effect(/datum/status_effect/sentient_blood_conversion)
+    target.dna.species.exotic_blood = null
 
 /datum/objective/subjugate_hosts
     name = "subjugate"
@@ -238,43 +290,3 @@
 
 /datum/job/sentient_blood
     title = ROLE_SENTIENT_BLOOD
-
-/datum/status_effect/sentient_blood_conversion
-    status_type = STATUS_EFFECT_UNIQUE
-    tick_interval = 0.5 SECONDS
-    alert_type = null
-
-    var/mob/living/carbon/human/human_owner
-    var/last_blood_volume = BLOOD_VOLUME_NORMAL
-    var/converted = 0 //How much of the owner's blood has been converted in units.
-
-/datum/status_effect/sentient_blood_conversion/on_apply()
-    human_owner = owner
-
-    if(!istype(human_owner))
-        return FALSE
-    if(human_owner.get_blood_id() != /datum/reagent/blood || HAS_TRAIT(human_owner, TRAIT_NOBLOOD))
-        return FALSE
-
-    human_owner.dna.species.exotic_blood = /datum/reagent/blood/sentient
-    last_blood_volume = human_owner.blood_volume
-    return TRUE
-
-/datum/status_effect/sentient_blood_conversion/on_remove()
-    human_owner.dna.species.exotic_blood = null
-
-/datum/status_effect/sentient_blood_conversion/tick(delta_time, times_fired)
-    if(human_owner.stat != DEAD)
-        converted += human_owner.blood_volume / 300 * delta_time //5 minutes for full conversion.
-    else
-        converted -= human_owner.blood_volume / 1200 * delta_time //20 minutes for full deconversion.
-
-    update_blood()
-
-/datum/status_effect/sentient_blood_conversion/proc/update_blood()
-    converted -= max(last_blood_volume - human_owner.blood_volume, 0)
-    last_blood_volume = human_owner.blood_volume
-
-    if(converted <= 0)
-        qdel(src)
-        return

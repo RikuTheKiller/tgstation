@@ -113,26 +113,14 @@
 /datum/reagent/blood/sentient
 	name = "Sentient Blood"
 	description = "It's looking at you."
-	metabolization_rate = 2 * REAGENTS_METABOLISM //Eh, sure, if they aren't human it'll stay around for a while.
 	self_consuming = TRUE
 	chemical_flags = REAGENT_INVISIBLE | REAGENT_DEAD_PROCESS //We don't want it to appear on scanners since it's presence in the bloodstream is just an intermediary step for what it actually does.
 
 /datum/reagent/blood/sentient/on_mob_add(mob/living/L, amount)
-	var/mob/living/carbon/human/human = L
-
-	if(!istype(human))
-		return
-
-	var/datum/status_effect/sentient_blood_conversion/effect = human.has_status_effect(/datum/status_effect/sentient_blood_conversion)
-
-	if(!IS_SUBJUGATED(human))
-		effect = human.apply_status_effect(/datum/status_effect/sentient_blood_conversion)
-		effect.converted += amount
-	else
-		human.remove_status_effect(/datum/status_effect/sentient_blood_conversion)
-		human.dna.species.exotic_blood = /datum/reagent/blood/sentient
-	
-	human.reagents.remove_reagent(/datum/reagent/blood/sentient, amount)
+	var/datum/status_effect/sentient_blood_conversion/effect = convert_blood_to_sentient(L, conversion_effect = TRUE)
+	if(effect)
+		effect.converted += min(amount, BLOOD_VOLUME_MAXIMUM - effect.converted)
+	L.reagents.remove_reagent(/datum/reagent/blood/sentient, amount)
 
 /datum/reagent/consumable/liquidgibs
 	name = "Liquid Gibs"
