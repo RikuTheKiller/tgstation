@@ -420,6 +420,13 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// Mob is using the scope component
 #define TRAIT_USER_SCOPED "user_scoped"
 
+/// Mob is subjugated (taken over) by a blood slime
+#define TRAIT_BLOODSLIME_SUBJUGATION "subjugated"
+/// Mob is puppeted (taken over as a corpse) by a blood slime
+#define TRAIT_BLOODSLIME_MARIONETTE "marionette"
+/// Mob is in symbiosis (not taken over, buffed) with a blood slime
+#define TRAIT_BLOODSLIME_SYMBIOSIS "symbiosis"
+
 /// Trait added when a revenant is visible.
 #define TRAIT_REVENANT_REVEALED "revenant_revealed"
 /// Trait added when a revenant has been inhibited (typically by the bane of a holy weapon)
