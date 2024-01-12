@@ -36,7 +36,6 @@
 		TRAIT_RDS_SUPPRESSED, // our host being crazy doesn't make us crazy
 		TRAIT_MADNESS_IMMUNE,
 		TRAIT_SLEEPIMMUNE, // we don't have a brain
-		TRAIT_STUNIMMUNE, // we don't rely on the body for movement
 		TRAIT_NODEATH, // we handle "death" via marionette and bleeding out
 		TRAIT_NOCRITDAMAGE,
 		TRAIT_NOCRITOVERLAY,
@@ -55,7 +54,7 @@
 		TRAIT_ILLITERATE, // a slime on it's own isn't intelligent enough to read human language
 		TRAIT_DISCOORDINATED_TOOL_USER, // same goes for operating machinery (also corpses lack dexterity)
 		TRAIT_SLEEPIMMUNE,
-		TRAIT_STUNIMMUNE,
+		TRAIT_STUNIMMUNE, // slugfest, we can't stun and we can't be stunned
 		TRAIT_NODEATH,
 		TRAIT_NOCRITDAMAGE,
 		TRAIT_NOCRITOVERLAY,

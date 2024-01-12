@@ -38,11 +38,11 @@
 	lighting_cutoff_green = 5
 	lighting_cutoff_blue = 20
 
-	unsuitable_atmos_damage = 0 // like regular slimes, it doesn't breathe
-	unsuitable_heat_damage = 5 // due to being similar to human blood, it's vulnerable to heat
-	unsuitable_cold_damage = 5 // the same similarity also dampens it's vulnerability to the cold
-	minimum_survivable_temperature = 200 // increased cold resistance compared to regular slimes
-	maximum_survivable_temperature = 500 // still retains most of its heat resistance
+	unsuitable_atmos_damage = 0
+	unsuitable_heat_damage = 5
+	unsuitable_cold_damage = 5
+	minimum_survivable_temperature = 200
+	maximum_survivable_temperature = 500
 
 	/// If we're currently small or not. Used for animations.
 	var/small = FALSE

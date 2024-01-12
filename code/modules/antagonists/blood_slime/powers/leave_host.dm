@@ -1,15 +1,23 @@
-/datum/action/bloodslime_leave_host
+/datum/action/bloodslime/delayed_host_action/leave_host
 	name = "Emerge"
-	desc = "Emerge from your host and take on your true appearance."
+	desc = "Emerge from your host, leaving them bloodless in the process."
+	delay = 2 SECONDS
 
-/datum/action/bloodslime_leave_host/Trigger(trigger_flags)
+/datum/action/bloodslime/delayed_host_action/leave_host/Trigger(trigger_flags)
 	. = ..()
 	if (!.)
 		return FALSE
 
-	var/datum/antagonist/blood_slime/blood_slime = owner.mind.has_antag_datum(/datum/antagonist/blood_slime)
-	if (!blood_slime)
-		CRASH("[owner] ([owner.mind]) attempted emerge action without the blood slime antag datum.")
+	var/mob/living/carbon/human/host = blood_slime.current_host
+
+	owner.visible_message(
+		message = span_danger("[host] trembles ominously."),
+		self_message = span_notice("You prepare to emerge from your host."),
+		ignored_mobs = list(blood_slime.current_host)
+	)
+
+	if (!do_delay())
+		return FALSE
 
 	blood_slime.leave_host()
 
