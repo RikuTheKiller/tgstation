@@ -16,3 +16,10 @@
 		blind_message = isturf(owner.loc) && owner.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(owner.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
 		ignored_mobs = list(blood_slime.current_host)
 	)
+
+    if (!do_delay())
+        return FALSE
+
+    
+
+    return TRUE
