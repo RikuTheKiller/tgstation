@@ -7,10 +7,16 @@
 // Takes care blood loss and regeneration
 /mob/living/carbon/human/handle_blood(seconds_per_tick, times_fired)
 
+	if(HAS_TRAIT(src, TRAIT_BLOODSLIME_CONTROL))
+		var/datum/antagonist/blood_slime/blood_slime = mind?.has_antag_datum(/datum/antagonist/blood_slime)
+		if (blood_slime)
+			blood_slime.handle_blood(seconds_per_tick, times_fired) // blood slime has it's own blood handling since it's completely different
+			return
+
 	if(HAS_TRAIT(src, TRAIT_NOBLOOD) || (HAS_TRAIT(src, TRAIT_FAKEDEATH)))
 		return
 
-	if(bodytemperature < BLOOD_STOP_TEMP || (HAS_TRAIT(src, TRAIT_HUSK))) //cold or husked people do not pump the blood.
+	if(bodytemperature < BLOOD_STOP_TEMP || HAS_TRAIT(src, TRAIT_HUSK)) //cold or husked people do not pump the blood.
 		return
 
 	//Blood regeneration if there is some space
@@ -71,6 +77,10 @@
 				investigate_log("has died of bloodloss.", INVESTIGATE_DEATHS)
 				death()
 
+	//Bleeding out
+	hanlde_bleeding(seconds_per_tick, times_fired)
+
+/mob/living/carbon/human/proc/handle_bleeding(seconds_per_tick, times_fired)
 	var/temp_bleed = 0
 	//Bleeding out
 	for(var/obj/item/bodypart/iter_part as anything in bodyparts)

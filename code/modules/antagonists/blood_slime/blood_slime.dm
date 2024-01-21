@@ -10,11 +10,11 @@
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
 	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
-	/// The blood slime basic mob, if it exists. (stored in host contents)
-	var/mob/living/basic/blood_slime/slime
-
 	/// How much blood the slime currently holds, only used when outside of a host. Use get_blood_amount() for abilities and such.
 	var/blood_amount = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
+
+	/// The blood slime basic mob, if it exists. (stored in host contents)
+	var/mob/living/basic/blood_slime/slime
 
 	/// The current host, if we're inside of one.
 	var/mob/living/carbon/human/current_host
@@ -42,6 +42,7 @@
 
 	/// Traits given to our host during subjugation.
 	var/list/subjugation_traits = list(
+		TRAIT_BLOODSLIME_CONTROL,
 		TRAIT_BLOODSLIME_SUBJUGATION,
 		TRAIT_MUTE, // sadly slime language doesn't really translate too well
 		TRAIT_MADNESS_IMMUNE, // ideally nothing "mental" should affect us similarly to our basic mob slime form (exceptionally hard to achieve without shitcode)
@@ -57,6 +58,7 @@
 
 	/// Traits given to our host during marionette.
 	var/list/marionette_traits = list(
+		TRAIT_BLOODSLIME_CONTROL,
 		TRAIT_BLOODSLIME_MARIONETTE,
 		TRAIT_MUTE,
 		TRAIT_MADNESS_IMMUNE,
@@ -118,7 +120,7 @@
  * Causes the slime to leave it's current host with an animation.
  * 
  * Arguments:
- * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host.
+ * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_max_blood()
  * * silent - Disables the visible message.
  * * disable_animation - Disables the animation.
  */
@@ -126,7 +128,7 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to leave a host that doesn't exist.")
 
-	blood_amount = min(current_host.blood_volume, max_blood)
+	blood_amount = min(current_host.blood_volume, max_blood, get_max_blood()) // just in case the host's blood_volume is somehow above get_max_blood() even though that should never happen
 
 	current_host.blood_volume = max_blood < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM ? max(current_host.blood_volume - blood_amount, 0) : 0
 
@@ -138,4 +140,33 @@
 	if (!silent)
 		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from [current_host]."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
 
+	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE)
+
+
 	current_host = null
+
+/// Gets the maximum blood amount of the slime. Prosthetics and missing limbs on a host can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
+/datum/antagonist/blood_slime/proc/get_max_blood()
+	if (!current_host)
+		return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
+
+	var/suitable_limbs = 0
+
+	for (var/obj/item/bodypart/limb in current_host.bodyparts)
+		if (!IS_ROBOTIC_LIMB(limb))
+			suitable_limbs += 1
+
+	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len) // preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
+
+/// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
+/datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)
+	if (!current_host)
+		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
+
+	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
+
+	current_host.blood_volume = min(current_host.blood_volume, get_max_blood()) // limit blood volume to max
+
+/datum/antagonist/blood_slime/proc/subjugate_host()
+	if (!current_host)
+		CRASH("[slime] ([owner]) attempted to subjugate a host that doesn't exist.")
