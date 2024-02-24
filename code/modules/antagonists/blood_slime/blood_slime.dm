@@ -180,7 +180,7 @@
 
 	blood_amount = amount
 
-	SEND_SIGNAL(src, COMSIG_BS_BLOOD_AMOUNT_CHANGED, amount)
+	slime.updatehealth()
 
 /// Adjusts the blood amount of the blood slime by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)

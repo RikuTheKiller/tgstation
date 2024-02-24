@@ -63,8 +63,6 @@
 		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
 		mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
 
-	RegisterSignal(blood_slime, COMSIG_BS_BLOOD_AMOUNT_CHANGED, PROC_REF(on_blood_amount_changed))
-
 /mob/living/basic/blood_slime/updatehealth()
 	. = ..()
 
@@ -74,7 +72,7 @@
 		become_big()
 
 	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
-	set_health(amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+	set_health(blood_slime.blood_amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
 
 /// Makes the blood slime turn small with an animation.
 /mob/living/basic/blood_slime/proc/become_small()
