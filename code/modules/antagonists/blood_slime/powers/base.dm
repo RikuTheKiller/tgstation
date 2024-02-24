@@ -9,9 +9,6 @@
 
 /datum/action/cooldown/blood_slime/Grant(mob/grant_to)
 	. = ..()
-	if (!.)
-		return FALSE
-
 	blood_slime = grant_to?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!blood_slime)

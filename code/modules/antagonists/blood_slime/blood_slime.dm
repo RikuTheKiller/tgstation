@@ -99,6 +99,9 @@
 	/// Action used to subjugate a corpse.
 	var/datum/action/cooldown/blood_slime/subjugate/subjugate_action
 
+	/// Action used to enter a corpse.
+	var/datum/action/cooldown/blood_slime/enter/enter_action
+
 /datum/antagonist/blood_slime/New()
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
@@ -109,13 +112,17 @@
 	emerge_action.Grant(owner.current)
 	subjugate_action = new(owner)
 	subjugate_action.Grant(owner.current)
+	enter_action = new(owner)
+	enter_action.Grant(owner.current)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
 	subjugate_action.Remove(owner.current)
 	emerge_action.Remove(owner.current)
+	enter_action.Remove(owner.current)
 	QDEL_NULL(subjugate_action)
 	QDEL_NULL(emerge_action)
+	QDEL_NULL(enter_action)
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.
