@@ -7,15 +7,14 @@
 
 /datum/action/bloodslime/Grant(mob/grant_to)
 	. = ..()
+	if (!.)
+		return FALSE
 
 	blood_slime = grant_to?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!blood_slime)
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
-
-	if (!.)
-		return FALSE
 
 /datum/action/bloodslime/delayed_host_action
 
