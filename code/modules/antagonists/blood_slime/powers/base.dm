@@ -1,11 +1,11 @@
-/datum/action/bloodslime
+/datum/action/cooldown/blood_slime
 	name = "Blood Slime Base Action"
 	desc = "Please ahelp this."
 
 	/// Our owner's blood slime antag datum.
 	var/datum/antagonist/blood_slime/blood_slime
 
-/datum/action/bloodslime/Grant(mob/grant_to)
+/datum/action/cooldown/blood_slime/Grant(mob/grant_to)
 	. = ..()
 	if (!.)
 		return FALSE
@@ -16,7 +16,9 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
-/datum/action/bloodslime/delayed_host_action
+
+
+/datum/action/cooldown/blood_slime/delayed_host_action
 
 	/// How long the action should take.
 	var/delay
@@ -27,7 +29,7 @@
 	/// Whether the action is being used.
 	var/active = FALSE
 
-/datum/action/bloodslime/delayed_host_action/IsAvailable(feedback)
+/datum/action/cooldown/blood_slime/delayed_host_action/IsAvailable(feedback)
 	. = ..()
 
 	if (!blood_slime)
@@ -42,7 +44,7 @@
 	return . && !canceled
 
 /// Returns TRUE if we passed the cancellable delay, otherwise FALSE. Ignores the user's loc.
-/datum/action/bloodslime/delayed_host_action/proc/do_delay()
+/datum/action/cooldown/blood_slime/delayed_host_action/proc/do_delay()
 	if (!delay)
 		return TRUE
 
@@ -58,5 +60,5 @@
 
 	return passed
 
-/datum/action/bloodslime/delayed_host_action/proc/doafter_cancel_check()
+/datum/action/cooldown/blood_slime/delayed_host_action/proc/doafter_cancel_check()
 	return !canceled

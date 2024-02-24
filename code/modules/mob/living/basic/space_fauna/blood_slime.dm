@@ -65,7 +65,7 @@
 
 	RegisterSignal(blood_slime, COMSIG_BS_BLOOD_AMOUNT_CHANGED, PROC_REF(on_blood_amount_changed))
 
-/mob/living/basic/blood_slime/apply_damage(damage, damagetype, def_zone, blocked, forced, spread_damage, wound_bonus, bare_wound_bonus, sharpness, attack_direction, attacking_item)
+/mob/living/basic/blood_slime/updatehealth()
 	. = ..()
 
 	if (health < small_threshold && !small)
@@ -84,4 +84,4 @@
 	return
 
 /mob/living/basic/blood_slime/proc/on_blood_amount_changed(amount)
-	health = amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
+	set_health(amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
