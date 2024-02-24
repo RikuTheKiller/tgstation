@@ -94,10 +94,10 @@
 	)
 
 	/// Action used to leave our current host. (emerge)
-	var/datum/action/cooldown/blood_slime/delayed_host_action/emerge/emerge_action
+	var/datum/action/cooldown/blood_slime/delayed/emerge/emerge_action
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/cooldown/blood_slime/delayed_host_action/subjugate/subjugate_action
+	var/datum/action/cooldown/blood_slime/delayed/subjugate/subjugate_action
 
 /datum/antagonist/blood_slime/New()
 	. = ..()

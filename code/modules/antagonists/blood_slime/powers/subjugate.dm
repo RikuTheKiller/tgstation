@@ -1,9 +1,9 @@
-/datum/action/cooldown/blood_slime/delayed_host_action/subjugate
+/datum/action/cooldown/blood_slime/delayed/subjugate
     name = "Subjugate"
     desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
     delay = 2 SECONDS
 
-/datum/action/cooldown/blood_slime/delayed_host_action/subjugate/Trigger(trigger_flags)
+/datum/action/cooldown/blood_slime/delayed/subjugate/Trigger(trigger_flags)
     . = ..()
     if (!.)
         return FALSE

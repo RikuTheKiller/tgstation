@@ -23,7 +23,7 @@
 		Remove(owner)
 		CRASH("[owner] tried to use [src] without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
-/datum/action/cooldown/blood_slime/delayed_host_action
+/datum/action/cooldown/blood_slime/delayed
 
 	/// How long the action should take.
 	var/delay
@@ -34,7 +34,7 @@
 	/// Whether the action is being used.
 	var/active = FALSE
 
-/datum/action/cooldown/blood_slime/delayed_host_action/IsAvailable(feedback)
+/datum/action/cooldown/blood_slime/delayed/IsAvailable(feedback)
 	. = ..()
 
 	if (active && !canceled)
@@ -45,7 +45,7 @@
 	return . && !canceled
 
 /// Returns TRUE if we passed the cancellable delay, otherwise FALSE. Ignores the user's loc.
-/datum/action/cooldown/blood_slime/delayed_host_action/proc/do_delay()
+/datum/action/cooldown/blood_slime/delayed/proc/do_delay()
 	if (!delay)
 		return TRUE
 
@@ -61,5 +61,5 @@
 
 	return passed
 
-/datum/action/cooldown/blood_slime/delayed_host_action/proc/doafter_cancel_check()
+/datum/action/cooldown/blood_slime/delayed/proc/doafter_cancel_check()
 	return !canceled
