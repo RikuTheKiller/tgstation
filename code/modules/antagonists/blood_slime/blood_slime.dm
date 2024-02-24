@@ -13,9 +13,6 @@
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
 	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
-	/// How much blood the slime currently holds, only used when outside of a host. Use get_blood_amount() for abilities and such.
-	var/blood_amount = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
-
 	/// The blood slime basic mob, if it exists. (stored in host contents)
 	var/mob/living/basic/blood_slime/slime
 
@@ -145,7 +142,7 @@
 	slime.forceMove(host)
 
 	current_host = host
-	current_host.blood_volume = min(current_host.blood_volume + blood_amount, BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
 
 /**
  * Causes the slime to leave it's current host with an animation.
@@ -159,9 +156,9 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to leave a host that doesn't exist.")
 
-	blood_amount = min(current_host.blood_volume, max_blood, get_max_blood()) // just in case the host's blood_volume is somehow above get_max_blood() even though that should never happen
+	set_blood_amount(min(current_host.blood_volume, max_blood, get_max_blood())) // just in case the host's blood_volume is somehow above get_max_blood() even though that should never happen
 
-	current_host.blood_volume = max_blood < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM ? max(current_host.blood_volume - blood_amount, 0) : 0
+	current_host.blood_volume = max_blood < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM ? max(current_host.blood_volume - get_blood_amount(), 0) : 0
 
 	if (!disable_animation)
 		flick("emerge", slime)
@@ -190,18 +187,17 @@
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
 	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
 
+/// Returns how much blood the blood slime currently holds.
+/datum/antagonist/blood_slime/proc/get_blood_amount()
+	return slime.health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / slime.maxHealth
+
 /// Sets the blood amount of the blood slime to the given amount.
 /datum/antagonist/blood_slime/proc/set_blood_amount(amount)
-	if (blood_amount == amount)
-		return
-
-	blood_amount = amount
-
-	slime.setBruteLoss(amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+	slime.setBruteLoss(amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM) // it was bruteloss all along
 
 /// Adjusts the blood amount of the blood slime by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)
-	set_blood_amount(blood_amount + amount)
+	set_blood_amount(get_blood_amount() + amount)
 
 /// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
 /datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)

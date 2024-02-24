@@ -69,8 +69,6 @@
 /mob/living/basic/blood_slime/updatehealth()
 	. = ..()
 
-	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
-
 	if (health < small_threshold && !small)
 		become_small()
 	else if (small)
