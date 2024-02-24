@@ -66,13 +66,13 @@
 /mob/living/basic/blood_slime/updatehealth()
 	. = ..()
 
+	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
+	set_health(blood_slime.blood_amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+
 	if (health < small_threshold && !small)
 		become_small()
 	else if (health >= small_threshold)
 		become_big()
-
-	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
-	set_health(blood_slime.blood_amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
 
 /// Makes the blood slime turn small with an animation.
 /mob/living/basic/blood_slime/proc/become_small()
