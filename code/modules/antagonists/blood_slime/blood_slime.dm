@@ -13,6 +13,9 @@
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
 	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
+	/// Our current state.
+	var/current_state = BLOOD_SLIME_STATE_SOLO
+
 	/// The blood slime basic mob, if it exists. (stored in host contents)
 	var/mob/living/basic/blood_slime/slime
 
@@ -78,7 +81,7 @@
 		TRAIT_FAKEDEATH // it's just a regular corpse, trust (mostly for aesthetics, though it can be used to fake death)
 	)
 
-	/// Traits given to our host during symbiosis. (symbiosis has a lot of downsides, however it has a couple unique benefits)
+	/// Traits given to our host during symbiosis.
 	var/static/list/symbiosis_traits = list(
 		TRAIT_BLOODSLIME_SYMBIOSIS,
 		TRAIT_NODEATH,
@@ -172,11 +175,17 @@
 		current_host.death()
 
 	current_host = null
+	state = BLOOD_SLIME_STATE_SOLO
 
 /// Gets the maximum blood amount of the slime. Prosthetics and missing limbs on a host can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
 /datum/antagonist/blood_slime/proc/get_max_blood()
+	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
+
 	if (!current_host)
-		return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
+		return
+
+	if (current_state == BLOOD_SLIME_STATE_SPLIT)
+		. *= 0.5
 
 	var/suitable_limbs = 0
 
@@ -185,7 +194,7 @@
 			suitable_limbs += 1
 
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
-	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
+	. *= suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
 
 /// Returns how much blood the blood slime currently holds.
 /datum/antagonist/blood_slime/proc/get_blood_amount()

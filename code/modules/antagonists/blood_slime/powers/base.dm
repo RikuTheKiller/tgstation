@@ -17,3 +17,30 @@
 
 /datum/action/cooldown/blood_slime/proc/doafter_cancel_check()
 	return !cancelled
+
+/datum/action/cooldown/blood_slime/delayed
+	/// Whether the action has been cancelled or not.
+	var/cancelled
+
+	/// Whether the delay is currently active or not.
+	var/active
+
+/datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, target)
+	. = ..()
+	if (!.)
+		return
+
+	if (active && !cancelled)
+		cancelled = TRUE
+		active = FALSE
+
+	active = TRUE
+
+/datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
+	. = do_after(user, delay, target, timed_action_flags, extra_checks = PROC_REF(doafter_cancel_check))
+
+	active = FALSE
+	cancelled = FALSE
+
+/datum/action/cooldown/blood_slime/delayed/proc/doafter_cancel_check()
+	return !cancelled
