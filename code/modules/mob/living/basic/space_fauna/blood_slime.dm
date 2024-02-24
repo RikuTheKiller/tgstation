@@ -73,8 +73,8 @@
 
 	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
 
-/mob/living/basic/blood_slime/become_small()
+/mob/living/basic/blood_slime/proc/become_small()
 	return // implement here TODO
 
-/mob/living/basic/blood_slime/become_big()
+/mob/living/basic/blood_slime/proc/become_big()
 	return // implement here TODO
