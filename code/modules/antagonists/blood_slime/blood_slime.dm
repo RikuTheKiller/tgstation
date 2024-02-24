@@ -1,3 +1,6 @@
+/datum/job/bloodslime
+	title = ROLE_BLOOD_SLIME_MIDROUND
+
 // This antag datum is quite volatile. It does a LOT of datum manipulation.
 // There's stuff here that can just *break* due to updates.
 // And also some stuff that should be periodically checked on, mainly the lists.
@@ -101,9 +104,9 @@
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
 	leave_action = new(owner)
-	leave_action.Grant(owner)
+	leave_action.Grant(owner.current)
 	subjugate_action = new(owner)
-	subjugate_action.Grant(owner)
+	subjugate_action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
 	return ..()
@@ -145,7 +148,7 @@
 		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from [current_host]."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
 
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE)
-
+		return // Implement here, TODO
 
 	current_host = null
 
