@@ -78,7 +78,7 @@
 				death()
 
 	//Bleeding out
-	hanlde_bleeding(seconds_per_tick, times_fired)
+	handle_bleeding(seconds_per_tick, times_fired)
 
 /mob/living/carbon/human/proc/handle_bleeding(seconds_per_tick, times_fired)
 	var/temp_bleed = 0

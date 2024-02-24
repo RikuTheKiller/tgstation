@@ -41,7 +41,7 @@
 	var/list/datum/quirk/disallowed_quirks_typecache = list()
 
 	/// Traits given to our host during subjugation.
-	var/list/subjugation_traits = list(
+	var/static/list/subjugation_traits = list(
 		TRAIT_BLOODSLIME_CONTROL,
 		TRAIT_BLOODSLIME_SUBJUGATION,
 		TRAIT_MUTE, // sadly slime language doesn't really translate too well
@@ -57,7 +57,7 @@
 	)
 
 	/// Traits given to our host during marionette.
-	var/list/marionette_traits = list(
+	var/static/list/marionette_traits = list(
 		TRAIT_BLOODSLIME_CONTROL,
 		TRAIT_BLOODSLIME_MARIONETTE,
 		TRAIT_MUTE,
@@ -79,8 +79,8 @@
 	)
 
 	/// Traits given to our host during symbiosis. (symbiosis has a lot of downsides, however it has a couple unique benefits)
-	var/list/symbiosis_traits = list(
-		TRAIT_BLOODSLIME_SYMBIOSIS, // grants the host immunity to the side effects of blood slime conversion
+	var/static/list/symbiosis_traits = list(
+		TRAIT_BLOODSLIME_SYMBIOSIS,
 		TRAIT_NODEATH,
 		TRAIT_NOCRITDAMAGE,
 		TRAIT_NOCRITOVERLAY,
