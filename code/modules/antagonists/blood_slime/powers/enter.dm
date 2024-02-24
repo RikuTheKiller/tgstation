@@ -2,7 +2,6 @@
 	name = "Enter Host"
 	desc = "Choose something that you wish to blend into the environment as. Click on yourself to reset your appearance."
 	button_icon_state = "sniper_zoom"
-	check_flags = AB_CHECK_CONSCIOUS
 	click_to_activate = TRUE
 
 /datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/target)
