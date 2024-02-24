@@ -91,15 +91,19 @@
 	)
 
 	/// Action used to leave our current host. (emerge)
-	var/datum/action/bloodslime/delayed_host_action/emerge/emerge
+	var/datum/action/bloodslime/delayed_host_action/emerge/emerge_action
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/bloodslime/delayed_host_action/subjugate/subjugate
+	var/datum/action/bloodslime/delayed_host_action/subjugate/subjugate_action
 
 /datum/antagonist/blood_slime/New()
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
+	leave_action = new(owner)
+	leave_action.Grant(owner)
+	subjugate_action = new(owner)
+	subjugate_action.Grant(owner)
 
 /datum/antagonist/blood_slime/on_gain()
 	return ..()
@@ -142,7 +146,6 @@
 
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
-
 
 	current_host = null
 

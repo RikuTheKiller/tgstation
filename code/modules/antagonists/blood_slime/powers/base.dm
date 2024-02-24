@@ -27,7 +27,7 @@
     /// Whether the action is being used.
     var/active = FALSE
 
-/datum/action/bloodslime/delayed_host_action/proc/IsAvailable(feedback)
+/datum/action/bloodslime/delayed_host_action/IsAvailable(feedback)
     . = ..()
 
     if (!blood_slime)
