@@ -50,10 +50,16 @@
 	/// The health threshold below which we automatically become small.
 	var/small_threshold = 80
 
+	/// Our antag datum.
+	var/datum/antagonist/blood_slime/blood_slime
+
 /mob/living/basic/blood_slime/mind_initialize()
 	..()
-	if(!mind.has_antag_datum(/datum/antagonist/blood_slime))
-		mind.add_antag_datum(/datum/antagonist/blood_slime)
+
+	blood_slime = mind.has_antag_datum(/datum/antagonist/blood_slime);
+
+	if(!blood_slime)
+		blood_slime = mind.add_antag_datum(/datum/antagonist/blood_slime)
 		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
 		mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
 
@@ -62,10 +68,13 @@
 
 	if (health < small_threshold && !small)
 		become_small()
-
-	if (health >= small_threshold && small)
+	else if (health >= small_threshold)
 		become_big()
 
+	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
+
 /mob/living/basic/blood_slime/become_small()
+	return // implement here TODO
 
 /mob/living/basic/blood_slime/become_big()
+	return // implement here TODO

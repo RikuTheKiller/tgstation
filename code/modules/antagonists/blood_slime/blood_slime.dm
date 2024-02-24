@@ -166,6 +166,14 @@
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
 	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
 
+/// Sets the blood amount of the blood slime to the given amount.
+/datum/antagonist/blood_slime/proc/set_blood_amount(amount)
+	blood_amount = amount
+
+/// Adjusts the blood amount of the blood slime by the given amount.
+/datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)
+	set_blood_amount(blood_amount + amount)
+
 /// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
 /datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)
 	if (!current_host)
