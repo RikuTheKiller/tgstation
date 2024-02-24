@@ -103,8 +103,8 @@
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
-	leave_action = new(owner)
-	leave_action.Grant(owner.current)
+	emerge_action = new(owner)
+	emerge_action.Grant(owner.current)
 	subjugate_action = new(owner)
 	subjugate_action.Grant(owner.current)
 
