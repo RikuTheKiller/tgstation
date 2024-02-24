@@ -103,12 +103,19 @@
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
+
+/datum/antagonist/blood_slime/on_gain()
 	emerge_action = new(owner)
 	emerge_action.Grant(owner.current)
 	subjugate_action = new(owner)
 	subjugate_action.Grant(owner.current)
+	return ..()
 
-/datum/antagonist/blood_slime/on_gain()
+/datum/antagonist/blood_slime/on_removal()
+	subjugate_action.Remove(owner.current)
+	emerge_action.Remove(owner.current)
+	QDEL_NULL(subjugate_action)
+	QDEL_NULL(emerge_action)
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.

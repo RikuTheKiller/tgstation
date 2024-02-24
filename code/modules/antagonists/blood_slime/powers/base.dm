@@ -10,11 +10,11 @@
 	if (!.)
 		return FALSE
 
-	blood_slime = owner.mind.has_antag_datum(/datum/antagonist/blood_slime)
+	blood_slime = grant_to?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!blood_slime)
-		Remove(owner)
-		CRASH("[owner] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
+		Remove(grant_to)
+		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
 /datum/action/bloodslime/delayed_host_action
 
