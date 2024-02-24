@@ -175,6 +175,9 @@
 
 /// Sets the blood amount of the blood slime to the given amount.
 /datum/antagonist/blood_slime/proc/set_blood_amount(amount)
+	if (blood_amount == amount)
+		return
+
 	blood_amount = amount
 
 	SEND_SIGNAL(src, COMSIG_BS_BLOOD_AMOUNT_CHANGED, amount)
