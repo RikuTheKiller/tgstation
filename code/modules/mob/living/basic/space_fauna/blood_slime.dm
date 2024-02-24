@@ -53,6 +53,9 @@
 	/// Our antag datum.
 	var/datum/antagonist/blood_slime/blood_slime
 
+/mob/living/basic/blood_slime/Initialize(mapload)
+	. = ..()
+
 /mob/living/basic/blood_slime/mind_initialize()
 	..()
 
@@ -67,7 +70,6 @@
 	. = ..()
 
 	blood_slime.set_blood_amount(health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / maxHealth)
-	set_health(blood_slime.blood_amount * maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
 
 	if (health < small_threshold && !small)
 		become_small()
