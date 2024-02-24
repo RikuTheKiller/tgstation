@@ -2,10 +2,8 @@
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 
-/datum/action/cooldown/blood_slime/emerge/Trigger(atom/target)
+/datum/action/cooldown/blood_slime/emerge/Activate(atom/target)
 	. = ..()
-	if (!.)
-		return FALSE
 
 	if(!cancelled)
 		cancelled = TRUE
@@ -13,7 +11,7 @@
 
 	var/mob/living/carbon/human/host = blood_slime.current_host
 
-	owner.visible_message(
+	host.visible_message(
 		message = span_danger("[host] trembles ominously."),
 		self_message = span_notice("You prepare to emerge from your host."),
 		ignored_mobs = list(blood_slime.current_host)

@@ -2,20 +2,21 @@
     name = "Subjugate"
     desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
 
-/datum/action/cooldown/blood_slime/subjugate/Trigger(atom/target)
+/datum/action/cooldown/blood_slime/subjugate/IsAvailable(feedback = FALSE)
+	return ..() && blood_slime?.current_host
+
+/datum/action/cooldown/blood_slime/subjugate/Activate(atom/target)
     . = ..()
-    if (!.)
-        return FALSE
 
     var/mob/living/carbon/human/host = blood_slime.current_host
 
     if (host.health < HEALTH_THRESHOLD_DEAD) // you either have to heal the corpse or use marionette instead
-        owner.balloon_alert(owner, "too damaged!");
+        host.balloon_alert(owner, "too damaged!");
 
-    owner.visible_message(
+    host.visible_message(
 		message = span_danger("[blood_slime.current_host] starts convulsing!"),
 		self_message = span_notice("You begin circulating around in your host's body..."),
-		blind_message = isturf(owner.loc) && owner.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(owner.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
+		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
