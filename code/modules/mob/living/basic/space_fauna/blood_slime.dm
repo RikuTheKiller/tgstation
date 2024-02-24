@@ -73,7 +73,7 @@
 
 	if (health < small_threshold && !small)
 		become_small()
-	else if (health >= small_threshold)
+	else if (small)
 		become_big()
 
 /// Makes the blood slime turn small with an animation.
