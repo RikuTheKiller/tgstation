@@ -91,15 +91,19 @@
 	)
 
 	/// Action used to leave our current host. (emerge)
-	var/datum/action/bloodslime/delayed_host_action/leave_host/leave_host
+	var/datum/action/bloodslime/delayed_host_action/leave_host/leave_action
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/bloodslime/delayed_host_action/subjugate/leave_host
+	var/datum/action/bloodslime/delayed_host_action/subjugate/subjugate_action
 
 /datum/antagonist/blood_slime/New()
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
+	leave_action = new(owner)
+	leave_action.Grant(owner)
+	subjugate_action = new(owner)
+	subjugate_action.Grant(owner)
 
 /datum/antagonist/blood_slime/on_gain()
 	return ..()
@@ -118,7 +122,7 @@
 
 /**
  * Causes the slime to leave it's current host with an animation.
- * 
+ *
  * Arguments:
  * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_max_blood()
  * * silent - Disables the visible message.
