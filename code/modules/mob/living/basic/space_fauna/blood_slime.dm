@@ -81,6 +81,3 @@
 /// Makes the blood slime turn big with an animation.
 /mob/living/basic/blood_slime/proc/become_big()
 	return
-
-/mob/living/basic/blood_slime/proc/on_blood_amount_changed(amount)
-	updatehealth()
