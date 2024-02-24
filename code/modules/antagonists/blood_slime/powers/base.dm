@@ -16,7 +16,12 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
+/datum/action/cooldown/blood_slime/IsAvailable(feedback)
+	. = ..()
 
+	if (!blood_slime)
+		Remove(owner)
+		CRASH("[owner] tried to use [src] without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
 /datum/action/cooldown/blood_slime/delayed_host_action
 
@@ -31,10 +36,6 @@
 
 /datum/action/cooldown/blood_slime/delayed_host_action/IsAvailable(feedback)
 	. = ..()
-
-	if (!blood_slime)
-		Remove(owner)
-		CRASH("[owner] tried to use [src] without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
 	if (active && !canceled)
 		canceled = TRUE
