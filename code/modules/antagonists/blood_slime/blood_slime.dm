@@ -170,6 +170,8 @@
 /datum/antagonist/blood_slime/proc/set_blood_amount(amount)
 	blood_amount = amount
 
+	SEND_SIGNAL(src, COMSIG_BS_BLOOD_AMOUNT_CHANGED)
+
 /// Adjusts the blood amount of the blood slime by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)
 	set_blood_amount(blood_amount + amount)
