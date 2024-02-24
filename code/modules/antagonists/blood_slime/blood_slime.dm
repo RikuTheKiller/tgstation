@@ -1,3 +1,6 @@
+/datum/job/bloodslime
+	title = ROLE_BLOOD_SLIME_MIDROUND
+
 // This antag datum is quite volatile. It does a LOT of datum manipulation.
 // There's stuff here that can just *break* due to updates.
 // And also some stuff that should be periodically checked on, mainly the lists.
@@ -101,9 +104,9 @@
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
 	leave_action = new(owner)
-	leave_action.Grant(owner)
+	leave_action.Grant(owner.current)
 	subjugate_action = new(owner)
-	subjugate_action.Grant(owner)
+	subjugate_action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
 	return ..()

@@ -49,3 +49,10 @@
 
 	/// The health threshold below which we automatically become small.
 	var/small_threshold = 80
+
+/mob/living/basic/blood_slime/mind_initialize()
+	..()
+	if(!mind.has_antag_datum(/datum/antagonist/blood_slime))
+		mind.add_antag_datum(/datum/antagonist/blood_slime)
+		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
+		mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
