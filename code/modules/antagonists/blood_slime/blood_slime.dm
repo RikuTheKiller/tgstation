@@ -107,7 +107,7 @@
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
 
-/datum/antagonist/blood_slime/on_gain()
+/datum/antagonist/blood_slime/apply_innate_effects(mob/living/mob_override)
 	emerge_action = new(owner)
 	emerge_action.Grant(owner.current)
 	subjugate_action = new(owner)
@@ -116,13 +116,23 @@
 	enter_action.Grant(owner.current)
 	return ..()
 
-/datum/antagonist/blood_slime/on_removal()
+/datum/antagonist/blood_slime/remove_innate_effects(mob/living/mob_override)
 	subjugate_action.Remove(owner.current)
 	emerge_action.Remove(owner.current)
 	enter_action.Remove(owner.current)
 	QDEL_NULL(subjugate_action)
 	QDEL_NULL(emerge_action)
 	QDEL_NULL(enter_action)
+	return ..()
+
+/datum/antagonist/blood_slime/on_gain()
+	if(istype(owner.current, /mob/living/basic/blood_slime))
+		slime = owner.current
+	return ..()
+
+/datum/antagonist/blood_slime/on_removal()
+	if(istype(owner.current, /mob/living/basic/blood_slime))
+		slime = null
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.
