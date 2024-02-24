@@ -56,3 +56,16 @@
 		mind.add_antag_datum(/datum/antagonist/blood_slime)
 		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
 		mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
+
+/mob/living/basic/blood_slime/apply_damage(damage, damagetype, def_zone, blocked, forced, spread_damage, wound_bonus, bare_wound_bonus, sharpness, attack_direction, attacking_item)
+	. = ..()
+
+	if (health < small_threshold && !small)
+		become_small()
+
+	if (health >= small_threshold && small)
+		become_big()
+
+/mob/living/basic/blood_slime/become_small()
+
+/mob/living/basic/blood_slime/become_big()
