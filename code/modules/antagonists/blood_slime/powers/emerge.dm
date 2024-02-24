@@ -2,7 +2,7 @@
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 
-/datum/action/cooldown/blood_slime/emerge/Trigger(trigger_flags)
+/datum/action/cooldown/blood_slime/emerge/Trigger(atom/target)
 	. = ..()
 	if (!.)
 		return FALSE

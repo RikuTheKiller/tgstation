@@ -2,7 +2,7 @@
     name = "Subjugate"
     desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
 
-/datum/action/cooldown/blood_slime/subjugate/Trigger(trigger_flags)
+/datum/action/cooldown/blood_slime/subjugate/Trigger(atom/target)
     . = ..()
     if (!.)
         return FALSE
