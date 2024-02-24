@@ -2946,6 +2946,7 @@
 #include "code\modules\antagonists\blood_slime\blood_slime.dm"
 #include "code\modules\antagonists\blood_slime\powers\base.dm"
 #include "code\modules\antagonists\blood_slime\powers\emerge.dm"
+#include "code\modules\antagonists\blood_slime\powers\enter.dm"
 #include "code\modules\antagonists\blood_slime\powers\subjugate.dm"
 #include "code\modules\antagonists\brainwashing\brainwashing.dm"
 #include "code\modules\antagonists\brother\brother.dm"

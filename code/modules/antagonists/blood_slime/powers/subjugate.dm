@@ -1,9 +1,8 @@
-/datum/action/cooldown/blood_slime/delayed/subjugate
+/datum/action/cooldown/blood_slime/subjugate
     name = "Subjugate"
     desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
-    delay = 2 SECONDS
 
-/datum/action/cooldown/blood_slime/delayed/subjugate/Trigger(trigger_flags)
+/datum/action/cooldown/blood_slime/subjugate/Trigger(trigger_flags)
     . = ..()
     if (!.)
         return FALSE
@@ -20,7 +19,7 @@
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
-    if (!do_delay())
+    if (!do_after(owner, 2 SECONDS, timed_action_flags = IGNORE_USER_LOC_CHANGE, extra_checks = CALLBACK(src, PROC_REF(doafter_cancel_check))))
         return FALSE
 
     if (host.health < HEALTH_THRESHOLD_DEAD)

@@ -1,12 +1,15 @@
-/datum/action/cooldown/blood_slime/delayed/emerge
+/datum/action/cooldown/blood_slime/emerge
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
-	delay = 2 SECONDS
 
-/datum/action/cooldown/blood_slime/delayed/emerge/Trigger(trigger_flags)
+/datum/action/cooldown/blood_slime/emerge/Trigger(trigger_flags)
 	. = ..()
 	if (!.)
 		return FALSE
+
+	if(!cancelled)
+		cancelled = TRUE
+		return
 
 	var/mob/living/carbon/human/host = blood_slime.current_host
 
@@ -16,9 +19,10 @@
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
-	if (!do_delay())
+	cancelled = FALSE
+	if (!do_after(owner, 2 SECONDS, timed_action_flags = IGNORE_USER_LOC_CHANGE, extra_checks = CALLBACK(src, PROC_REF(doafter_cancel_check))))
+		cancelled = FALSE
 		return FALSE
 
 	blood_slime.leave_host()
-
 	return TRUE
