@@ -91,10 +91,10 @@
 	)
 
 	/// Action used to leave our current host. (emerge)
-	var/datum/action/bloodslime/delayed_host_action/leave_host/leave_host
+	var/datum/action/bloodslime/delayed_host_action/emerge/emerge
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/bloodslime/delayed_host_action/subjugate/leave_host
+	var/datum/action/bloodslime/delayed_host_action/subjugate/subjugate
 
 /datum/antagonist/blood_slime/New()
 	. = ..()
@@ -118,7 +118,7 @@
 
 /**
  * Causes the slime to leave it's current host with an animation.
- * 
+ *
  * Arguments:
  * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_max_blood()
  * * silent - Disables the visible message.
@@ -140,7 +140,8 @@
 	if (!silent)
 		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from [current_host]."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
 
-	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE)
+	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
+		current_host.death()
 
 
 	current_host = null
@@ -156,7 +157,8 @@
 		if (!IS_ROBOTIC_LIMB(limb))
 			suitable_limbs += 1
 
-	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len) // preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
+	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
+	return BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
 
 /// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
 /datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)

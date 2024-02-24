@@ -1,9 +1,9 @@
-/datum/action/bloodslime/delayed_host_action/leave_host
+/datum/action/bloodslime/delayed_host_action/emerge
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 	delay = 2 SECONDS
 
-/datum/action/bloodslime/delayed_host_action/leave_host/Trigger(trigger_flags)
+/datum/action/bloodslime/delayed_host_action/emerge/Trigger(trigger_flags)
 	. = ..()
 	if (!.)
 		return FALSE
