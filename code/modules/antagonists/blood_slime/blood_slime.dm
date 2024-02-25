@@ -248,7 +248,7 @@
 	desc = "It pulses ominously. You feel like it's watching you."
 
 	var/obj/item/organ/internal/eyes/invincible/temp_eyes
-	var/obj/item/organ/internal/eyes/invincible/temp_ears
+	var/obj/item/organ/internal/ears/invincible/temp_ears
 
 	var/obj/item/organ/internal/eyes/old_eyes
 	var/obj/item/organ/internal/ears/old_ears
