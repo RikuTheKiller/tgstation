@@ -26,9 +26,9 @@
 	if (!.)
 		return
 
-	if (active && !cancelled)
+	if (active) // cancel the action if used again during the delay
 		cancelled = TRUE
-		active = FALSE
+		return FALSE
 
 	active = TRUE
 
