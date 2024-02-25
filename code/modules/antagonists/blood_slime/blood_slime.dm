@@ -123,12 +123,6 @@
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
-	if(isnull(initialized_actions))
-		initialized_actions = state_actions.Copy()
-		for(var/state_key in initialized_actions)
-			for(var/path in initialized_actions[state_key])
-				initialized_actions[state_key] -= path
-				initialized_actions[state_key] += new path(owner)
 
 /datum/antagonist/blood_slime/proc/swap_state(state)
 	if(current_state == state)
@@ -144,6 +138,12 @@
 		action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
+	if (isnull(initialized_actions))
+		initialized_actions = state_actions.Copy()
+		for (var/state_key in initialized_actions)
+			for (var/path in initialized_actions[state_key])
+				initialized_actions[state_key] -= path
+				initialized_actions[state_key] += new path(owner)
 	if (istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
 		swap_state(BLOOD_SLIME_STATE_SOLO)
