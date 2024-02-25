@@ -14,7 +14,7 @@
 	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
 	/// Our current state.
-	var/current_state = BLOOD_SLIME_STATE_SOLO
+	var/current_state = -1 // Uninitialized
 
 	/// The blood slime basic mob, if it exists. (stored in host contents)
 	var/mob/living/basic/blood_slime/slime
@@ -127,6 +127,9 @@
 			for(var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
 				initialized_actions[state_key] += new path(owner)
+/datum/antagonist/blood_slime/proc/swap_state(state)
+	if(current_state == state)
+		return
 
 /// Removes the actions from the given state from the given target.
 /datum/antagonist/blood_slime/proc/remove_state_actions(state, mob/living/target)
@@ -271,7 +274,7 @@
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	current_state = BLOOD_SLIME_STATE_SUBJUGATION
+	swap_state(BLOOD_SLIME_STATE_SUBJUGATION)
 
 	control_host()
 
@@ -286,7 +289,7 @@
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	current_state = BLOOD_SLIME_STATE_MARIONETTE
+	swap_state(BLOOD_SLIME_STATE_MARIONETTE)
 
 	control_host()
 
