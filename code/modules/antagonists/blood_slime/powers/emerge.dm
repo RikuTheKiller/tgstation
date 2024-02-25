@@ -25,7 +25,7 @@
 
 	host.emote("tremble")
 
-	host.do_jitter_animation(100)
+	host.set_jitter_if_lower(50 SECONDS)
 
 	if (!do_delay(owner, 2 SECONDS, target = host))
 		return FALSE
