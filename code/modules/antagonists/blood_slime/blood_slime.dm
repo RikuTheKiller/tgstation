@@ -115,6 +115,7 @@
 		),
 	)
 
+	/// Associative list of initialized action datums sorted by state.
 	var/list/initialized_actions
 
 /datum/antagonist/blood_slime/New()

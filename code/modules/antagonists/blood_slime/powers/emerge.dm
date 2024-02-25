@@ -21,3 +21,10 @@
 
 	blood_slime.leave_host()
 	return TRUE
+
+/datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
+	if (user != owner)
+		return
+	Trigger()
+	owner.balloon_alert("emerging")
+	return COMSIG_BLOCK_RELAYMOVE
