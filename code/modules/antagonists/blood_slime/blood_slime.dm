@@ -85,6 +85,7 @@
 
 	/// Traits given to our host during symbiosis.
 	var/static/list/symbiosis_traits = list(
+		TRAIT_BLOODSLIME_CONTROL,
 		TRAIT_BLOODSLIME_SYMBIOSIS,
 		TRAIT_NODEATH,
 		TRAIT_NOCRITDAMAGE,
@@ -250,11 +251,15 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
+	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max (so bleeding acts as if the excess blood doesnt exist)
+
 	current_host.handle_bleeding(seconds_per_tick, times_fired)
 
 	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
 
-	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max
+	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max again (so regen factor cant go over max blood)
+
+	set_blood_amount(current_host.blood_volume)
 
 /// Makes the blood slime subjugate its host.
 /datum/antagonist/blood_slime/proc/subjugate_host()

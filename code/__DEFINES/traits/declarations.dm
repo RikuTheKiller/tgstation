@@ -435,7 +435,7 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// Mob is unable to feel pain
 #define TRAIT_ANALGESIA "analgesia"
 
-/// Mob is taken over by a blood slime (applies to both subjugation and marionette)
+/// Mob is inhabited by a blood slime
 #define TRAIT_BLOODSLIME_CONTROL "control"
 /// Mob is subjugated (taken over) by a blood slime
 #define TRAIT_BLOODSLIME_SUBJUGATION "subjugation"
