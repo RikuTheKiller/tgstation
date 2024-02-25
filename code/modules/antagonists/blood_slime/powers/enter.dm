@@ -20,6 +20,10 @@
 		target.balloon_alert(owner, "not dead!")
 		return
 
+	if (target.dna.species.exotic_blood)
+		target.balloon_alert(owner, "incompatible blood!")
+		return
+
 	if (blood_slime.get_host_max_blood(target) <= 0)
 		target.balloon_alert(owner, "bloodless!")
 		return

@@ -233,7 +233,7 @@
 	if (!host)
 		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
 
-	if (HAS_TRAIT(host, TRAIT_NOBLOOD))
+	if (HAS_TRAIT(host, TRAIT_NOBLOOD) || host.dna.species.exotic_blood) // no randomly turning into liquid electricity or going into a skeleton
 		return 0
 
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
@@ -269,9 +269,9 @@
 
 	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max (so bleeding acts as if the excess blood doesnt exist)
 
-	current_host.handle_bleeding(seconds_per_tick, times_fired)
-
 	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
+
+	current_host.handle_bleeding(seconds_per_tick, times_fired)
 
 	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max again (so regen factor cant go over max blood)
 
