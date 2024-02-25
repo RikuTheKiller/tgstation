@@ -207,7 +207,7 @@
 			suitable_limbs += 1
 
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
-	. *= suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len)
+	. = min(., BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len))
 
 /// Returns how much blood the blood slime currently holds.
 /datum/antagonist/blood_slime/proc/get_blood_amount()
