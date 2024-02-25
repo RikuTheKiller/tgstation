@@ -14,7 +14,7 @@
 	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
 	/// Our current state.
-	var/current_state = BLOOD_SLIME_STATE_SOLO
+	var/current_state = -1 // Uninitialized
 
 	/// The blood slime basic mob, if it exists. (stored in host contents)
 	var/mob/living/basic/blood_slime/slime
@@ -127,21 +127,21 @@
 			for(var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
 				initialized_actions[state_key] += new path(owner)
+/datum/antagonist/blood_slime/proc/swap_state(state)
+	if(current_state == state)
+		return
 
-/datum/antagonist/blood_slime/proc/remove_state_spells(mob/living/target)
+	for(var/datum/action/cooldown/blood_slime/former in owner.current?.actions)
+		former.Remove(owner.current)
+	current_state = state
 	var/list/spells = initialized_actions[current_state]
 	for(var/datum/action/action as anything in spells)
-		action.Remove(target)
-
-/datum/antagonist/blood_slime/proc/add_state_spells(mob/living/target)
-	var/list/spells = initialized_actions[current_state]
-	for(var/datum/action/action as anything in spells)
-		action.Grant(target)
+		action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
-		add_state_spells(slime)
+		swap_state(BLOOD_SLIME_STATE_SOLO)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
@@ -157,9 +157,7 @@
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
 
 	slime.forceMove(host)
-	remove_state_spells(slime)
-	current_state = BLOOD_SLIME_STATE_DORMANT
-	add_state_spells(slime)
+	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
@@ -197,10 +195,8 @@
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
-	remove_state_spells(current_host)
 	current_host = null
-	current_state = BLOOD_SLIME_STATE_SOLO
-	add_state_spells(slime)
+	swap_state(BLOOD_SLIME_STATE_SOLO)
 
 /// Gets the maximum blood amount of the slime itself.
 /datum/antagonist/blood_slime/proc/get_max_blood()
@@ -265,7 +261,7 @@
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	current_state = BLOOD_SLIME_STATE_SUBJUGATION
+	swap_state(BLOOD_SLIME_STATE_SUBJUGATION)
 
 	control_host()
 
@@ -280,7 +276,7 @@
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	current_state = BLOOD_SLIME_STATE_MARIONETTE
+	swap_state(BLOOD_SLIME_STATE_MARIONETTE)
 
 	control_host()
 
@@ -289,9 +285,7 @@
 	if(current_host.mind)
 		host_mind = current_host.mind
 
-	remove_state_spells(slime)
 	owner.transfer_to(current_host)
-	add_state_spells(current_host)
 	current_host.revive()
 
 /obj/item/organ/internal/blood_slime_membrane
