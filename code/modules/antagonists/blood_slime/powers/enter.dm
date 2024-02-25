@@ -13,19 +13,19 @@
 		return
 
 	if (!owner.Adjacent(target))
-		owner.balloon_alert(owner, "out of range!")
+		target.balloon_alert(owner, "out of range!")
 		return
 
 	if (target.stat != DEAD)
-		owner.balloon_alert(owner, "not dead!")
+		target.balloon_alert(owner, "not dead!")
 		return
 
 	if (target.dna.species.exotic_blood)
-		owner.balloon_alert(owner, "incompatible blood!")
+		target.balloon_alert(owner, "incompatible blood!")
 		return
 
 	if (blood_slime.get_host_max_blood(target) <= 0)
-		owner.balloon_alert(owner, "bloodless!")
+		target.balloon_alert(owner, "bloodless!")
 		return
 
 	. = TRUE // accidentally smacking a viable host is bad
