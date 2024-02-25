@@ -143,7 +143,7 @@
 	for(var/datum/action/action as anything in actions)
 		action.Grant(target)
 
-/// Swaps our state to the given state.
+/// Sets our state to the given state.
 /datum/antagonist/blood_slime/proc/set_state(state)
 	var/list/actions = initialized_actions[state]
 	remove_state_actions(current_state, owner.current)
