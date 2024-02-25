@@ -7,6 +7,7 @@
 
 /datum/action/cooldown/blood_slime/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
+
 	blood_slime = antag_override ? antag_override : grant_to?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!blood_slime)
@@ -19,27 +20,28 @@
 
 /// Blood slime action subtype for delayed activations, which it has plenty of.
 /datum/action/cooldown/blood_slime/delayed
-	/// Whether the action has been cancelled or not.
-	var/cancelled
+	/// Whether the action has been canceled or not.
+	var/canceled
 
 	/// Whether the delay is currently active or not.
 	var/active
 
 /datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, target)
 	if (active) // cancel the action if used again during the delay
-		cancelled = TRUE
+		canceled = TRUE
 		active = FALSE
+		owner.balloon_alert(owner, "canceled!")
 		return FALSE
 
 	active = TRUE
-	cancelled = FALSE
+	canceled = FALSE
 	return ..()
 
-/datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
+/datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags = IGNORE_USER_LOC_CHANGE|IGNORE_TARGET_LOC_CHANGE|IGNORE_HELD_ITEM|IGNORE_INCAPACITATED|IGNORE_SLOWDOWNS)
 	. = do_after(user, delay, target, timed_action_flags, extra_checks =  CALLBACK(src, PROC_REF(doafter_cancel_check)))
 
 	active = FALSE
-	cancelled = FALSE
+	canceled = FALSE
 
 /datum/action/cooldown/blood_slime/delayed/proc/doafter_cancel_check()
-	return !cancelled
+	return !canceled

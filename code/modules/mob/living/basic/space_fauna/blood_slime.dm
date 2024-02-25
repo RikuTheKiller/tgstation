@@ -6,7 +6,7 @@
 
 /mob/living/basic/blood_slime
 	name = "blood slime"
-	desc = "A horrid slime-like abomination that takes over the corpses of the deceased and feasts on their blood."
+	desc = "A horrid abomination that takes over the corpses of the deceased and feasts on their blood."
 	icon = 'icons/mob/nonhuman-player/blood_slime.dmi'
 	icon_state = "large"
 	icon_living = "large"
@@ -33,6 +33,7 @@
 
 	speak_emote = list("blorbles")
 	attack_vis_effect = ATTACK_EFFECT_SMASH
+	attack_sound = 'sound/weapons/genhit1.ogg'
 
 	lighting_cutoff_red = 30
 	lighting_cutoff_green = 5
@@ -72,12 +73,18 @@
 	if (health < small_threshold && !small)
 		become_small()
 	else if (small)
-		become_big()
+		become_large()
 
 /// Makes the blood slime turn small with an animation.
 /mob/living/basic/blood_slime/proc/become_small()
+	icon_state = "small"
+	icon_living = "small"
+	small = TRUE
 	return
 
-/// Makes the blood slime turn big with an animation.
-/mob/living/basic/blood_slime/proc/become_big()
+/// Makes the blood slime turn large with an animation.
+/mob/living/basic/blood_slime/proc/become_large()
+	icon_state = "large"
+	icon_living = "large"
+	small = FALSE
 	return

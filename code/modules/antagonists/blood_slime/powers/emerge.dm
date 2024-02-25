@@ -2,8 +2,15 @@
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 
-/datum/action/cooldown/blood_slime/delayed/emerge/IsAvailable(feedback = FALSE)
-	return ..() && blood_slime?.current_host //there is no state for chilling inside a body
+/datum/action/cooldown/blood_slime/delayed/emerge/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
+	. = ..()
+
+	RegisterSignal(grant_to, COMSIG_ATOM_RELAYMOVE, PROC_REF(host_relaymove), override = TRUE)
+
+/datum/action/cooldown/blood_slime/delayed/emerge/Remove(mob/removed_from)
+	. = ..()
+
+	UnregisterSignal(removed_from, COMSIG_ATOM_RELAYMOVE)
 
 /datum/action/cooldown/blood_slime/delayed/emerge/Activate(atom/target)
 	. = ..()
@@ -16,8 +23,14 @@
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
-	if (!do_delay(owner, 2 SECONDS, target = host, timed_action_flags = IGNORE_USER_LOC_CHANGE|IGNORE_TARGET_LOC_CHANGE))
+	if (!do_delay(owner, 2 SECONDS, target = host))
 		return FALSE
 
 	blood_slime.leave_host()
 	return TRUE
+
+/datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
+	if (user != owner)
+		return
+	owner.balloon_alert("can't move in a corpse!")
+	return COMSIG_BLOCK_RELAYMOVE

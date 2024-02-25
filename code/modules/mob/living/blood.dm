@@ -136,7 +136,7 @@
  * bleed_warn() is used to for carbons with an active client to occasionally receive messages warning them about their bleeding status (if applicable)
  *
  * Arguments:
- * * bleed_amt- When we run this from [/mob/living/carbon/human/proc/handle_blood] we already know how much blood we're losing this tick, so we can skip tallying it again with this
+ * * bleed_amt- When we run this from [/mob/living/carbon/human/proc/handle_bleeding] we already know how much blood we're losing this tick, so we can skip tallying it again with this
  * * forced-
  */
 /mob/living/carbon/proc/bleed_warn(bleed_amt = 0, forced = FALSE)
@@ -173,7 +173,7 @@
 	if(HAS_TRAIT(src, TRAIT_COAGULATING)) // if we have coagulant, we're getting better quick
 		rate_of_change = ", but it's clotting up quickly!"
 	else
-		// flick through our wounds to see if there are any bleeding ones getting worse or holding flow (maybe move this to handle_blood and cache it so we don't need to cycle through the wounds so much)
+		// flick through our wounds to see if there are any bleeding ones getting worse or holding flow (maybe move this to handle_bleeding and cache it so we don't need to cycle through the wounds so much)
 		for(var/i in all_wounds)
 			var/datum/wound/iter_wound = i
 			if(!iter_wound.blood_flow)

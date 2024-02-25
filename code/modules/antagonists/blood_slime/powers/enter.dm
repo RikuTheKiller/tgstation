@@ -1,5 +1,5 @@
 /datum/action/cooldown/blood_slime/enter
-	name = "Enter Host"
+	name = "Enter Corpse"
 	desc = "Enter the target corpse, turning them into your host."
 	click_to_activate = TRUE
 
