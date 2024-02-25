@@ -250,6 +250,8 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
+	current_host.handle_bleeding(seconds_per_tick, times_fired)
+
 	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
 
 	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max

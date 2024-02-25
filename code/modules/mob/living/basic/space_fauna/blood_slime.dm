@@ -6,7 +6,7 @@
 
 /mob/living/basic/blood_slime
 	name = "blood slime"
-	desc = "A horrid slime-like abomination that takes over the corpses of the deceased and feasts on their blood."
+	desc = "A horrid abomination that takes over the corpses of the deceased and feasts on their blood."
 	icon = 'icons/mob/nonhuman-player/blood_slime.dmi'
 	icon_state = "large"
 	icon_living = "large"
@@ -77,8 +77,14 @@
 
 /// Makes the blood slime turn small with an animation.
 /mob/living/basic/blood_slime/proc/become_small()
+	icon_state = "small"
+	icon_living = "small"
+	small = TRUE
 	return
 
 /// Makes the blood slime turn big with an animation.
 /mob/living/basic/blood_slime/proc/become_big()
+	icon_state = "big"
+	icon_living = "big"
+	small = FALSE
 	return
