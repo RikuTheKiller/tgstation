@@ -12,6 +12,10 @@
 	if (!istype(target))
 		return
 
+	if (!owner.Adjacent(target))
+		target.balloon_alert(owner, "out of range!")
+		return
+
 	if (target.stat != DEAD)
 		target.balloon_alert(owner, "not dead!")
 		return

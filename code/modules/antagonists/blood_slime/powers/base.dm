@@ -5,6 +5,13 @@
 	/// Our owner's blood slime antag datum.
 	var/datum/antagonist/blood_slime/blood_slime
 
+/datum/action/cooldown/blood_slime/Trigger(trigger_flags, target)
+	. = ..()
+	if (!.)
+		return
+	if (owner.stat == DEAD) // yeah no sorry you can't revive by emerging when you're dead for real
+		return FALSE
+
 /datum/action/cooldown/blood_slime/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
 
