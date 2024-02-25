@@ -96,7 +96,7 @@
 		TRAIT_STABLEHEART
 	)
 
-	var/static/list/state_to_spells = list(
+	var/static/list/state_actions = list(
 		BLOOD_SLIME_STATE_SOLO = list(
 			/datum/action/cooldown/blood_slime/enter,
 		),
@@ -122,7 +122,7 @@
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
 	if(isnull(initialized_actions))
-		initialized_actions = state_to_spells.Copy()
+		initialized_actions = state_actions.Copy()
 		for(var/state_key in initialized_actions)
 			for(var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
@@ -131,22 +131,35 @@
 	if(current_state == state)
 		return
 
-	for(var/datum/action/cooldown/blood_slime/former in owner.current?.actions)
-		former.Remove(owner.current)
+/// Removes the actions from the given state from the given target.
+/datum/antagonist/blood_slime/proc/remove_state_actions(state, mob/living/target)
+	var/list/actions = initialized_actions[state]
+	for(var/datum/action/action as anything in actions)
+		action.Remove(target)
+
+/// Adds the actions from the given state to the given target.
+/datum/antagonist/blood_slime/proc/add_state_actions(state, mob/living/target)
+	var/list/actions = initialized_actions[state]
+	for(var/datum/action/action as anything in actions)
+		action.Grant(target)
+
+/// Swaps our state to the given state.
+/datum/antagonist/blood_slime/proc/set_state(state)
+	var/list/actions = initialized_actions[state]
+	remove_state_actions(current_state, owner.current)
 	current_state = state
-	var/list/spells = initialized_actions[current_state]
-	for(var/datum/action/action as anything in spells)
-		action.Grant(owner.current)
+	add_state_actions(current_state, owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
-		swap_state(BLOOD_SLIME_STATE_SOLO)
+		add_state_actions(current_state, owner.current)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = null
+		remove_state_actions(current_state, owner.current)
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.
@@ -157,7 +170,7 @@
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
 
 	slime.forceMove(host)
-	swap_state(BLOOD_SLIME_STATE_DORMANT)
+	set_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
@@ -195,8 +208,8 @@
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
+	set_state(BLOOD_SLIME_STATE_SOLO)
 	current_host = null
-	swap_state(BLOOD_SLIME_STATE_SOLO)
 
 /// Gets the maximum blood amount of the slime itself.
 /datum/antagonist/blood_slime/proc/get_max_blood()
