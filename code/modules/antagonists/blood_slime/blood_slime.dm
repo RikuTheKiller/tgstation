@@ -179,7 +179,9 @@
 	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
-	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+
+	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), get_host_max_blood())
+	set_blood_amount(current_host.blood_volume)
 
 	return TRUE
 
