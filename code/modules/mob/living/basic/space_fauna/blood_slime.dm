@@ -82,9 +82,9 @@
 	small = TRUE
 	return
 
-/// Makes the blood slime turn big with an animation.
-/mob/living/basic/blood_slime/proc/become_big()
-	icon_state = "big"
-	icon_living = "big"
+/// Makes the blood slime turn large with an animation.
+/mob/living/basic/blood_slime/proc/become_large()
+	icon_state = "large"
+	icon_living = "large"
 	small = FALSE
 	return
