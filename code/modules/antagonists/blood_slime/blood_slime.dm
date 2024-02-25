@@ -211,7 +211,7 @@
 
 /// Gets the maximum blood amount of the host. Prosthetics and missing limbs can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
 /datum/antagonist/blood_slime/proc/get_host_max_blood(mob/living/carbon/human/host_override = null)
-	var/host = host_override ? host_override : current_host
+	var/mob/living/carbon/human/host = host_override ? host_override : current_host
 
 	if (!host)
 		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
