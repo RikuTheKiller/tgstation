@@ -132,20 +132,8 @@
 	if(current_state == state)
 		return
 
-/// Removes blood slime actions from the given target.
-/datum/antagonist/blood_slime/proc/remove_actions(mob/living/target)
-	for(var/datum/action/cooldown/blood_slime/action in target.actions)
-		action.Remove(target)
-
-/// Adds the actions from the given state to the given target.
-/datum/antagonist/blood_slime/proc/add_state_actions(state, mob/living/target)
-	var/list/actions = initialized_actions[state]
-	for(var/datum/action/action as anything in actions)
-		action.Grant(target)
-
-/// Sets our state to the given state.
-/datum/antagonist/blood_slime/proc/set_state(state)
-	remove_actions(owner.current)
+	for(var/datum/action/cooldown/blood_slime/former in owner.current?.actions)
+		former.Remove(owner.current)
 	current_state = state
 	var/list/actions = initialized_actions[current_state]
 	for(var/datum/action/action as anything in actions)
@@ -154,13 +142,12 @@
 /datum/antagonist/blood_slime/on_gain()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
-		set_state(BLOOD_SLIME_STATE_SOLO)
+		swap_state(BLOOD_SLIME_STATE_SOLO)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = null
-		remove_actions(owner.current)
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.
@@ -275,9 +262,9 @@
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	set_state(BLOOD_SLIME_STATE_SUBJUGATION)
-
 	control_host()
+
+	swap_state(BLOOD_SLIME_STATE_SUBJUGATION)
 
 /// Makes the blood slime marionette its host.
 /datum/antagonist/blood_slime/proc/marionette_host()
@@ -290,9 +277,9 @@
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	set_state(BLOOD_SLIME_STATE_MARIONETTE)
-
 	control_host()
+
+	swap_state(BLOOD_SLIME_STATE_MARIONETTE)
 
 /// Makes the blood slime control its host. Not sanity checked.
 /datum/antagonist/blood_slime/proc/control_host()
