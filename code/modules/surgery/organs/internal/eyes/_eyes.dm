@@ -244,6 +244,11 @@
 #undef NIGHTVISION_LIGHT_MID
 #undef NIGHTVISION_LIGHT_HIG
 
+/obj/item/organ/internal/eyes/invincible
+	maxHealth = 0 // can't take damage
+	flash_protect = FLASH_PROTECTION_WELDER
+	pepperspray_protect = TRUE
+
 /obj/item/organ/internal/eyes/night_vision/mushroom
 	name = "fung-eye"
 	desc = "While on the outside they look inert and dead, the eyes of mushroom people are actually very advanced."

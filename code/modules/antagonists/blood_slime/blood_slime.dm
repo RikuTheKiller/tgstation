@@ -236,3 +236,44 @@
 	current_state = BLOOD_SLIME_STATE_SUBJUGATION
 	current_host.revive()
 	owner.transfer_to(current_host)
+
+/obj/item/organ/internal/blood_slime_membrane
+	name = "Bloody Membrane"
+	desc = "It pulses ominously. You feel like it's watching you."
+
+	var/obj/item/organ/internal/eyes/invincible/temp_eyes
+	var/obj/item/organ/internal/eyes/invincible/temp_ears
+
+	var/obj/item/organ/internal/eyes/old_eyes
+	var/obj/item/organ/internal/ears/old_ears
+
+/obj/item/organ/internal/blood_slime_membrane/Insert(receiver, special, movement_flags)
+	. = ..()
+
+	var/obj/item/organ/internal/eyes/old_eyes = receiver.get_organ_slot(ORGAN_SLOT_EYES)
+	if (old_eyes)
+		old_eyes.Remove(receiver, TRUE)
+
+	temp_eyes = new()
+	temp_ears.zone = BODY_ZONE_CHEST
+	temp_eyes.Insert(receiver, TRUE)
+
+	var/obj/item/organ/internal/ears/old_ears = receiver.get_organ_slot(ORGAN_SLOT_EARS)
+	if (old_ears)
+		old_eyes.Remove(receiver, TRUE)
+
+	temp_ears = new()
+	temp_ears.zone = BODY_ZONE_CHEST
+	temp_ears.Insert(receiver, TRUE)
+
+/obj/item/organ/internal/blood_slime_membrane/Remove(organ_owner, special, movement_flags)
+	. = ..()
+
+	temp_eyes.Remove(organ_owner, TRUE)
+	temp_eyes.Destroy()
+
+	temp_ears.Remove(organ_owner, TRUE)
+	temp_ears.Destroy()
+
+	old_eyes.Insert(organ_owner, TRUE)
+	old_ears.Insert(organ_owner, TRUE)
