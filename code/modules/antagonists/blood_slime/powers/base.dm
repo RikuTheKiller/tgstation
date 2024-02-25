@@ -13,30 +13,30 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
-/// Blood slime action subtype for cancellable activations.
-/datum/action/cooldown/blood_slime/cancellable
+/// Blood slime action subtype for delayed activations, which it has plenty of.
+/datum/action/cooldown/blood_slime/delayed
 	/// Whether the action has been cancelled or not.
 	var/cancelled
 
 	/// Whether the delay is currently active or not.
 	var/active
 
-/datum/action/cooldown/blood_slime/cancellable/Trigger(trigger_flags)
-	if (active && !cancelled)
+/datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, target)
+	. = ..()
+	if (!.)
+		return
+
+	if (active) // cancel the action if used again during the delay
 		cancelled = TRUE
-		active = FALSE
-		owner.balloon_alert(owner, "cancelled!")
 		return FALSE
 
-	. = ..()
-	if(.)
-		active = TRUE
+	active = TRUE
 
-/datum/action/cooldown/blood_slime/cancellable/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
+/datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
 	. = do_after(user, delay, target, timed_action_flags, extra_checks = PROC_REF(doafter_cancel_check))
 
 	active = FALSE
 	cancelled = FALSE
 
-/datum/action/cooldown/blood_slime/cancellable/proc/doafter_cancel_check()
+/datum/action/cooldown/blood_slime/delayed/proc/doafter_cancel_check()
 	return !cancelled
