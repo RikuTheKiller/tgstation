@@ -13,6 +13,10 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
+/datum/action/cooldown/blood_slime/Remove(mob/removed_from)
+	. = ..()
+	blood_slime = null
+
 /// Blood slime action subtype for delayed activations, which it has plenty of.
 /datum/action/cooldown/blood_slime/delayed
 	/// Whether the action has been cancelled or not.
