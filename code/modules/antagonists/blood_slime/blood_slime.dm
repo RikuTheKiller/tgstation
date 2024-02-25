@@ -145,7 +145,6 @@
 
 /// Sets our state to the given state.
 /datum/antagonist/blood_slime/proc/set_state(state)
-	var/list/actions = initialized_actions[state]
 	remove_state_actions(current_state, owner.current)
 	current_state = state
 	add_state_actions(current_state, owner.current)
