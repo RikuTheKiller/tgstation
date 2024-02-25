@@ -210,9 +210,14 @@
 		. *= 0.5
 
 /// Gets the maximum blood amount of the host. Prosthetics and missing limbs can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
-/datum/antagonist/blood_slime/proc/get_host_max_blood()
-	if (!current_host)
+/datum/antagonist/blood_slime/proc/get_host_max_blood(mob/living/carbon/human/host_override = null)
+	var/host = host_override ? host_override : current_host
+
+	if (!host)
 		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
+
+	if (HAS_TRAIT(host, TRAIT_NOBLOOD))
+		return 0
 
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
 
@@ -221,12 +226,12 @@
 
 	var/suitable_limbs = 0
 
-	for (var/obj/item/bodypart/limb in current_host.bodyparts)
+	for (var/obj/item/bodypart/limb in host.bodyparts)
 		if (!IS_ROBOTIC_LIMB(limb))
 			suitable_limbs += 1
 
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
-	. = min(., BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (current_host.bodyparts.len + current_host.get_missing_limbs().len))
+	. = min(., BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (host.bodyparts.len + host.get_missing_limbs().len))
 
 /// Returns how much blood the blood slime currently holds.
 /datum/antagonist/blood_slime/proc/get_blood_amount()

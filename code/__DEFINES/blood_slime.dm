@@ -1,4 +1,4 @@
-// States
+// States (as strings to use in assoc)
 #define BLOOD_SLIME_STATE_SOLO "solo" // out of host
 #define BLOOD_SLIME_STATE_DORMANT "dormant" // inside of a dormant (dead) host
 #define BLOOD_SLIME_STATE_SUBJUGATION "subjugation" // controlling host via subjugation

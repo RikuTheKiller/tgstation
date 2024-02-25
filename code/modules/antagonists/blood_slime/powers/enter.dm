@@ -6,14 +6,18 @@
 /datum/action/cooldown/blood_slime/enter/IsAvailable(feedback = FALSE)
 	return ..() && !blood_slime?.current_host
 
-/datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/target)
+/datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/human/target)
 	. = ..()
 
-	if(!istype(target))
+	if (!istype(target))
 		return
 
-	if(target.stat != DEAD)
+	if (target.stat != DEAD)
 		target.balloon_alert(owner, "not dead!")
+		return
+
+	if (blood_slime.get_host_max_blood(target) <= 0)
+		target.balloon_alert(owner, "bloodless!")
 		return
 
 	. = TRUE // accidentally smacking a viable host is bad
@@ -23,7 +27,7 @@
 		self_message = span_notice("You begin to enter [target]."),
 	)
 
-	if(!do_after(owner, 2 SECONDS, target))
+	if (!do_after(owner, 2 SECONDS, target))
 		return
 
 	target.do_jitter_animation(10) // fluff
