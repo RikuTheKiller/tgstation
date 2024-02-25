@@ -9,6 +9,7 @@
 
 	if (host.health < HEALTH_THRESHOLD_DEAD) // you either have to heal the corpse or use marionette instead
 		host.balloon_alert(owner, "too damaged!")
+		return FALSE
 
 	owner.visible_message(
 		message = span_danger("[blood_slime.current_host] starts convulsing!"),
@@ -22,6 +23,7 @@
 
 	if (host.health < HEALTH_THRESHOLD_DEAD)
 		owner.balloon_alert(owner, "too damaged!")
+		return FALSE
 
 	blood_slime.subjugate_host()
 
