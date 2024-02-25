@@ -35,6 +35,8 @@
 	attack_vis_effect = ATTACK_EFFECT_SMASH
 	attack_sound = 'sound/weapons/genhit1.ogg'
 
+	initial_language_holder = /datum/language_holder/slime // perfect for us, can understand slime and common but can only speak slime
+
 	// vivid red
 	lighting_cutoff_red = 40
 	lighting_cutoff_green = 15
