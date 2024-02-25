@@ -1,6 +1,6 @@
 /datum/action/cooldown/blood_slime/enter
 	name = "Enter Host"
-	desc = "Enters the target corpse, turning them into your host."
+	desc = "Enter the target corpse, turning them into your host."
 	click_to_activate = TRUE
 
 /datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/target)
@@ -12,6 +12,8 @@
 	if(target.stat != DEAD)
 		target.balloon_alert(owner, "not dead!")
 		return
+
+	. = TRUE // accidentally smacking a viable host is bad
 
 	owner.visible_message(
 		message = span_danger("\The [owner] begins to enter [target]!"),

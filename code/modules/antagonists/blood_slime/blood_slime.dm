@@ -93,11 +93,11 @@
 		TRAIT_NOFAT
 	)
 
-	/// Action used to leave our current host. (emerge)
-	var/datum/action/cooldown/blood_slime/emerge/emerge_action
+	/// Action used to emerge from our current host.
+	var/datum/action/cooldown/blood_slime/delayed/emerge/emerge_action
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/cooldown/blood_slime/subjugate/subjugate_action
+	var/datum/action/cooldown/blood_slime/delayed/subjugate/subjugate_action
 
 	/// Action used to enter a corpse.
 	var/datum/action/cooldown/blood_slime/enter/enter_action
@@ -175,7 +175,7 @@
 		current_host.death()
 
 	current_host = null
-	state = BLOOD_SLIME_STATE_SOLO
+	current_state = BLOOD_SLIME_STATE_SOLO
 
 /// Gets the maximum blood amount of the slime. Prosthetics and missing limbs on a host can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
 /datum/antagonist/blood_slime/proc/get_max_blood()
