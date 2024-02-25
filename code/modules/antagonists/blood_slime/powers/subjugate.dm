@@ -3,7 +3,9 @@
 	desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
 
 /datum/action/cooldown/blood_slime/delayed/subjugate/IsAvailable(feedback = FALSE)
-	return ..() && blood_slime?.current_host
+	if(!blood_slime.current_host || blood_slime.current_state != BLOOD_SLIME_STATE_SOLO)
+		return FALSE
+	return ..()
 
 /datum/action/cooldown/blood_slime/delayed/subjugate/Activate(atom/target)
 	. = ..()

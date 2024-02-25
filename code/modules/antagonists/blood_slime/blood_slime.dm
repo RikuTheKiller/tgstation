@@ -166,7 +166,9 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
+	owner.transfer_to(slime)
 	slime.forceMove(current_host.drop_location())
+	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
 
 	if (!silent)
 		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from [current_host]."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
@@ -220,3 +222,10 @@
 /datum/antagonist/blood_slime/proc/subjugate_host()
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to subjugate a host that doesn't exist.")
+	if(current_host.stat != DEAD)
+		return
+	for(var/trait in subjugation_traits)
+		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
+	current_state = BLOOD_SLIME_STATE_SUBJUGATION
+	current_host.revive()
+	owner.transfer_to(current_host)

@@ -2,6 +2,9 @@
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 
+/datum/action/cooldown/blood_slime/delayed/emerge/IsAvailable(feedback = FALSE)
+	return ..() && blood_slime?.current_host //there is no state for chilling inside a body
+
 /datum/action/cooldown/blood_slime/delayed/emerge/Activate(atom/target)
 	. = ..()
 

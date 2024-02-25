@@ -22,15 +22,14 @@
 	var/active
 
 /datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, target)
-	. = ..()
-	if (!.)
-		return
-
 	if (active) // cancel the action if used again during the delay
 		cancelled = TRUE
+		active = FALSE
 		return FALSE
 
 	active = TRUE
+	cancelled = FALSE
+	return ..()
 
 /datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
 	. = do_after(user, delay, target, timed_action_flags, extra_checks =  CALLBACK(src, PROC_REF(doafter_cancel_check)))

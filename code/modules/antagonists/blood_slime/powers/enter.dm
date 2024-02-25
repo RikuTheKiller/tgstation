@@ -3,6 +3,9 @@
 	desc = "Enter the target corpse, turning them into your host."
 	click_to_activate = TRUE
 
+/datum/action/cooldown/blood_slime/enter/IsAvailable(feedback = FALSE)
+	return ..() && !blood_slime?.current_host
+
 /datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/target)
 	. = ..()
 
