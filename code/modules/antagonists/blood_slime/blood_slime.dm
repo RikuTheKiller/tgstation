@@ -204,7 +204,7 @@
 
 /// Sets the blood amount of the blood slime to the given amount.
 /datum/antagonist/blood_slime/proc/set_blood_amount(amount)
-	slime.setBruteLoss(amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM) // it was bruteloss all along
+	slime.setBruteLoss(slime.maxHealth - amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM) // it was bruteloss all along
 
 /// Adjusts the blood amount of the blood slime by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)
