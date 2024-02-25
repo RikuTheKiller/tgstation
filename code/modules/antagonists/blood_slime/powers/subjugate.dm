@@ -1,11 +1,11 @@
-/datum/action/cooldown/blood_slime/delayed/subjugate
+/datum/action/cooldown/blood_slime/cancellable/subjugate
 	name = "Subjugate"
 	desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
 
-/datum/action/cooldown/blood_slime/delayed/subjugate/IsAvailable(feedback = FALSE)
+/datum/action/cooldown/blood_slime/cancellable/subjugate/IsAvailable(feedback = FALSE)
 	return ..() && blood_slime?.current_host
 
-/datum/action/cooldown/blood_slime/delayed/subjugate/Activate(atom/target)
+/datum/action/cooldown/blood_slime/cancellable/subjugate/Activate(atom/target)
 	. = ..()
 
 	var/mob/living/carbon/human/host = blood_slime.current_host
