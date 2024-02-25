@@ -14,6 +14,7 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
+/// Blood slime action subtype for delayed actions, which it has plenty of
 /datum/action/cooldown/blood_slime/cancellable
 	/// Whether the action has been cancelled or not.
 	var/cancelled
