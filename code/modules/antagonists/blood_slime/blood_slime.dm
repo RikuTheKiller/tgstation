@@ -93,11 +93,11 @@
 		TRAIT_NOFAT
 	)
 
-	/// Action used to leave our current host. (emerge)
-	var/datum/action/cooldown/blood_slime/cancellable/emerge/emerge_action
+	/// Action used to emerge from our current host.
+	var/datum/action/cooldown/blood_slime/delayed/emerge/emerge_action
 
 	/// Action used to subjugate a corpse.
-	var/datum/action/cooldown/blood_slime/cancellable/subjugate/subjugate_action
+	var/datum/action/cooldown/blood_slime/delayed/subjugate/subjugate_action
 
 	/// Action used to enter a corpse.
 	var/datum/action/cooldown/blood_slime/enter/enter_action
