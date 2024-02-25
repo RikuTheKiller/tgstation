@@ -134,8 +134,10 @@
 
 	for(var/datum/action/cooldown/blood_slime/former in owner.current?.actions)
 		former.Remove(owner.current)
+
 	current_state = state
 	var/list/actions = initialized_actions[current_state]
+
 	for(var/datum/action/action as anything in actions)
 		action.Grant(owner.current)
 
