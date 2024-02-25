@@ -127,14 +127,14 @@
 			for(var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
 				initialized_actions[state_key] += new path(owner)
+
 /datum/antagonist/blood_slime/proc/swap_state(state)
 	if(current_state == state)
 		return
 
-/// Removes the actions from the given state from the given target.
-/datum/antagonist/blood_slime/proc/remove_state_actions(state, mob/living/target)
-	var/list/actions = initialized_actions[state]
-	for(var/datum/action/action as anything in actions)
+/// Removes blood slime actions from the given target.
+/datum/antagonist/blood_slime/proc/remove_actions(mob/living/target)
+	for(var/datum/action/cooldown/blood_slime/action in target.actions)
 		action.Remove(target)
 
 /// Adds the actions from the given state to the given target.
@@ -145,20 +145,22 @@
 
 /// Sets our state to the given state.
 /datum/antagonist/blood_slime/proc/set_state(state)
-	remove_state_actions(current_state, owner.current)
+	remove_actions(owner.current)
 	current_state = state
-	add_state_actions(current_state, owner.current)
+	var/list/actions = initialized_actions[current_state]
+	for(var/datum/action/action as anything in actions)
+		action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
-		add_state_actions(current_state, owner.current)
+		set_state(BLOOD_SLIME_STATE_SOLO)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = null
-		remove_state_actions(current_state, owner.current)
+		remove_actions(owner.current)
 	return ..()
 
 /// Causes the slime to enter the target host with an animation.
@@ -169,7 +171,7 @@
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
 
 	slime.forceMove(host)
-	set_state(BLOOD_SLIME_STATE_DORMANT)
+	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
@@ -207,7 +209,7 @@
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
-	set_state(BLOOD_SLIME_STATE_SOLO)
+	swap_state(BLOOD_SLIME_STATE_SOLO)
 	current_host = null
 
 /// Gets the maximum blood amount of the slime itself.
@@ -273,7 +275,7 @@
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	swap_state(BLOOD_SLIME_STATE_SUBJUGATION)
+	set_state(BLOOD_SLIME_STATE_SUBJUGATION)
 
 	control_host()
 
@@ -288,7 +290,7 @@
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
 
-	swap_state(BLOOD_SLIME_STATE_MARIONETTE)
+	set_state(BLOOD_SLIME_STATE_MARIONETTE)
 
 	control_host()
 
@@ -297,8 +299,8 @@
 	if(current_host.mind)
 		host_mind = current_host.mind
 
-	owner.transfer_to(current_host)
 	current_host.revive()
+	owner.transfer_to(current_host)
 
 /obj/item/organ/internal/blood_slime_membrane
 	name = "Bloody Membrane"
