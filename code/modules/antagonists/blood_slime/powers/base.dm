@@ -1,7 +1,6 @@
 /datum/action/cooldown/blood_slime
 	name = "Blood Slime Base Action"
 	desc = "Please ahelp this."
-	click_to_activate = FALSE
 
 	/// Our owner's blood slime antag datum.
 	var/datum/antagonist/blood_slime/blood_slime
@@ -14,7 +13,7 @@
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the blood slime antag datum.") // the blood slime datum is rather volatile due to it's body-swapping nature
 
-/// Blood slime action subtype for delayed actions, which it has plenty of.
+/// Blood slime action subtype for delayed activations, which it has plenty of.
 /datum/action/cooldown/blood_slime/delayed
 	/// Whether the action has been cancelled or not.
 	var/cancelled
