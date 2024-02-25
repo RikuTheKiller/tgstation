@@ -149,7 +149,7 @@
 		swap_state(BLOOD_SLIME_STATE_SOLO)
 	else if (istype(owner.current, /mob/living/carbon/human))
 		slime = new(owner.current)
-		if (!enter_host(owner.current, silent = TRUE)) // check if entering the host was successful
+		if (!enter_host(owner.current, disable_animation = TRUE)) // check if entering the host was successful
 			owner.remove_antag_datum(src.type)
 			return ..()
 		subjugate_host()
