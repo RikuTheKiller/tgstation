@@ -144,28 +144,44 @@
 		action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
-	if(istype(owner.current, /mob/living/basic/blood_slime))
+	if (istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
 		swap_state(BLOOD_SLIME_STATE_SOLO)
+	else if (istype(owner.current, /mob/living/carbon/human))
+		slime = new(owner.current)
+		if (!enter_host(owner.current, silent = TRUE)) // check if entering the host was successful
+			owner.remove_antag_datum(src.type)
+			return ..()
+		subjugate_host()
+	else
+		owner.remove_antag_datum(src.type)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
-	if(istype(owner.current, /mob/living/basic/blood_slime))
-		slime = null
+	if (current_host)
+		for (var/datum/action/cooldown/blood_slime/former in current_host.actions)
+			former.Remove(former)
+	for (var/datum/action/cooldown/blood_slime/former in owner.current.actions)
+		former.Remove(former)
+	QDEL_LIST_ASSOC(initialized_actions)
 	return ..()
 
-/// Causes the slime to enter the target host with an animation.
-/datum/antagonist/blood_slime/proc/enter_host(mob/living/carbon/human/host, silent = FALSE)
+/// Causes the slime to enter the target host with an animation. Returns whether or not entering was successful.
+/datum/antagonist/blood_slime/proc/enter_host(mob/living/carbon/human/host, disable_animation = FALSE)
 	if (!host)
 		CRASH("[slime] ([owner]) attempted to enter a host that doesn't exist.")
 	if (current_host)
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
+	if (get_host_max_blood(host) <= 0)
+		return FALSE
 
 	slime.forceMove(host)
 	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
+
+	return TRUE
 
 /**
  * Causes the slime to leave it's current host with an animation.

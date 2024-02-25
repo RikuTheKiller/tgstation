@@ -23,9 +23,15 @@
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
+	host.emote("tremble")
+
+	host.do_jitter_animation(100)
+
 	if (!do_delay(owner, 2 SECONDS, target = host))
 		return FALSE
 
+	playsound(owner, 'sound/effects/butcher.ogg', 40, TRUE)
+	playsound(owner, 'sound/effects/splat.ogg', 60, TRUE)
 	blood_slime.leave_host()
 	return TRUE
 
