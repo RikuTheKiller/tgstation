@@ -20,8 +20,8 @@
 	maxHealth = 200
 	damage_coeff = list(BRUTE = 1, BURN = 0.75, TOX = 1, STAMINA = 0, OXY = 0)
 
-	melee_damage_lower = 20
-	melee_damage_upper = 30
+	melee_damage_lower = 15
+	melee_damage_upper = 25
 	obj_damage = 30
 	melee_attack_cooldown = CLICK_CD_MELEE
 	wound_bonus = 0 // getting hit by a mass of hardened blood is bound to break some bones (also encourages finding pristine corpses rather than creating mangled ones)
