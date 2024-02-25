@@ -285,8 +285,8 @@
 	if(current_host.mind)
 		host_mind = current_host.mind
 
-	owner.transfer_to(current_host)
 	current_host.revive()
+	owner.transfer_to(current_host)
 
 /obj/item/organ/internal/blood_slime_membrane
 	name = "Bloody Membrane"
