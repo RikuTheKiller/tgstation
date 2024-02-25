@@ -281,7 +281,7 @@
 	var/obj/item/organ/internal/eyes/old_eyes
 	var/obj/item/organ/internal/ears/old_ears
 
-/obj/item/organ/internal/blood_slime_membrane/Insert(receiver, special, movement_flags)
+/obj/item/organ/internal/blood_slime_membrane/Insert(mob/living/carbon/receiver, special, movement_flags)
 	. = ..()
 
 	var/obj/item/organ/internal/eyes/old_eyes = receiver.get_organ_slot(ORGAN_SLOT_EYES)
