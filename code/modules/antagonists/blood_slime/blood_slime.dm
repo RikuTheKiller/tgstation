@@ -96,41 +96,52 @@
 		TRAIT_STABLEHEART
 	)
 
-	/// Action used to emerge from our current host.
-	var/datum/action/cooldown/blood_slime/delayed/emerge/emerge_action
+	var/static/list/state_to_spells = list(
+		BLOOD_SLIME_STATE_SOLO = list(
+			/datum/action/cooldown/blood_slime/enter,
+		),
+		BLOOD_SLIME_STATE_DORMANT = list(
+			/datum/action/cooldown/blood_slime/delayed/emerge,
+			/datum/action/cooldown/blood_slime/delayed/subjugate,
+		),
+		BLOOD_SLIME_STATE_SUBJUGATION = list(
+			/datum/action/cooldown/blood_slime/delayed/emerge,
+		),
+		BLOOD_SLIME_STATE_MARIONETTE = list(
+			/datum/action/cooldown/blood_slime/delayed/emerge,
+		),
+		BLOOD_SLIME_STATE_SYMBIOSIS = list(
+			/datum/action/cooldown/blood_slime/delayed/emerge,
+		),
+	)
 
-	/// Action used to subjugate a corpse.
-	var/datum/action/cooldown/blood_slime/delayed/subjugate/subjugate_action
-
-	/// Action used to enter a corpse.
-	var/datum/action/cooldown/blood_slime/enter/enter_action
+	var/list/initialized_actions
 
 /datum/antagonist/blood_slime/New()
 	. = ..()
 	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
 	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
+	if(isnull(initialized_actions))
+		initialized_actions = state_to_spells.Copy()
+		for(var/state_key in initialized_actions)
+			for(var/path in initialized_actions[state_key])
+				initialized_actions[state_key] -= path
+				initialized_actions[state_key] += new path
 
-/datum/antagonist/blood_slime/apply_innate_effects(mob/living/mob_override)
-	emerge_action = new(owner)
-	emerge_action.Grant(owner.current)
-	subjugate_action = new(owner)
-	subjugate_action.Grant(owner.current)
-	enter_action = new(owner)
-	enter_action.Grant(owner.current)
-	return ..()
+/datum/antagonist/blood_slime/proc/remove_state_spells(mob/living/target)
+	var/list/spells = initialized_actions[current_state]
+	for(var/datum/action/action as anything in spells)
+		action.Remove(target)
 
-/datum/antagonist/blood_slime/remove_innate_effects(mob/living/mob_override)
-	subjugate_action.Remove(owner.current)
-	emerge_action.Remove(owner.current)
-	enter_action.Remove(owner.current)
-	QDEL_NULL(subjugate_action)
-	QDEL_NULL(emerge_action)
-	QDEL_NULL(enter_action)
-	return ..()
+/datum/antagonist/blood_slime/proc/add_state_spells(mob/living/target)
+	var/list/spells = initialized_actions[current_state]
+	for(var/datum/action/action as anything in spells)
+		action.Grant(target)
 
 /datum/antagonist/blood_slime/on_gain()
 	if(istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
+		add_state_spells(slime)
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
@@ -146,6 +157,9 @@
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
 
 	slime.forceMove(host)
+	remove_state_spells(slime)
+	current_state = BLOOD_SLIME_STATE_DORMANT
+	add_state_spells(slime)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
@@ -183,8 +197,10 @@
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
+	remove_state_spells(current_host)
 	current_host = null
 	current_state = BLOOD_SLIME_STATE_SOLO
+	add_state_spells(slime)
 
 /// Gets the maximum blood amount of the slime itself.
 /datum/antagonist/blood_slime/proc/get_max_blood()
@@ -268,7 +284,9 @@
 	if(current_host.mind)
 		host_mind = current_host.mind
 
+	remove_state_spells(slime)
 	owner.transfer_to(current_host)
+	add_state_spells(current_host)
 	current_host.revive()
 
 /obj/item/organ/internal/blood_slime_membrane
