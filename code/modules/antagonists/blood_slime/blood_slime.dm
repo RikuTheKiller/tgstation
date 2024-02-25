@@ -211,7 +211,7 @@
 		host_mind = null
 
 	if (!silent)
-		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from [current_host]."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
+		slime.visible_message(span_danger("\The [src] gushes out of [current_host]!"), span_notice("You emerge from your host."), span_hear("You hear a sudden gush of liquid!"), ignored_mobs = list(current_host))
 
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()

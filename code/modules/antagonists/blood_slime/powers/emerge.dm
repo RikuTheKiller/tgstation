@@ -17,11 +17,7 @@
 
 	var/mob/living/carbon/human/host = blood_slime.current_host
 
-	owner.visible_message(
-		message = span_danger("[host] trembles ominously."),
-		self_message = span_notice("You prepare to emerge from your host."),
-		ignored_mobs = list(blood_slime.current_host)
-	)
+	to_chat(owner, span_notice("You prepare to emerge from your host."))
 
 	host.emote("tremble")
 
@@ -38,5 +34,5 @@
 /datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
 	if (user != owner)
 		return
-	owner.balloon_alert("can't move in a corpse!")
+	owner.balloon_alert(owner, "can't move while in a body!")
 	return COMSIG_BLOCK_RELAYMOVE

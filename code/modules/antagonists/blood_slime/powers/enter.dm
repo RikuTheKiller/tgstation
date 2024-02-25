@@ -1,6 +1,6 @@
 /datum/action/cooldown/blood_slime/enter
-	name = "Enter Corpse"
-	desc = "Enter the target corpse, turning them into your host."
+	name = "Enter Body"
+	desc = "Enter the target's body, turning them into your host."
 	click_to_activate = TRUE
 
 /datum/action/cooldown/blood_slime/enter/IsAvailable(feedback = FALSE)
@@ -31,12 +31,17 @@
 	. = TRUE // accidentally smacking a viable host is bad
 
 	owner.visible_message(
-		message = span_danger("\The [owner] begins to enter [target]!"),
-		self_message = span_notice("You begin to enter [target]."),
+		message = span_danger("\The [owner] begins to enter [target]'s body!"),
+		self_message = span_notice("You begin to enter [target]'s body."),
 	)
 
 	if (!do_after(owner, 2 SECONDS, target))
 		return
+
+	owner.visible_message(
+		message = span_danger("\The [owner] enters [target]'s body!"),
+		self_message = span_notice("You begin to enter [target]'s body."),
+	)
 
 	target.do_jitter_animation(10) // fluff
 

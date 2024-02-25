@@ -71,9 +71,12 @@
 /mob/living/basic/blood_slime/updatehealth()
 	. = ..()
 
+	if (stat == DEAD) // dont change size while dead
+		return
+
 	if (health < small_threshold && !small)
 		become_small()
-	else if (small)
+	else if (health > small_threshold && small)
 		become_large()
 
 /// Makes the blood slime turn small with an animation.
