@@ -56,7 +56,8 @@
 		TRAIT_NOSOFTCRIT,
 		TRAIT_NOHARDCRIT,
 		TRAIT_NOHUNGER, // the host feeds us and we feed the host (can't carry food as a slime so it'd get annoying quick, especially if you took over a host and they turned out to be starved to uselessness)
-		TRAIT_NOFAT // we just eat the fat, slime moment (also it would be a problem without hunger, even if especially rare)
+		TRAIT_NOFAT, // we just eat the fat, slime moment (also it would be a problem without hunger, even if especially rare)
+		TRAIT_STABLEHEART // we are the circulation
 	)
 
 	/// Traits given to our host during marionette.
@@ -76,6 +77,7 @@
 		TRAIT_NOHARDCRIT,
 		TRAIT_NOHUNGER,
 		TRAIT_NOFAT,
+		TRAIT_STABLEHEART
 		TRAIT_NOBREATH, // dead people don't breathe (most things that don't process while dead shouldn't process during marionette, yet another difficult thing to do without shitcode)
 		TRAIT_LIVERLESS_METABOLISM, // they also don't metabolize (mostly a downside since you can't use healing meds to make a corpse suitable for subjugation)
 		TRAIT_FAKEDEATH // it's just a regular corpse, trust (mostly for aesthetics, though it can be used to fake death)
@@ -90,7 +92,8 @@
 		TRAIT_NOSOFTCRIT,
 		TRAIT_NOHARDCRIT,
 		TRAIT_NOHUNGER,
-		TRAIT_NOFAT
+		TRAIT_NOFAT,
+		TRAIT_STABLEHEART
 	)
 
 	/// Action used to emerge from our current host.
@@ -230,16 +233,41 @@
 
 	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max
 
+/// Makes the blood slime subjugate its host.
 /datum/antagonist/blood_slime/proc/subjugate_host()
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to subjugate a host that doesn't exist.")
-	if(current_host.stat != DEAD)
+
+	if(current_host.stat != DEAD || current_host.health < HEALTH_THRESHOLD_DEAD)
 		return
+
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
+
 	current_state = BLOOD_SLIME_STATE_SUBJUGATION
+
+	control_host()
+
+/// Makes the blood slime marionette its host.
+/datum/antagonist/blood_slime/proc/marionette_host()
+	if (!current_host)
+		CRASH("[slime] ([owner]) attempted to marionette a host that doesn't exist.")
+
+	if(current_host.stat != DEAD)
+		return
+
+	for(var/trait in marionette_traits)
+		ADD_TRAIT(current_host, trait, BLOODCONTROL_TRAIT)
+
+	current_state = BLOOD_SLIME_STATE_MARIONETTE
+
+	control_host()
+
+/// Makes the blood slime control its host. Not sanity checked.
+/datum/antagonist/blood_slime/proc/control_host()
 	if(current_host.mind)
 		host_mind = current_host.mind
+
 	owner.transfer_to(current_host)
 	current_host.revive()
 
