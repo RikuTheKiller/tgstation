@@ -58,6 +58,11 @@
 /mob/living/basic/blood_slime/Initialize(mapload)
 	. = ..()
 
+	// same elements and traits as a regular slime for the most part
+	AddElement(/datum/element/soft_landing)
+	AddElement(/datum/element/swabable, CELL_LINE_TABLE_SLIME, CELL_VIRUS_TABLE_GENERIC_MOB, 1, 5)
+	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
+
 /mob/living/basic/blood_slime/mind_initialize()
 	..()
 
