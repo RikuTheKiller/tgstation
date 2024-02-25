@@ -7,6 +7,7 @@
 
 /datum/action/cooldown/blood_slime/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
+
 	blood_slime = antag_override ? antag_override : grant_to?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!blood_slime)
