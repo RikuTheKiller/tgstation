@@ -73,7 +73,7 @@
 	if (health < small_threshold && !small)
 		become_small()
 	else if (small)
-		become_big()
+		become_large()
 
 /// Makes the blood slime turn small with an animation.
 /mob/living/basic/blood_slime/proc/become_small()
