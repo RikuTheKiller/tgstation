@@ -179,12 +179,19 @@
 	current_host = null
 	current_state = BLOOD_SLIME_STATE_SOLO
 
-/// Gets the maximum blood amount of the slime. Prosthetics and missing limbs on a host can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
+/// Gets the maximum blood amount of the slime itself.
 /datum/antagonist/blood_slime/proc/get_max_blood()
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
 
+	if (current_state == BLOOD_SLIME_STATE_SPLIT)
+		. *= 0.5
+
+/// Gets the maximum blood amount of the host. Prosthetics and missing limbs can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
+/datum/antagonist/blood_slime/proc/get_host_max_blood()
 	if (!current_host)
-		return
+		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
+
+	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
 
 	if (current_state == BLOOD_SLIME_STATE_SPLIT)
 		. *= 0.5
@@ -217,7 +224,7 @@
 
 	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
 
-	current_host.blood_volume = min(current_host.blood_volume, get_max_blood()) // limit blood volume to max
+	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max
 
 /datum/antagonist/blood_slime/proc/subjugate_host()
 	if (!current_host)
