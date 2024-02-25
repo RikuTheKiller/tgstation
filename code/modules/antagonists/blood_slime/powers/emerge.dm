@@ -2,8 +2,15 @@
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 
-/datum/action/cooldown/blood_slime/delayed/emerge/IsAvailable(feedback = FALSE)
-	return ..() && blood_slime?.current_host //there is no state for chilling inside a body
+/datum/action/cooldown/blood_slime/delayed/emerge/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
+	. = ..()
+
+	RegisterSignal(grant_to, COMSIG_ATOM_RELAYMOVE, PROC_REF(host_relaymove), override = TRUE)
+
+/datum/action/cooldown/blood_slime/delayed/emerge/Remove(mob/removed_from)
+	. = ..()
+
+	UnregisterSignal(removed_from, COMSIG_ATOM_RELAYMOVE)
 
 /datum/action/cooldown/blood_slime/delayed/emerge/Activate(atom/target)
 	. = ..()
