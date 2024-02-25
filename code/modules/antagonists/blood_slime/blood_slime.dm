@@ -77,7 +77,7 @@
 		TRAIT_NOHARDCRIT,
 		TRAIT_NOHUNGER,
 		TRAIT_NOFAT,
-		TRAIT_STABLEHEART
+		TRAIT_STABLEHEART,
 		TRAIT_NOBREATH, // dead people don't breathe (most things that don't process while dead shouldn't process during marionette, yet another difficult thing to do without shitcode)
 		TRAIT_LIVERLESS_METABOLISM, // they also don't metabolize (mostly a downside since you can't use healing meds to make a corpse suitable for subjugation)
 		TRAIT_FAKEDEATH // it's just a regular corpse, trust (mostly for aesthetics, though it can be used to fake death)
