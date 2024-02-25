@@ -158,7 +158,7 @@
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
 
 	slime.forceMove(host)
-	set_state(BLOOD_SLIME_STATE_DORMANT)
+	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
 	current_host = host
 	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM)
@@ -196,7 +196,7 @@
 	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
-	set_state(BLOOD_SLIME_STATE_SOLO)
+	swap_state(BLOOD_SLIME_STATE_SOLO)
 	current_host = null
 
 /// Gets the maximum blood amount of the slime itself.
