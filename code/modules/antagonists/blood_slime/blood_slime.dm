@@ -126,7 +126,7 @@
 		for(var/state_key in initialized_actions)
 			for(var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
-				initialized_actions[state_key] += new path
+				initialized_actions[state_key] += new path(owner)
 
 /datum/antagonist/blood_slime/proc/remove_state_spells(mob/living/target)
 	var/list/spells = initialized_actions[current_state]
