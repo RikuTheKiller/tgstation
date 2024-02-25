@@ -32,6 +32,5 @@
 /datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
 	if (user != owner)
 		return
-	Trigger()
-	owner.balloon_alert("emerging")
+	owner.balloon_alert("can't move in a corpse!")
 	return COMSIG_BLOCK_RELAYMOVE
