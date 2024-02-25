@@ -320,10 +320,7 @@
 /obj/item/organ/internal/blood_slime_membrane/Remove(organ_owner, special, movement_flags)
 	. = ..()
 
-	temp_eyes.Remove(organ_owner, TRUE)
 	temp_eyes.Destroy()
-
-	temp_ears.Remove(organ_owner, TRUE)
 	temp_ears.Destroy()
 
 	old_eyes.Insert(organ_owner, TRUE)
