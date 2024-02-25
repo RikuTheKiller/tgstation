@@ -33,6 +33,7 @@
 
 	speak_emote = list("blorbles")
 	attack_vis_effect = ATTACK_EFFECT_SMASH
+	attack_sound = 'sound/weapons/genhit1.ogg'
 
 	lighting_cutoff_red = 30
 	lighting_cutoff_green = 5
