@@ -33,7 +33,7 @@
 		active = TRUE
 
 /datum/action/cooldown/blood_slime/cancellable/proc/do_delay(mob/user, delay, atom/target, timed_action_flags)
-	. = do_after(user, delay, target, timed_action_flags, extra_checks = PROC_REF(doafter_cancel_check))
+	. = do_after(user, delay, target, timed_action_flags, extra_checks =  CALLBACK(src, PROC_REF(doafter_cancel_check)))
 
 	active = FALSE
 	cancelled = FALSE
