@@ -35,9 +35,10 @@
 	attack_vis_effect = ATTACK_EFFECT_SMASH
 	attack_sound = 'sound/weapons/genhit1.ogg'
 
-	lighting_cutoff_red = 30
-	lighting_cutoff_green = 5
-	lighting_cutoff_blue = 20
+	// vivid red
+	lighting_cutoff_red = 40
+	lighting_cutoff_green = 15
+	lighting_cutoff_blue = 15
 
 	unsuitable_atmos_damage = 0
 	unsuitable_heat_damage = 5
