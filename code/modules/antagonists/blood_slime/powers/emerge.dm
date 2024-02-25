@@ -16,7 +16,7 @@
 		ignored_mobs = list(blood_slime.current_host)
 	)
 
-	if (!do_delay(owner, 2 SECONDS, target = host, timed_action_flags = IGNORE_USER_LOC_CHANGE|IGNORE_TARGET_LOC_CHANGE))
+	if (!do_delay(owner, 2 SECONDS, target = host))
 		return FALSE
 
 	blood_slime.leave_host()
