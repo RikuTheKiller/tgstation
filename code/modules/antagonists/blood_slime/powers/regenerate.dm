@@ -1,6 +1,6 @@
 /datum/action/cooldown/blood_slime/regen
 	name = "Regeneration"
-	desc = "Rapidly consume yourself to recreate your host's lost bodily tissues. Faster and more efficient if your host is heavily injured, especially if they're dead. Toggleable."
+	desc = "Rapidly consume yourself to recreate your host's lost bodily tissues. More efficient if your host is dead. Toggleable."
 
 /datum/action/cooldown/blood_slime/regen/Activate(atom/target)
 	. = ..()
@@ -40,12 +40,12 @@
 	if (damage <= 0)
 		return
 
-	blood_slime.adjust_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * -0.025 * seconds_between_ticks) // -2.5% blood per second
+	var/potency = 3 + damage * 0.01 * seconds_between_ticks
 
-	var/potency = 3 + damage * 0.01 * seconds_between_ticks // at 200 damage blood to health ratio is 1 to 2
+	blood_slime.adjust_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.004 * potency * seconds_between_ticks) // -0.4% blood per second per potency (-2% at 200 damage)
 
 	if (host.stat == DEAD)
-		potency *= 2 // at minimum 10 per second or a blood to health ratio of 1 to 4
+		potency *= 1.5
 
 	host.adjustBruteLoss(-potency)
 	host.adjustFireLoss(-potency)
