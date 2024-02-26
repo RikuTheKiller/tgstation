@@ -21,8 +21,11 @@
 
 	owner.visible_message(
 		span_danger("[host]'s skin begins to turn pale!"),
-		span_notice("You prepare to emerge from your host.")
+		span_notice("You prepare to emerge from your host."),
+		ignored_mobs = host
 	)
+
+	to_chat(host, span_userdanger("Your skin begins to turn pale!"))
 
 	host.emote("tremble")
 
