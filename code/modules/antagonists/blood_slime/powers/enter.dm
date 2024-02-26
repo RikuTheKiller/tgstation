@@ -40,7 +40,7 @@
 
 	owner.visible_message(
 		message = span_danger("\The [owner] enters [target]'s body!"),
-		self_message = span_notice("You begin to enter [target]'s body.")
+		self_message = span_notice("You enter [target]'s body.")
 	)
 
 	target.do_jitter_animation(10) // fluff

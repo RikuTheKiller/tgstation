@@ -13,7 +13,7 @@
 
 	owner.visible_message(
 		message = span_danger("[host] starts convulsing!"),
-		self_message = span_notice("You begin subjugating your host..."),
+		self_message = span_notice("You begin to subjugate your host..."),
 		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
 	)
 
