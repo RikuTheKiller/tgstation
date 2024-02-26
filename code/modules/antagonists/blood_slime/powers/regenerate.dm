@@ -42,7 +42,7 @@
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks
 
-	blood_slime.adjust_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.004 * potency * seconds_between_ticks) // -0.4% blood per second per potency (-2% at 200 damage)
+	blood_slime.adjust_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * -0.004 * potency * seconds_between_ticks) // -0.4% blood per second per potency (-2% at 200 damage)
 
 	if (host.stat == DEAD)
 		potency *= 1.5
