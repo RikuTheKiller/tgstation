@@ -1,6 +1,7 @@
 /datum/action/cooldown/blood_slime
 	name = "Blood Slime Base Action"
 	desc = "Please ahelp this."
+	button_icon = 'icons/mob/actions/actions_minor_antag.dmi'
 
 	/// Our owner's blood slime antag datum.
 	var/datum/antagonist/blood_slime/blood_slime

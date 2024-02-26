@@ -1,6 +1,7 @@
 /datum/action/cooldown/blood_slime/delayed/emerge
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
+	button_icon_state = "blood_emerge"
 
 /datum/action/cooldown/blood_slime/delayed/emerge/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
