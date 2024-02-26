@@ -43,7 +43,7 @@
 	if (update)
 		next_update_time = world.time + update_frequency
 
-	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.1) // 10% blood or less, don't regen
+	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.05) // 5% blood or less, don't regen
 		if (update)
 			to_chat(slime, span_danger("Your regeneration stalls due to a lack of blood."))
 		return
@@ -73,6 +73,9 @@
 	bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.004 * potency // -0.4% blood per second per potency (-2% at 200 damage)
 
 	blood_slime.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
+
+	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.1) // 5% blood or less, set to 4% blood
+		blood_slime.set_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.04)
 
 	if (host.stat == DEAD)
 		potency *= 1.5
