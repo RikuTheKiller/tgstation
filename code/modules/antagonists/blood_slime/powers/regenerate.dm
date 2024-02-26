@@ -50,13 +50,13 @@
 
 	var/bloodloss = 0
 
-	if (host.getOxyLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
+	if (host.getOxyLoss() > 10) // less than 10 is insignificant as it heals on its own if possible
 		host.adjustOxyLoss(-2 * seconds_between_ticks)
 		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
 		if (update)
 			to_chat(slime, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
 
-	if (host.getToxLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
+	if (host.getToxLoss() > 0) // does not heal on it's own
 		host.adjustToxLoss(-2 * seconds_between_ticks)
 		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
 		if (update)
