@@ -38,28 +38,29 @@
 	if (host.health >= host.maxHealth)
 		return
 
-	var/update = world.time < next_update_time
+	var/update = world.time >= next_update_time
 
 	if (update)
 		next_update_time = world.time + update_frequency
 
-	var/bloodloss = 0
+	if (blood_slime.get_blood_amount() < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.05) // less than 5% blood, don't regen
+		if (update)
+			to_chat(slime, span_danger("You have too little blood to sustain your regeneration."))
+		return
 
-	var/oxy = host.getOxyLoss()
+	var/bloodloss = 0
 
 	if (host.getOxyLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
 		host.adjustOxyLoss(-2 * seconds_between_ticks)
-		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.005 // -0.5% blood per second
+		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
 		if (update)
-			to_chat(host, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
-
-	var/tox = host.getToxLoss()
+			to_chat(slime, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
 
 	if (host.getToxLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
 		host.adjustToxLoss(-2 * seconds_between_ticks)
-		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.005 // -0.5% blood per second
+		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
 		if (update)
-			to_chat(host, span_boldnotice("Your regeneration is detoxifying your host's cells."))
+			to_chat(slime, span_boldnotice("Your regeneration is detoxifying your host's cells."))
 
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
