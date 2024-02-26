@@ -99,20 +99,24 @@
 
 	var/static/list/state_actions = list(
 		BLOOD_SLIME_STATE_SOLO = list(
-			/datum/action/cooldown/blood_slime/enter,
+			/datum/action/cooldown/blood_slime/enter
 		),
 		BLOOD_SLIME_STATE_DORMANT = list(
 			/datum/action/cooldown/blood_slime/delayed/emerge,
-			/datum/action/cooldown/blood_slime/delayed/subjugate,
+			/datum/action/cooldown/blood_slime/regen,
+			/datum/action/cooldown/blood_slime/delayed/subjugate
 		),
 		BLOOD_SLIME_STATE_SUBJUGATION = list(
 			/datum/action/cooldown/blood_slime/delayed/emerge,
+			/datum/action/cooldown/blood_slime/regen
 		),
 		BLOOD_SLIME_STATE_MARIONETTE = list(
 			/datum/action/cooldown/blood_slime/delayed/emerge,
+			/datum/action/cooldown/blood_slime/regen
 		),
 		BLOOD_SLIME_STATE_SYMBIOSIS = list(
 			/datum/action/cooldown/blood_slime/delayed/emerge,
+			/datum/action/cooldown/blood_slime/regen
 		),
 	)
 

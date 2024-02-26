@@ -50,3 +50,16 @@
 
 /datum/action/cooldown/blood_slime/delayed/proc/doafter_cancel_check()
 	return !canceled
+
+/// Base type for status effects given by the blood slime antagonist.
+/datum/status_effect/blood_slime
+	/// Reference to the antag datum that's responsible for our creation.
+	var/datum/antagonist/blood_slime/blood_slime
+
+/datum/status_effect/blood_slime/on_creation(var/datum/antagonist/blood_slime/antag_override)
+	. = ..()
+
+	blood_slime = antag_override ? antag_override : owner?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
+
+	if (!istype(blood_slime))
+		return FALSE
