@@ -20,7 +20,7 @@
 	to_chat(owner, span_notice("You prepare to emerge from your host."))
 
 	owner.visible_message(
-		span_danger("[host]'s skin begins to turn pale!"),
+		span_danger("[host] begins to turn pale!"),
 		span_notice("You prepare to emerge from your host."),
 		ignored_mobs = host
 	)
