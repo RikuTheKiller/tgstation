@@ -65,6 +65,15 @@
 	AddElement(/datum/element/swabable, CELL_LINE_TABLE_SLIME, CELL_VIRUS_TABLE_GENERIC_MOB, 1, 5)
 	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
 
+/mob/living/basic/blood_slime/get_status_tab_items()
+	. = ..()
+	if(isnull(blood_slime))
+		return
+	. += "Blood: [blood_slime.get_blood_amount()]/[blood_slime.get_max_blood()]"
+	if(isnull(blood_slime.current_host))
+		return
+	. += "Host Blood: [blood_slime.get_host_blood_amount()]"
+
 /mob/living/basic/blood_slime/mind_initialize()
 	..()
 
