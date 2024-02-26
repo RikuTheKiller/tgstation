@@ -43,9 +43,9 @@
 	if (update)
 		next_update_time = world.time + update_frequency
 
-	if (blood_slime.get_blood_amount() < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.05) // less than 5% blood, don't regen
+	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.1) // 10% blood or less, don't regen
 		if (update)
-			to_chat(slime, span_danger("You have too little blood to sustain your regeneration."))
+			to_chat(slime, span_danger("Your regeneration stalls due to a lack of blood."))
 		return
 
 	var/bloodloss = 0
