@@ -1,6 +1,6 @@
 /datum/action/cooldown/blood_slime/regen
 	name = "Regeneration"
-	desc = "Rapidly consume yourself to recreate your host's lost bodily tissues. More efficient if your host is dead. Toggleable."
+	desc = "Rapidly consume yourself to heal your host. More efficient if your host is dead. Toggleable."
 
 /datum/action/cooldown/blood_slime/regen/Activate(atom/target)
 	. = ..()
@@ -35,14 +35,43 @@
 		qdel(src)
 		return
 
+	if (host.health >= host.maxHealth)
+		return
+
+	var/update = world.time < next_update_time
+
+	if (update)
+		next_update_time = world.time + update_frequency
+
+	var/bloodloss = 0
+
+	var/oxy = host.getOxyLoss()
+
+	if (host.getOxyLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
+		host.adjustOxyLoss(-2 * seconds_between_ticks)
+		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.005 // -0.5% blood per second
+		if (update)
+			to_chat(host, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
+
+	var/tox = host.getToxLoss()
+
+	if (host.getToxLoss() > 10) // less than 10 is insignificant (avoid wasting blood if its being outhealed by something else)
+		host.adjustToxLoss(-2 * seconds_between_ticks)
+		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.005 // -0.5% blood per second
+		if (update)
+			to_chat(host, span_boldnotice("Your regeneration is detoxifying your host's cells."))
+
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
 	if (damage <= 0 && host.all_wounds.len <= 0)
+		blood_slime.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
 		return
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks
 
-	blood_slime.adjust_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * -0.004 * potency * seconds_between_ticks) // -0.4% blood per second per potency (-2% at 200 damage)
+	bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.004 * potency // -0.4% blood per second per potency (-2% at 200 damage)
+
+	blood_slime.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
 
 	if (host.stat == DEAD)
 		potency *= 1.5
@@ -69,10 +98,8 @@
 			ignored_mobs = slime
 		)
 
-	if (world.time < next_update_time)
+	if (!update)
 		return
-
-	next_update_time = world.time + update_frequency
 
 	var/slime_message = "Your regeneration is "
 
