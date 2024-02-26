@@ -91,6 +91,9 @@
 	icon_state = "small"
 	icon_living = "small"
 	small = TRUE
+
+	to_chat(src, span_danger("Your outer membrane collapses as you struggle to maintain your form!"))
+
 	return
 
 /// Makes the blood slime turn large with an animation.
@@ -98,4 +101,7 @@
 	icon_state = "large"
 	icon_living = "large"
 	small = FALSE
+
+	to_chat(src, span_notice("You increase in size as you grow a new outer membrane."))
+
 	return
