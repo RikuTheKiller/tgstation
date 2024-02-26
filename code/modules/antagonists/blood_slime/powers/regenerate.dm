@@ -37,7 +37,7 @@
 
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
-	if (damage <= 0 || host.all_wounds.len <= 0)
+	if (damage <= 0 && host.all_wounds.len <= 0)
 		return
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks
@@ -51,7 +51,7 @@
 	host.adjustFireLoss(-potency)
 
 	for (var/datum/wound/wound in host.all_wounds)
-		wound.on_xadone(host.stat == DEAD ? 1.5 : 2) // if i ever rework med/chem im going to fix whatever the fuck this is (skeleton/plasmeme livers use this too)
+		wound.on_xadone(host.stat == DEAD ? 3 : 2) // if i ever rework med/chem im going to fix whatever the fuck this is (skeleton/plasmeme livers use this too)
 
 	if (SPT_PROB(10, seconds_between_ticks))
 		var/message = pick(list(
