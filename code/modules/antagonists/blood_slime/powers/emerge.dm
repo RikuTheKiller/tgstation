@@ -25,7 +25,8 @@
 		ignored_mobs = host
 	)
 
-	to_chat(host, span_userdanger("Your skin begins to turn pale!"))
+	if (owner != host)
+		to_chat(host, span_userdanger("Your skin begins to turn pale!")) // symbiosis
 
 	host.emote("tremble")
 
