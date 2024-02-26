@@ -56,10 +56,10 @@
 	/// Reference to the antag datum that's responsible for our creation.
 	var/datum/antagonist/blood_slime/blood_slime
 
-/datum/status_effect/blood_slime/on_creation(var/datum/antagonist/blood_slime/antag_override)
-	. = ..()
-
+/datum/status_effect/blood_slime/on_creation(datum/antagonist/blood_slime/antag_override)
 	blood_slime = antag_override ? antag_override : owner?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!istype(blood_slime))
 		return FALSE
+
+	return ..()

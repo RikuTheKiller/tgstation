@@ -8,7 +8,7 @@
 	if (blood_slime.current_host.has_status_effect(/datum/status_effect/blood_slime/regen))
 		blood_slime.current_host.remove_status_effect(/datum/status_effect/blood_slime/regen)
 	else
-		blood_slime.current_host.apply_status_effect(/datum/status_effect/blood_slime/regen)
+		blood_slime.current_host.apply_status_effect(/datum/status_effect/blood_slime/regen, blood_slime)
 
 /datum/status_effect/blood_slime/regen
 	id = "blood_slime_regen"
