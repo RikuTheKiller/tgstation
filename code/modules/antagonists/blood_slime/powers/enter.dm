@@ -1,6 +1,7 @@
 /datum/action/cooldown/blood_slime/enter
 	name = "Enter Body"
 	desc = "Enter the target's body, turning them into your host."
+	button_icon_state = "blood_enter"
 	click_to_activate = TRUE
 
 /datum/action/cooldown/blood_slime/enter/IsAvailable(feedback = FALSE)
