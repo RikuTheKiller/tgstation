@@ -31,7 +31,7 @@
 	var/mob/living/carbon/human/host = blood_slime?.current_host
 	var/mob/living/slime = blood_slime?.owner?.current
 
-	if (!host || !slime)
+	if (!host || !slime || slime.stat == DEAD)
 		qdel(src)
 		return
 
