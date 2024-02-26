@@ -32,7 +32,7 @@
 
 	owner.visible_message(
 		message = span_danger("\The [owner] begins to enter [target]'s body!"),
-		self_message = span_notice("You begin to enter [target]'s body."),
+		self_message = span_notice("You begin to enter [target]'s body.")
 	)
 
 	if (!do_after(owner, 2 SECONDS, target))
@@ -40,10 +40,12 @@
 
 	owner.visible_message(
 		message = span_danger("\The [owner] enters [target]'s body!"),
-		self_message = span_notice("You begin to enter [target]'s body."),
+		self_message = span_notice("You begin to enter [target]'s body.")
 	)
 
 	target.do_jitter_animation(10) // fluff
+
+	playsound(owner, 'sound/effects/blobattack.ogg', 50, TRUE)
 
 	blood_slime.enter_host(target) // actually enter the host
 

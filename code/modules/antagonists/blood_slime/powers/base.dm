@@ -5,12 +5,8 @@
 	/// Our owner's blood slime antag datum.
 	var/datum/antagonist/blood_slime/blood_slime
 
-/datum/action/cooldown/blood_slime/Trigger(trigger_flags, target)
-	. = ..()
-	if (!.)
-		return
-	if (owner.stat == DEAD) // yeah no sorry you can't revive by emerging when you're dead for real
-		return FALSE
+/datum/action/cooldown/blood_slime/IsAvailable(feedback)
+	return ..() && owner.stat != DEAD // emerging when you've actually died and magically being revived is like, kind of bad
 
 /datum/action/cooldown/blood_slime/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
@@ -33,19 +29,20 @@
 	/// Whether the delay is currently active or not.
 	var/active
 
-/datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, target)
+/datum/action/cooldown/blood_slime/delayed/Trigger(trigger_flags, atom/target)
 	if (active) // cancel the action if used again during the delay
-		canceled = TRUE
-		active = FALSE
-		owner.balloon_alert(owner, "canceled!")
+		if (!canceled)
+			canceled = TRUE
+			owner.balloon_alert(owner, "canceled!")
 		return FALSE
 
-	active = TRUE
-	canceled = FALSE
 	return ..()
 
 /datum/action/cooldown/blood_slime/delayed/proc/do_delay(mob/user, delay, atom/target, timed_action_flags = IGNORE_USER_LOC_CHANGE|IGNORE_TARGET_LOC_CHANGE|IGNORE_HELD_ITEM|IGNORE_INCAPACITATED|IGNORE_SLOWDOWNS)
-	. = do_after(user, delay, target, timed_action_flags, extra_checks =  CALLBACK(src, PROC_REF(doafter_cancel_check)))
+	active = TRUE
+	canceled = FALSE
+
+	. = do_after(user, delay, target, timed_action_flags, extra_checks = CALLBACK(src, PROC_REF(doafter_cancel_check)))
 
 	active = FALSE
 	canceled = FALSE

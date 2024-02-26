@@ -5,7 +5,7 @@
 /datum/action/cooldown/blood_slime/delayed/emerge/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
 
-	RegisterSignal(grant_to, COMSIG_ATOM_RELAYMOVE, PROC_REF(host_relaymove), override = TRUE)
+	RegisterSignal(grant_to, COMSIG_ATOM_RELAYMOVE, PROC_REF(host_relaymove))
 
 /datum/action/cooldown/blood_slime/delayed/emerge/Remove(mob/removed_from)
 	. = ..()
@@ -19,6 +19,11 @@
 
 	to_chat(owner, span_notice("You prepare to emerge from your host."))
 
+	owner.visible_message(
+		span_danger("[host]'s skin begins to turn pale!"),
+		span_notice("You prepare to emerge from your host.")
+	)
+
 	host.emote("tremble")
 
 	host.set_jitter_if_lower(50 SECONDS)
@@ -26,9 +31,11 @@
 	if (!do_delay(owner, 2 SECONDS, target = host))
 		return FALSE
 
-	playsound(owner, 'sound/effects/butcher.ogg', 40, TRUE)
-	playsound(owner, 'sound/effects/splat.ogg', 60, TRUE)
+	playsound(owner, 'sound/effects/butcher.ogg', 25, TRUE)
+	playsound(owner, 'sound/effects/splat.ogg', 50, TRUE)
+
 	blood_slime.leave_host()
+
 	return TRUE
 
 /datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)

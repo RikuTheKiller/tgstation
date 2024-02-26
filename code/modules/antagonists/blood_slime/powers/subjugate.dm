@@ -12,18 +12,26 @@
 		return FALSE
 
 	owner.visible_message(
-		message = span_danger("[blood_slime.current_host] starts convulsing!"),
-		self_message = span_notice("You begin circulating around in your host's body..."),
+		message = span_danger("[host] starts convulsing!"),
+		self_message = span_notice("You begin subjugating your host..."),
 		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
-		ignored_mobs = list(blood_slime.current_host)
 	)
 
+	host.do_jitter_animation(200) // fluff
+
 	if (!do_delay(owner, 2 SECONDS, target = host))
+		owner.visible_message(span_notice("[host] stops convulsing."))
 		return FALSE
 
 	if (host.health < HEALTH_THRESHOLD_DEAD)
 		owner.balloon_alert(owner, "too damaged!")
 		return FALSE
+
+	owner.visible_message(
+		message = span_danger("[host] suddenly wakes up!"),
+		self_message = span_notice("You subjugate your host."),
+		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
+	)
 
 	blood_slime.subjugate_host()
 
