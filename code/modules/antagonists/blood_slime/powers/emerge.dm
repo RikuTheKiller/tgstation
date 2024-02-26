@@ -17,11 +17,9 @@
 
 	var/mob/living/carbon/human/host = blood_slime.current_host
 
-	to_chat(owner, span_notice("You begin to emerge from your host..."))
-
 	owner.visible_message(
 		span_danger("[host] begins to turn pale!"),
-		span_notice("You prepare to emerge from your host."),
+		span_notice("You prepare to emerge from your host..."),
 		ignored_mobs = host
 	)
 
