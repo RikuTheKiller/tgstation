@@ -19,8 +19,8 @@
 	var/mob/living/carbon/human/host = blood_slime.current_host
 
 	owner.visible_message(
-		span_danger("[host] begins to turn pale!"),
-		span_notice("You prepare to emerge from your host..."),
+		message = span_danger("[host] begins to turn pale!"),
+		self_message = span_notice("You prepare to emerge from your host..."),
 		ignored_mobs = host
 	)
 
@@ -32,6 +32,9 @@
 	host.set_jitter_if_lower(50 SECONDS)
 
 	if (!do_delay(owner, 2 SECONDS, target = host))
+		owner.visible_message(span_notice("[host] stops turning pale and recovers."), ignored_mobs = host)
+		if (owner != host)
+			to_chat(host, span_boldnotice("Your skin stops turning pale and recovers!"))
 		return FALSE
 
 	playsound(owner, 'sound/effects/butcher.ogg', 25, TRUE)
