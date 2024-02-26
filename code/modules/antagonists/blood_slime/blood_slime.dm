@@ -201,9 +201,9 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to leave a host that doesn't exist.")
 
-	set_blood_amount(min(current_host.blood_volume, max_blood, get_max_blood())) // just in case the host's blood_volume is somehow above get_max_blood() even though that should never happen
+	set_blood_amount(min(get_host_blood_amount(), max_blood), ignore_host_sync = TRUE)
 
-	current_host.blood_volume = max_blood < BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM ? max(current_host.blood_volume - get_blood_amount(), 0) : 0
+	set_host_blood_amount(get_host_blood_amount() - get_blood_amount(), ignore_slime_sync = TRUE)
 
 	if (!disable_animation)
 		flick("emerge", slime)
@@ -267,27 +267,41 @@
 	return slime.health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / slime.maxHealth
 
 /// Sets the blood amount of the blood slime to the given amount.
-/datum/antagonist/blood_slime/proc/set_blood_amount(amount)
+/datum/antagonist/blood_slime/proc/set_blood_amount(amount, ignore_host_sync)
 	slime.setBruteLoss(slime.maxHealth - amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM) // it was bruteloss all along
+	if (slime.loc == current_host && !ignore_host_sync)
+		set_host_blood_amount(amount, ignore_slime_sync = TRUE)
 
 /// Adjusts the blood amount of the blood slime by the given amount.
-/datum/antagonist/blood_slime/proc/adjust_blood_amount(amount)
-	set_blood_amount(get_blood_amount() + amount)
+/datum/antagonist/blood_slime/proc/adjust_blood_amount(amount, ignore_host_sync)
+	set_blood_amount(get_blood_amount() + amount, ignore_host_sync)
+
+/// Returns how much blood the blood slime's host currently holds.
+/datum/antagonist/blood_slime/proc/get_host_blood_amount()
+	return current_host ? clamp(current_host.blood_volume, 0, get_host_max_blood()) : 0
+
+/// Sets the blood amount of the blood slime's host to the given amount.
+/datum/antagonist/blood_slime/proc/set_host_blood_amount(amount, ignore_slime_sync)
+	if (!current_host)
+		return
+	current_host.blood_volume = clamp(amount, 0, get_host_max_blood())
+	if (slime.loc == current_host && !ignore_slime_sync)
+		set_blood_amount(amount, ignore_host_sync = TRUE)
+
+/// Adjusts the blood amount of the blood slime's host by the given amount.
+/datum/antagonist/blood_slime/proc/adjust_host_blood_amount(amount, ignore_slime_sync)
+	set_host_blood_amount(get_host_blood_amount() + amount, ignore_slime_sync)
 
 /// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
 /datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)
 	if (!current_host)
 		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
-	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max (so bleeding acts as if the excess blood doesnt exist)
+	adjust_host_blood_amount(BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick, ignore_slime_sync = TRUE) // regen blood, desyncs blood_volume from the slimes bruteloss
 
-	current_host.blood_volume += BLOOD_SLIME_REGEN_FACTOR * seconds_per_tick
+	current_host.handle_bleeding(seconds_per_tick, times_fired) // handle bleeding
 
-	current_host.handle_bleeding(seconds_per_tick, times_fired)
-
-	current_host.blood_volume = min(current_host.blood_volume, get_host_max_blood()) // limit blood volume to max again (so regen factor cant go over max blood)
-
-	set_blood_amount(current_host.blood_volume)
+	set_blood_amount(current_host.blood_volume, ignore_host_sync = TRUE) // resync
 
 /// Makes the blood slime subjugate its host.
 /datum/antagonist/blood_slime/proc/subjugate_host()

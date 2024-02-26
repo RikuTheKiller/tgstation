@@ -53,13 +53,21 @@
 
 /// Base type for status effects given by the blood slime antagonist.
 /datum/status_effect/blood_slime
-	/// Reference to the antag datum that's responsible for our creation.
+	/// Reference to the blood slime antag datum that owns this.
 	var/datum/antagonist/blood_slime/blood_slime
 
-/datum/status_effect/blood_slime/on_creation(datum/antagonist/blood_slime/antag_override)
-	blood_slime = antag_override ? antag_override : owner?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
+/datum/status_effect/blood_slime/on_creation(mob/living/new_owner, datum/antagonist/blood_slime/antag_override)
+	blood_slime = antag_override
+
+	return ..()
+
+/datum/status_effect/blood_slime/on_apply()
+	blood_slime = blood_slime ? blood_slime : owner?.mind?.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if (!istype(blood_slime))
 		return FALSE
 
 	return ..()
+
+/datum/status_effect/blood_slime/on_remove()
+	blood_slime = null
