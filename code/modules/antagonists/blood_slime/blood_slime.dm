@@ -270,67 +270,6 @@
 
 	current_host = null
 
-/// Gets the maximum blood amount of the slime itself.
-/datum/antagonist/blood_slime/proc/get_max_blood()
-	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
-
-	if (current_state == BLOOD_SLIME_STATE_SPLIT)
-		. *= 0.5
-
-/// Gets the maximum blood amount of the host. Prosthetics and missing limbs can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
-/datum/antagonist/blood_slime/proc/get_host_max_blood(mob/living/carbon/human/host_override = null)
-	var/mob/living/carbon/human/host = host_override ? host_override : current_host
-
-	if (!host)
-		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
-
-	if (HAS_TRAIT(host, TRAIT_NOBLOOD)) // also not checking for exotic blood is on purpose, clearly we suffice as liquid electricity (slimes have electric charge anyway)
-		return 0
-
-	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
-
-	if (current_state == BLOOD_SLIME_STATE_SPLIT)
-		. *= 0.5
-
-	var/suitable_limbs = 0
-
-	for (var/obj/item/bodypart/limb in host.bodyparts)
-		if (!IS_ROBOTIC_LIMB(limb))
-			suitable_limbs += 1
-
-	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
-	. = min(., BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * suitable_limbs / (host.bodyparts.len + host.get_missing_limbs().len))
-
-/// Returns how much blood the blood slime currently holds.
-/datum/antagonist/blood_slime/proc/get_blood_amount()
-	return slime.health * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM / slime.maxHealth
-
-/// Sets the blood amount of the blood slime to the given amount.
-/datum/antagonist/blood_slime/proc/set_blood_amount(amount, ignore_host_sync)
-	slime.setBruteLoss(slime.maxHealth - amount * slime.maxHealth / BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM) // it was bruteloss all along
-	if (slime.loc == current_host && !ignore_host_sync)
-		set_host_blood_amount(amount, ignore_slime_sync = TRUE)
-
-/// Adjusts the blood amount of the blood slime by the given amount.
-/datum/antagonist/blood_slime/proc/adjust_blood_amount(amount, ignore_host_sync)
-	set_blood_amount(get_blood_amount() + amount, ignore_host_sync)
-
-/// Returns how much blood the blood slime's host currently holds.
-/datum/antagonist/blood_slime/proc/get_host_blood_amount()
-	return current_host ? clamp(current_host.blood_volume, 0, get_host_max_blood()) : 0
-
-/// Sets the blood amount of the blood slime's host to the given amount.
-/datum/antagonist/blood_slime/proc/set_host_blood_amount(amount, ignore_slime_sync)
-	if (!current_host)
-		return
-	current_host.blood_volume = clamp(amount, 0, get_host_max_blood())
-	if (slime.loc == current_host && !ignore_slime_sync)
-		set_blood_amount(amount, ignore_host_sync = TRUE)
-
-/// Adjusts the blood amount of the blood slime's host by the given amount.
-/datum/antagonist/blood_slime/proc/adjust_host_blood_amount(amount, ignore_slime_sync)
-	set_host_blood_amount(get_host_blood_amount() + amount, ignore_slime_sync)
-
 /// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
 /datum/antagonist/blood_slime/proc/handle_blood(seconds_per_tick, times_fired)
 	if (!current_host)

@@ -43,7 +43,7 @@
 	if (update)
 		next_update_time = world.time + update_frequency
 
-	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.05) // 5% blood or less, don't regen
+	if (blood_slime.get_host_blood_percentage() <= 0.05) // 5% blood or less, stall
 		if (update)
 			to_chat(slime, span_danger("Your regeneration stalls due to a lack of blood."))
 		return
@@ -52,13 +52,13 @@
 
 	if (host.getOxyLoss() > 10) // less than 10 is insignificant as it heals on its own if possible
 		host.adjustOxyLoss(-2 * seconds_between_ticks)
-		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
+		bloodloss += 0.01 // -1% blood per second
 		if (update)
 			to_chat(slime, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
 
 	if (host.getToxLoss() > 0) // does not heal on it's own
 		host.adjustToxLoss(-2 * seconds_between_ticks)
-		bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.01 // -1% blood per second
+		bloodloss += 0.01 // -1% blood per second
 		if (update)
 			to_chat(slime, span_boldnotice("Your regeneration is detoxifying your host's cells."))
 
@@ -70,12 +70,9 @@
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks
 
-	bloodloss += BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.004 * potency // -0.4% blood per second per potency (-2% at 200 damage)
+	bloodloss += 0.004 * potency // -0.4% blood per second per potency (-2% at 200 damage)
 
-	blood_slime.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
-
-	if (blood_slime.get_host_blood_amount() <= BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.1) // 5% blood or less, set to 4% blood
-		blood_slime.set_host_blood_amount(BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM * 0.04)
+	blood_slime.set_host_blood_percentage(max(blood_slime.get_host_blood_percentage() - bloodloss * seconds_between_ticks, 0.04)) // make sure we don't kill ourselves
 
 	if (host.stat == DEAD)
 		potency *= 1.5

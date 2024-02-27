@@ -6,4 +6,8 @@
 /datum/action/cooldown/blood_slime/blood_barrage/Activate(atom/target)
 	. = ..()
 
-	owner.visible_message()
+	owner.visible_message(
+		message = span_boldwarning("[owner] starts firing a barrage of blood!"),
+		self_message = span_notice("You start firing a barrage of blood."),
+		blind_message = span_hear("You hear constant splashing!")
+	)
