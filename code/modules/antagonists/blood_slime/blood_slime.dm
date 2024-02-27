@@ -321,7 +321,7 @@
 	if (!current_host)
 		CRASH("[slime] ([owner]) attempted to subjugate a host that doesn't exist.")
 
-	if(current_host.stat != DEAD || current_host.health < HEALTH_THRESHOLD_DEAD)
+	if(current_host.stat != DEAD || current_host.health <= HEALTH_THRESHOLD_DEAD)
 		return
 
 	for(var/trait in subjugation_traits)
