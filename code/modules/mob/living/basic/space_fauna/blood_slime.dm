@@ -26,7 +26,7 @@
 	melee_attack_cooldown = CLICK_CD_MELEE
 	wound_bonus = 0 // getting hit by a mass of hardened blood is bound to break some bones (also encourages finding pristine corpses rather than creating mangled ones)
 
-	attack_verb_continuous = "hardens and strikes" // unlike regular slimes, it's objective is killing rather than eating
+	attack_verb_continuous = "hardens and strikes"
 	attack_verb_simple = "harden and strike"
 	response_help_continuous = "pets"
 	response_help_simple = "pet"
@@ -60,9 +60,6 @@
 /mob/living/basic/blood_slime/Initialize(mapload)
 	. = ..()
 
-	// same elements and traits as a regular slime for the most part
-	AddElement(/datum/element/soft_landing)
-	AddElement(/datum/element/swabable, CELL_LINE_TABLE_SLIME, CELL_VIRUS_TABLE_GENERIC_MOB, 1, 5)
 	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
 
 /mob/living/basic/blood_slime/get_status_tab_items()
