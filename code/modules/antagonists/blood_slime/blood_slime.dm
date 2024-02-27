@@ -151,11 +151,17 @@
 	eyes = new()
 	ears = new()
 	if (isnull(initialized_actions))
+		var/list/initialized_actions_by_type = list()
 		initialized_actions = state_actions.Copy()
 		for (var/state_key in initialized_actions)
 			for (var/path in initialized_actions[state_key])
 				initialized_actions[state_key] -= path
-				initialized_actions[state_key] += new path(owner)
+				var/action = initialized_actions_by_type[path]
+				if (!action)
+					action = new path(owner)
+					initialized_actions_by_type[path] = action
+				initialized_actions[state_key] += action
+		QDEL_NULL(initialized_actions_by_type)
 	if (istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
 		swap_state(BLOOD_SLIME_STATE_SOLO)
@@ -203,10 +209,10 @@
 /datum/antagonist/blood_slime/proc/stop_host_control()
 	if (isnull(current_host))
 		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
-	swap_state(BLOOD_SLIME_STATE_SOLO)
+	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
+	swap_state(BLOOD_SLIME_STATE_DORMANT)
 	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
 	return_host_senses()
-	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
 	if(current_host.mind != owner)
 		return
 	owner.transfer_to(slime)
@@ -233,8 +239,8 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
-	slime.forceMove(current_host.drop_location())
 	stop_host_control()
+	slime.forceMove(current_host.drop_location())
 
 	if (!silent)
 		slime.visible_message(
