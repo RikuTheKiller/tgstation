@@ -7,7 +7,7 @@
 // It should never outright stop working, though. That'd be impressive.
 
 /datum/antagonist/blood_slime
-	name = "\improper Hemoparasite" // lol have fun with it being named completely differently lul
+	name = "\improper Hemoparasite" // have fun with it being named completely differently lul
 	antagpanel_category = ANTAG_GROUP_BIOHAZARDS // either biohazard or horror works, but biohazard is more applicable here
 	show_name_in_check_antagonists = TRUE
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
@@ -168,7 +168,7 @@
 		ears.forceMove(slime)
 	else if (istype(owner.current, /mob/living/carbon/human))
 		slime = new(owner.current)
-		if (!enter_host(owner.current, disable_animation = TRUE)) // check if entering the host was successful
+		if (!enter_host(owner.current, silent = TRUE, disable_animation = TRUE)) // check if entering the host was successful
 			owner.remove_antag_datum(src.type)
 			return ..()
 		subjugate_host()
@@ -186,8 +186,15 @@
 	QDEL_LIST_ASSOC(initialized_actions)
 	return ..()
 
-/// Causes the slime to enter the target host with an animation. Returns whether or not entering was successful.
-/datum/antagonist/blood_slime/proc/enter_host(mob/living/carbon/human/host, disable_animation = FALSE)
+/**
+ * Causes the slime to enter the target with an animation.
+ *
+ * Arguments:
+ * * target - The target to enter.
+ * * silent - Disables the visible message.
+ * * disable_animation - Disables the animation.
+ */
+/datum/antagonist/blood_slime/proc/enter_host(mob/living/carbon/human/target, silent, disable_animation)
 	if (!host)
 		CRASH("[slime] ([owner]) attempted to enter a host that doesn't exist.")
 	if (current_host)
@@ -195,13 +202,19 @@
 	if (get_host_max_blood(host) <= 0)
 		return FALSE
 
-	slime.forceMove(host)
+	if (!silent)
+		owner.visible_message(
+			message = span_danger("\The [owner] enters [target]'s body!"),
+			self_message = span_notice("You enter [target]'s body."),
+			blind_message = span_hear("You hear a splash.")
+		)
+
+	slime.forceMove(target)
 	swap_state(BLOOD_SLIME_STATE_DORMANT)
 
-	current_host = host
+	current_host = target
 
-	current_host.blood_volume = min(current_host.blood_volume + get_blood_amount(), get_host_max_blood())
-	set_blood_amount(current_host.blood_volume)
+	set_host_blood_amount(get_host_blood_amount() + get_blood_amount())
 
 	return TRUE
 

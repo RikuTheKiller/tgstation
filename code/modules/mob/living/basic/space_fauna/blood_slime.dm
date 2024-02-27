@@ -5,7 +5,7 @@
 */
 
 /mob/living/basic/blood_slime
-	name = "hemoparasite"
+	name = "hemoparasite" // sentient blood real???
 	desc = "A horrid abomination that takes over the corpses of the deceased and feasts on their blood."
 	icon = 'icons/mob/nonhuman-player/blood_slime.dmi'
 	icon_state = "large"
