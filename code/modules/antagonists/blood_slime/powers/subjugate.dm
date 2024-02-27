@@ -23,7 +23,7 @@
 		owner.visible_message(span_notice("[host] stops convulsing."))
 		return FALSE
 
-	if (host.health < HEALTH_THRESHOLD_DEAD)
+	if (host.health <= HEALTH_THRESHOLD_DEAD)
 		owner.balloon_alert(owner, "too damaged!")
 		return FALSE
 
