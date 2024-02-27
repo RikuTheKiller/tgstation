@@ -362,14 +362,14 @@
 	current_host.revive()
 	owner.transfer_to(current_host)
 
+	replace_host_senses()
+
 /datum/antagonist/blood_slime/proc/host_is_kil(mob/living/source, gibbed)
 	SIGNAL_HANDLER
 	if(gibbed)
 		leave_host(silent = TRUE, disable_animation = TRUE)
 		return
 	stop_host_control()
-
-	replace_host_senses()
 
 /// Replaces the current host's senses with our own.
 /datum/antagonist/blood_slime/proc/replace_host_senses()
