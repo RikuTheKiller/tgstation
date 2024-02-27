@@ -361,7 +361,7 @@
 	if (!current_host)
 		return
 
-	if (!eyes?.owner || eyes.owner != current_host)
+	if (eyes?.loc != slime && (!eyes?.owner || eyes.owner != current_host))
 		eyes = new()
 		eyes.apply_organ_damage(eyes.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
 		eyes.Insert(current_host, special = TRUE)
@@ -372,7 +372,7 @@
 			ignored_mobs = owner.current
 		)
 		to_chat(owner.current, span_danger("You grow a pair of unfinished visual membranes in place of the ones you lost."))
-	if (!ears?.owner || ears.owner != current_host)
+	if (eyes?.loc != slime && (!ears?.owner || ears.owner != current_host))
 		ears = new()
 		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
 		ears.Insert(current_host, special = TRUE)
