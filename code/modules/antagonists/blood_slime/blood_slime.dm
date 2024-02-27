@@ -360,6 +360,13 @@
 	RegisterSignal(current_host, COMSIG_LIVING_DEATH, PROC_REF(host_is_kil))
 	owner.transfer_to(current_host)
 
+/datum/antagonist/blood_slime/proc/host_is_kil(mob/living/source, gibbed)
+	SIGNAL_HANDLER
+	if(gibbed)
+		leave_host(silent = TRUE, disable_animation = TRUE)
+		return
+	stop_host_control()
+
 /obj/item/organ/internal/blood_slime_membrane
 	name = "Bloody Membrane"
 	desc = "It pulses ominously. You feel like it's watching you."
