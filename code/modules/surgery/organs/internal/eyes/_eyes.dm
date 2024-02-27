@@ -769,9 +769,9 @@
 
 	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES))
 		if (covered)
-			examine_list += span_boldwarning("[owner.p_their()] eyes are covered by a red slimey mass!")
+			examine_list += span_boldwarning("[owner.p_Their()] eyes are covered by a red slimey mass!")
 		else
-			examine_list += span_boldwarning("[owner.p_their()] eyes have been replaced by a red slimey mass!")
+			examine_list += span_boldwarning("[owner.p_Their()] eyes have been replaced by a red slimey mass!")
 
 /obj/item/organ/internal/eyes/night_vision/blood_slime/Insert(mob/living/carbon/receiver, special, movement_flags)
 	covered = receiver.get_organ_slot(ORGAN_SLOT_EYES)
