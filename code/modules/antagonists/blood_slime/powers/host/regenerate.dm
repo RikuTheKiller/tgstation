@@ -1,6 +1,6 @@
 /datum/action/cooldown/blood_slime/regen
 	name = "Regeneration"
-	desc = "Rapidly consume yourself to heal your host. More efficient if your host is dead. Toggleable."
+	desc = "Rapidly consume yourself to heal your host. More efficient if your host is dead."
 
 /datum/action/cooldown/blood_slime/regen/Activate(atom/target)
 	. = ..()
@@ -16,7 +16,7 @@
 	id = "blood_slime_regen"
 
 	/// How often we should notify the player of their regen status.
-	var/update_frequency = 10 SECONDS
+	var/update_frequency = 15 SECONDS
 
 	/// The time when we will next notify the player of their regen status.
 	var/next_update_time
@@ -54,13 +54,13 @@
 		host.adjustOxyLoss(-2 * seconds_between_ticks)
 		bloodloss += 0.01 // -1% blood per second
 		if (update)
-			to_chat(slime, span_boldnotice("Your regeneration is energizing your host's cells in place of oxygen."))
+			to_chat(slime, span_boldnotice("Your regeneration is reoxygenating your host."))
 
 	if (host.getToxLoss() > 0) // does not heal on it's own
 		host.adjustToxLoss(-2 * seconds_between_ticks)
 		bloodloss += 0.01 // -1% blood per second
 		if (update)
-			to_chat(slime, span_boldnotice("Your regeneration is detoxifying your host's cells."))
+			to_chat(slime, span_boldnotice("Your regeneration is detoxifying your host."))
 
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
