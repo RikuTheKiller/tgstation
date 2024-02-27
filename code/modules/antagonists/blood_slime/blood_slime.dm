@@ -195,16 +195,16 @@
  * * disable_animation - Disables the animation.
  */
 /datum/antagonist/blood_slime/proc/enter_host(mob/living/carbon/human/target, silent, disable_animation)
-	if (!host)
+	if (!target)
 		CRASH("[slime] ([owner]) attempted to enter a host that doesn't exist.")
 	if (current_host)
 		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
-	if (get_host_max_blood(host) <= 0)
+	if (get_host_max_blood(target) <= 0)
 		return FALSE
 
 	if (!silent)
-		owner.visible_message(
-			message = span_danger("\The [owner] enters [target]'s body!"),
+		slime.visible_message(
+			message = span_danger("\The [slime] enters [target]'s body!"),
 			self_message = span_notice("You enter [target]'s body."),
 			blind_message = span_hear("You hear a splash.")
 		)
@@ -256,7 +256,7 @@
 
 	if (!silent)
 		slime.visible_message(
-			span_danger("\The [src] emerges from [current_host]!"),
+			span_danger("\The [slime] emerges from [current_host]!"),
 			span_notice("You emerge from your host."),
 			span_hear("You hear a sudden gush of liquid!"),
 			ignored_mobs = current_host
