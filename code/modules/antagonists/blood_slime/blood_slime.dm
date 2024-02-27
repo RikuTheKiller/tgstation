@@ -189,6 +189,19 @@
 
 	return TRUE
 
+/datum/antagonist/blood_slime/proc/stop_host_control()
+	if (isnull(current_host))
+		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
+	swap_state(BLOOD_SLIME_STATE_SOLO)
+	slime.forceMove(current_host.drop_location())
+	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
+	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
+	if(current_host.mind != owner)
+		return
+	owner.transfer_to(slime)
+	if(host_mind)
+		host_mind.transfer_to(current_host)
+		host_mind = null
 /**
  * Causes the slime to leave it's current host with an animation.
  *
@@ -208,13 +221,7 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
-	owner.transfer_to(slime)
-	slime.forceMove(current_host.drop_location())
-	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
-
-	if(host_mind)
-		host_mind.transfer_to(current_host)
-		host_mind = null
+	stop_host_control()
 
 	if (!silent)
 		slime.visible_message(
@@ -225,10 +232,9 @@
 		)
 		to_chat(current_host, span_userdanger("You feel a sudden rush of blood escape your body... you feel woozy..."))
 
-	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
+	if (current_host.stat != DEAD && current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
-	swap_state(BLOOD_SLIME_STATE_SOLO)
 	current_host = null
 
 /// Gets the maximum blood amount of the slime itself.
@@ -339,7 +345,15 @@
 		host_mind = current_host.mind
 
 	current_host.revive()
+	RegisterSignal(current_host, COMSIG_LIVING_DEATH, PROC_REF(host_is_kil))
 	owner.transfer_to(current_host)
+
+/datum/antagonist/blood_slime/proc/host_is_kil(mob/living/source, gibbed)
+	SIGNAL_HANDLER
+	if(gibbed)
+		leave_host(silent = TRUE, disable_animation = TRUE)
+		return
+	stop_host_control()
 
 /obj/item/organ/internal/blood_slime_membrane
 	name = "Bloody Membrane"
