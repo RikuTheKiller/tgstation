@@ -7,11 +7,10 @@
 // It should never outright stop working, though. That'd be impressive.
 
 /datum/antagonist/blood_slime
-	name = "\improper Blood Slime"
+	name = "\improper Hemoparasite" // lol have fun with it being named completely differently lul
 	antagpanel_category = ANTAG_GROUP_BIOHAZARDS // either biohazard or horror works, but biohazard is more applicable here
 	show_name_in_check_antagonists = TRUE
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
-	default_custom_objective = "Gather blood and grow stronger to wreak havoc on the station." // tiny reference to the rampage ability (fix this shit later)
 
 	/// Our current state.
 	var/current_state = -1 // Uninitialized
@@ -272,7 +271,7 @@
 	if (!host)
 		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
 
-	if (HAS_TRAIT(host, TRAIT_NOBLOOD) || host.dna.species.exotic_blood) // no randomly turning into liquid electricity or going into a skeleton
+	if (HAS_TRAIT(host, TRAIT_NOBLOOD)) // also not checking for exotic blood is on purpose, clearly we suffice as liquid electricity (slimes have electric charge anyway)
 		return 0
 
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
