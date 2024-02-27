@@ -101,7 +101,7 @@
 	icon_living = "small"
 	small = TRUE
 
-	to_chat(src, span_warning("Your outer membrane collapses as you struggle to maintain your form!"))
+	to_chat(src, span_boldwarning("Your outer membrane collapses as you struggle to maintain your form!"))
 
 	return
 
@@ -111,6 +111,6 @@
 	icon_living = "large"
 	small = FALSE
 
-	to_chat(src, span_warning("You increase in size as you grow a new outer membrane."))
+	to_chat(src, span_boldwarning("You increase in size as you grow a new outer membrane."))
 
 	return
