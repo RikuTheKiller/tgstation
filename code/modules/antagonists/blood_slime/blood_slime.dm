@@ -204,7 +204,6 @@
 	if (isnull(current_host))
 		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
 	swap_state(BLOOD_SLIME_STATE_SOLO)
-	slime.forceMove(current_host.drop_location())
 	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
 	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
 	if(current_host.mind != owner)
@@ -232,6 +231,7 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
+	slime.forceMove(current_host.drop_location())
 	stop_host_control()
 
 	if (!silent)
