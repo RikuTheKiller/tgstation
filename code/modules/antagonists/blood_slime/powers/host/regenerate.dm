@@ -93,7 +93,7 @@
 		))
 
 		host.visible_message(
-			message = span_danger(message),
+			message = span_warning(message),
 			self_message = slime == host ? null : span_boldnotice("Your wounds are gushing far more blood than usual, yet somehow you feel better."),
 			blind_message = span_hear("You hear liquid bubbling and sizzling."),
 			ignored_mobs = slime
