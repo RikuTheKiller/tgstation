@@ -205,6 +205,7 @@
 		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
 	swap_state(BLOOD_SLIME_STATE_SOLO)
 	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
+	return_host_senses()
 	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
 	if(current_host.mind != owner)
 		return
@@ -247,7 +248,6 @@
 		current_host.death()
 
 	swap_state(BLOOD_SLIME_STATE_SOLO)
-	return_host_senses()
 
 	current_host = null
 
