@@ -77,7 +77,7 @@
 /mob/living/basic/blood_slime/mind_initialize()
 	..()
 
-	blood_slime = mind.has_antag_datum(/datum/antagonist/blood_slime);
+	blood_slime = mind.has_antag_datum(/datum/antagonist/blood_slime)
 
 	if(!blood_slime)
 		blood_slime = mind.add_antag_datum(/datum/antagonist/blood_slime)
