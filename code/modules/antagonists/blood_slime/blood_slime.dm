@@ -272,7 +272,7 @@
 	if (!host)
 		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
 
-	if (HAS_TRAIT(host, TRAIT_NOBLOOD) || host.dna.species.exotic_blood) // no randomly turning into liquid electricity or going into a skeleton
+	if (HAS_TRAIT(host, TRAIT_NOBLOOD)) // also not checking for exotic blood is on purpose, clearly we suffice as liquid electricity (slimes have electric charge anyway)
 		return 0
 
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
