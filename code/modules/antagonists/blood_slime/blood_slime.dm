@@ -418,8 +418,10 @@
 		if (eyes.owner == current_host)
 			eyes.Remove(current_host, special = TRUE)
 			eyes.covered.Insert(current_host, special = TRUE)
+			eyes.covered.organ_flags &= ~ORGAN_FROZEN
 		if (eyes.owner == current_host)
 			ears.Remove(current_host, special = TRUE)
 			ears.covered.Insert(current_host, special = TRUE)
+			ears.covered.organ_flags &= ~ORGAN_FROZEN
 	eyes.forceMove(slime)
 	ears.forceMove(slime)

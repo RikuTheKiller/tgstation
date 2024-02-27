@@ -167,6 +167,7 @@
 	if (covered)
 		covered.Remove(receiver, special = TRUE)
 		covered.forceMove(src)
+		covered.organ_flags |= ORGAN_FROZEN
 
 	return ..()
 
@@ -193,6 +194,7 @@
 		)
 		cut = TRUE
 		user.put_in_hands(covered)
+		covered.organ_flags &= ~ORGAN_FROZEN
 
 	return ..()
 
