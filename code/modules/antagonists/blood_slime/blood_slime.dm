@@ -388,22 +388,22 @@
 		eyes.Insert(current_host, special = TRUE)
 		current_host.visible_message(
 			message = span_bolddanger("[current_host] suddenly grows a pair of membranes in place of their eyes!"),
-			self_message = current_host == owner.current ? null : span_bolddanger("You feel something growing in place of your eyes."),
+			self_message = current_host == owner.current ? null : span_boldnotice("You feel something growing in place of your eyes."),
 			blind_message = span_hear("You hear a loud and wet crunch."),
 			ignored_mobs = owner.current
 		)
-		to_chat(owner.current, span_danger("You grow a pair of unfinished visual membranes in place of the ones you lost."))
+		to_chat(owner.current, span_warning("You grow a pair of unfinished visual membranes in place of the ones you lost."))
 	if (eyes?.loc != slime && (!ears?.owner || ears.owner != current_host))
 		ears = new()
 		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
 		ears.Insert(current_host, special = TRUE)
 		current_host.visible_message(
 			message = span_bolddanger("[current_host] suddenly grows a pair of membranes in place of their ears!"),
-			self_message = current_host == owner.current ? null : span_bolddanger("You feel something growing in place of your ears."),
+			self_message = current_host == owner.current ? null : span_boldnotice("You feel something growing in place of your ears."),
 			blind_message = span_hear("You hear a loud and wet crunch."),
 			ignored_mobs = owner.current
 		)
-		to_chat(owner.current, span_danger("You grow a pair of unfinished acoustic membranes in place of the ones you lost."))
+		to_chat(owner.current, span_warning("You grow a pair of unfinished acoustic membranes in place of the ones you lost."))
 
 	eyes.Insert(current_host, special = TRUE)
 	ears.Insert(current_host, special = TRUE)
