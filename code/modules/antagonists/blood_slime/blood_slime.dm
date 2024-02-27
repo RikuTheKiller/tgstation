@@ -117,11 +117,17 @@
 		BLOOD_SLIME_STATE_SYMBIOSIS = list(
 			/datum/action/cooldown/blood_slime/delayed/emerge,
 			/datum/action/cooldown/blood_slime/regen
-		),
+		)
 	)
 
 	/// Associative list of initialized action datums sorted by state.
 	var/list/initialized_actions
+
+	/// The "eyes" of the blood slime. These can get damaged while in a host.
+	var/obj/item/organ/internal/eyes/night_vision/blood_slime/eyes
+
+	/// The "ears" of the blood slime. These can get damaged while in a host.
+	var/obj/item/organ/internal/ears/blood_slime/ears
 
 /datum/antagonist/blood_slime/New()
 	. = ..()
@@ -142,6 +148,8 @@
 		action.Grant(owner.current)
 
 /datum/antagonist/blood_slime/on_gain()
+	eyes = new()
+	ears = new()
 	if (isnull(initialized_actions))
 		initialized_actions = state_actions.Copy()
 		for (var/state_key in initialized_actions)
@@ -151,6 +159,8 @@
 	if (istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
 		swap_state(BLOOD_SLIME_STATE_SOLO)
+		eyes.forceMove(slime)
+		ears.forceMove(slime)
 	else if (istype(owner.current, /mob/living/carbon/human))
 		slime = new(owner.current)
 		if (!enter_host(owner.current, disable_animation = TRUE)) // check if entering the host was successful
@@ -159,6 +169,7 @@
 		subjugate_host()
 	else
 		owner.remove_antag_datum(src.type)
+
 	return ..()
 
 /datum/antagonist/blood_slime/on_removal()
@@ -235,6 +246,7 @@
 	if (current_host.stat != DEAD && current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
+	swap_state(BLOOD_SLIME_STATE_SOLO)
 	current_host = null
 
 /// Gets the maximum blood amount of the slime itself.
@@ -348,13 +360,6 @@
 	RegisterSignal(current_host, COMSIG_LIVING_DEATH, PROC_REF(host_is_kil))
 	owner.transfer_to(current_host)
 
-/datum/antagonist/blood_slime/proc/host_is_kil(mob/living/source, gibbed)
-	SIGNAL_HANDLER
-	if(gibbed)
-		leave_host(silent = TRUE, disable_animation = TRUE)
-		return
-	stop_host_control()
-
 /obj/item/organ/internal/blood_slime_membrane
 	name = "Bloody Membrane"
 	desc = "It pulses ominously. You feel like it's watching you."
@@ -384,11 +389,18 @@
 	temp_ears.zone = BODY_ZONE_CHEST
 	temp_ears.Insert(receiver, TRUE)
 
-/obj/item/organ/internal/blood_slime_membrane/Remove(organ_owner, special, movement_flags)
-	. = ..()
-
-	temp_eyes.Destroy()
-	temp_ears.Destroy()
-
-	old_eyes.Insert(organ_owner, TRUE)
-	old_ears.Insert(organ_owner, TRUE)
+/// Returns the current host's senses back to their own.
+/datum/antagonist/blood_slime/proc/return_host_senses()
+	if (!eyes)
+		eyes = new()
+	if (!ears)
+		ears = new()
+	if (current_host)
+		if (eyes.loc == current_host)
+			eyes.Remove(current_host, special = TRUE)
+			eyes.covered.Insert(current_host, special = TRUE)
+		if (ears.loc == current_host)
+			ears.Remove(current_host, special = TRUE)
+			ears.covered.Insert(current_host, special = TRUE)
+	eyes.forceMove(slime)
+	ears.forceMove(slime)

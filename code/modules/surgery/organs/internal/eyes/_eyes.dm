@@ -744,3 +744,78 @@
 /obj/item/organ/internal/eyes/night_vision/maintenance_adapted/on_mob_remove(mob/living/carbon/unadapted, special = FALSE)
 	REMOVE_TRAIT(unadapted, TRAIT_UNNATURAL_RED_GLOWY_EYES, ORGAN_TRAIT)
 	return ..()
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime
+	name = "bloody visual membranes"
+	desc = "The \"eyes\" of an abomination. They shift around unnervingly. Despite their looks, they see really well."
+
+	healing_factor = 0 // we handle this ourselves
+	decay_factor = 0 // don't decay
+
+	eye_color_left = "#d30000"
+	eye_color_right = "#d30000"
+
+	// vivid red
+	low_light_cutoff = list(15, 5, 5)
+	medium_light_cutoff = list(25, 10, 10)
+	high_light_cutoff = list(40, 15, 15)
+
+	var/obj/item/organ/internal/eyes/covered
+
+	var/cut
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/on_owner_examine(datum/source, mob/user, list/examine_list)
+	. = ..()
+
+	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES))
+		if (covered)
+			examine_list += span_boldwarning("[owner.p_Their()] eyes are covered by a red slimey mass!")
+		else
+			examine_list += span_boldwarning("[owner.p_Their()] eyes have been replaced by a red slimey mass!")
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/Insert(mob/living/carbon/receiver, special, movement_flags)
+	covered = receiver.get_organ_slot(ORGAN_SLOT_EYES)
+
+	if (covered)
+		covered.Remove(receiver, special = TRUE)
+		covered.forceMove(src)
+
+	return ..()
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/examine(mob/user)
+	. = ..()
+
+	if (covered)
+		. += span_notice("You can see a pair of [covered] underneath. Maybe you can extract them with something sharp?")
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/attackby(obj/item/attacking_item, mob/user, params)
+	if (attacking_item.sharpness & SHARP_EDGED || attacking_item.tool_behaviour == TOOL_WIRECUTTER)
+		user.visible_message(
+			message = span_notice("[user] begins cutting \the [src] apart."),
+			self_message = span_notice("You begin cutting \the [src] apart with \the [attacking_item]."),
+			blind_message = span_hear("You hear cutting.")
+		)
+		if (!do_after(user, 2 SECONDS, src))
+			balloon_alert(user, "canceled!")
+			return
+		user.visible_message(
+			message = span_notice("[user] finishes cutting \the [src] apart."),
+			self_message = span_notice("You finish cutting \the [src] apart and a pair of [covered] fall out."),
+			blind_message = span_hear("You hear a splat.")
+		)
+		cut = TRUE
+		user.put_in_hands(covered)
+
+	return ..()
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/on_life(seconds_per_tick, times_fired)
+	. = ..()
+
+	if (!(organ_flags & ORGAN_FAILING) || SPT_PROB(15, seconds_per_tick))
+		apply_organ_damage(-0.05 * maxHealth * seconds_per_tick)
+
+/obj/item/organ/internal/eyes/night_vision/blood_slime/on_death(seconds_per_tick, times_fired)
+	. = ..()
+
+	if (!(organ_flags & ORGAN_FAILING) || SPT_PROB(10, seconds_per_tick))
+		apply_organ_damage(-0.025 * maxHealth * seconds_per_tick)
