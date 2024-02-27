@@ -200,6 +200,19 @@
 
 	return TRUE
 
+/datum/antagonist/blood_slime/proc/stop_host_control()
+	if (isnull(current_host))
+		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
+	swap_state(BLOOD_SLIME_STATE_SOLO)
+	slime.forceMove(current_host.drop_location())
+	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
+	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
+	if(current_host.mind != owner)
+		return
+	owner.transfer_to(slime)
+	if(host_mind)
+		host_mind.transfer_to(current_host)
+		host_mind = null
 /**
  * Causes the slime to leave it's current host with an animation.
  *
@@ -219,13 +232,7 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
-	owner.transfer_to(slime)
-	slime.forceMove(current_host.drop_location())
-	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
-
-	if(host_mind)
-		host_mind.transfer_to(current_host)
-		host_mind = null
+	stop_host_control()
 
 	if (!silent)
 		slime.visible_message(
@@ -236,12 +243,10 @@
 		)
 		to_chat(current_host, span_userdanger("You feel a sudden rush of blood escape your body... you feel woozy..."))
 
-	if (current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
+	if (current_host.stat != DEAD && current_host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(current_host, TRAIT_NODEATH))
 		current_host.death()
 
 	swap_state(BLOOD_SLIME_STATE_SOLO)
-	return_host_senses()
-
 	current_host = null
 
 /// Gets the maximum blood amount of the slime itself.
@@ -352,40 +357,37 @@
 		host_mind = current_host.mind
 
 	current_host.revive()
+	RegisterSignal(current_host, COMSIG_LIVING_DEATH, PROC_REF(host_is_kil))
 	owner.transfer_to(current_host)
 
-	replace_host_senses()
+/obj/item/organ/internal/blood_slime_membrane
+	name = "Bloody Membrane"
+	desc = "It pulses ominously. You feel like it's watching you."
 
-/// Replaces the current host's senses with our own.
-/datum/antagonist/blood_slime/proc/replace_host_senses()
-	if (!current_host)
-		return
+	var/obj/item/organ/internal/eyes/invincible/temp_eyes
+	var/obj/item/organ/internal/ears/invincible/temp_ears
 
-	if (eyes?.loc != slime && (!eyes?.owner || eyes.owner != current_host))
-		eyes = new()
-		eyes.apply_organ_damage(eyes.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		eyes.Insert(current_host, special = TRUE)
-		current_host.visible_message(
-			message = span_bolddanger("[current_host] suddenly grows a pair of membranes in place of their eyes!"),
-			self_message = current_host == owner.current ? null : span_bolddanger("You feel something growing in place of your eyes."),
-			blind_message = span_hear("You hear a loud and wet crunch."),
-			ignored_mobs = owner.current
-		)
-		to_chat(owner.current, span_danger("You grow a pair of unfinished visual membranes in place of the ones you lost."))
-	if (eyes?.loc != slime && (!ears?.owner || ears.owner != current_host))
-		ears = new()
-		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		ears.Insert(current_host, special = TRUE)
-		current_host.visible_message(
-			message = span_bolddanger("[current_host] suddenly grows a pair of membranes in place of their ears!"),
-			self_message = current_host == owner.current ? null : span_bolddanger("You feel something growing in place of your ears."),
-			blind_message = span_hear("You hear a loud and wet crunch."),
-			ignored_mobs = owner.current
-		)
-		to_chat(owner.current, span_danger("You grow a pair of unfinished acoustic membranes in place of the ones you lost."))
+	var/obj/item/organ/internal/eyes/old_eyes
+	var/obj/item/organ/internal/ears/old_ears
 
-	eyes.Insert(current_host, special = TRUE)
-	ears.Insert(current_host, special = TRUE)
+/obj/item/organ/internal/blood_slime_membrane/Insert(mob/living/carbon/receiver, special, movement_flags)
+	. = ..()
+
+	var/obj/item/organ/internal/eyes/old_eyes = receiver.get_organ_slot(ORGAN_SLOT_EYES)
+	if (old_eyes)
+		old_eyes.Remove(receiver, TRUE)
+
+	temp_eyes = new()
+	temp_ears.zone = BODY_ZONE_CHEST
+	temp_eyes.Insert(receiver, TRUE)
+
+	var/obj/item/organ/internal/ears/old_ears = receiver.get_organ_slot(ORGAN_SLOT_EARS)
+	if (old_ears)
+		old_eyes.Remove(receiver, TRUE)
+
+	temp_ears = new()
+	temp_ears.zone = BODY_ZONE_CHEST
+	temp_ears.Insert(receiver, TRUE)
 
 /// Returns the current host's senses back to their own.
 /datum/antagonist/blood_slime/proc/return_host_senses()
