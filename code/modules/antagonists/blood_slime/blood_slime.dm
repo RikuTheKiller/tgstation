@@ -213,6 +213,7 @@
 	if(host_mind)
 		host_mind.transfer_to(current_host)
 		host_mind = null
+
 /**
  * Causes the slime to leave it's current host with an animation.
  *
