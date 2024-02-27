@@ -200,6 +200,18 @@
 
 	return TRUE
 
+/datum/antagonist/blood_slime/proc/stop_host_control()
+	if (isnull(current_host))
+		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
+	swap_state(BLOOD_SLIME_STATE_SOLO)
+	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
+	UnregisterSignal(current_host, COMSIG_LIVING_DEATH)
+	if(current_host.mind != owner)
+		return
+	owner.transfer_to(slime)
+	if(host_mind)
+		host_mind.transfer_to(current_host)
+		host_mind = null
 /**
  * Causes the slime to leave it's current host with an animation.
  *
@@ -219,13 +231,8 @@
 	if (!disable_animation)
 		flick("emerge", slime)
 
-	owner.transfer_to(slime)
 	slime.forceMove(current_host.drop_location())
-	REMOVE_TRAITS_IN(current_host, BLOODCONTROL_TRAIT)
-
-	if(host_mind)
-		host_mind.transfer_to(current_host)
-		host_mind = null
+	stop_host_control()
 
 	if (!silent)
 		slime.visible_message(
@@ -353,6 +360,13 @@
 
 	current_host.revive()
 	owner.transfer_to(current_host)
+
+/datum/antagonist/blood_slime/proc/host_is_kil(mob/living/source, gibbed)
+	SIGNAL_HANDLER
+	if(gibbed)
+		leave_host(silent = TRUE, disable_animation = TRUE)
+		return
+	stop_host_control()
 
 	replace_host_senses()
 
