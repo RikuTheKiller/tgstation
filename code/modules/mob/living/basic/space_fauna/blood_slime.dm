@@ -1,5 +1,5 @@
 /*
-* ## Hemoparasites
+* ## Hemoparasite
 *
 * Player-controlled horrid abominations originating from a failed NT cleaning experiment. They're nothing like their relatively docile ancestors.
 */
