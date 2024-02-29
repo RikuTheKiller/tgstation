@@ -150,9 +150,9 @@
 		return
 	apply_organ_damage(20 / severity)
 
-/obj/item/organ/internal/ears/blood_slime
-	name = "bloody acoustic membranes"
-	desc = "The \"ears\" of an abomination. They vibrate constantly. Despite their looks, they hear really well."
+/obj/item/organ/internal/ears/hemoparasite
+	name = "acoustic membranes"
+	desc = "The \"ears\" of a hemoparasite. They vibrate so finely it's mesmerizing..."
 
 	healing_factor = STANDARD_ORGAN_HEALING * 2 // heal twice as fast
 	decay_factor = 0 // don't decay
@@ -161,7 +161,7 @@
 
 	var/cut
 
-/obj/item/organ/internal/ears/blood_slime/Insert(mob/living/carbon/receiver, special, movement_flags)
+/obj/item/organ/internal/ears/hemoparasite/Insert(mob/living/carbon/receiver, special, movement_flags)
 	covered = receiver.get_organ_slot(ORGAN_SLOT_EARS)
 
 	if (covered)
@@ -171,13 +171,13 @@
 
 	return ..()
 
-/obj/item/organ/internal/ears/blood_slime/examine(mob/user)
+/obj/item/organ/internal/ears/hemoparasite/examine(mob/user)
 	. = ..()
 
 	if (covered)
 		. += span_notice("You can see a pair of [covered] underneath. Maybe you can extract them with something sharp?")
 
-/obj/item/organ/internal/ears/blood_slime/attackby(obj/item/attacking_item, mob/user, params)
+/obj/item/organ/internal/ears/hemoparasite/attackby(obj/item/attacking_item, mob/user, params)
 	if (attacking_item.sharpness & SHARP_EDGED || attacking_item.tool_behaviour == TOOL_WIRECUTTER)
 		user.visible_message(
 			message = span_notice("[user] begins cutting \the [src] apart."),
@@ -198,13 +198,13 @@
 
 	return ..()
 
-/obj/item/organ/internal/ears/blood_slime/on_life(seconds_per_tick, times_fired)
+/obj/item/organ/internal/ears/hemoparasite/on_life(seconds_per_tick, times_fired)
 	. = ..()
 
 	if (!(organ_flags & ORGAN_FAILING) || SPT_PROB(15, seconds_per_tick))
 		apply_organ_damage(-0.05 * maxHealth * seconds_per_tick)
 
-/obj/item/organ/internal/ears/blood_slime/on_death(seconds_per_tick, times_fired)
+/obj/item/organ/internal/ears/hemoparasite/on_death(seconds_per_tick, times_fired)
 	. = ..()
 
 	if (!(organ_flags & ORGAN_FAILING) || SPT_PROB(10, seconds_per_tick))

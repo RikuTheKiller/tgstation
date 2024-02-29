@@ -96,7 +96,7 @@
 /// Trait given to you by shapeshifting
 #define SHAPESHIFT_TRAIT "shapeshift_trait"
 
-/// Trait given to you by blood slimes
+/// Trait given to you by hemoparasites
 #define BLOODCONTROL_TRAIT "bloodslimecontrol"
 
 // unique trait sources, still defines

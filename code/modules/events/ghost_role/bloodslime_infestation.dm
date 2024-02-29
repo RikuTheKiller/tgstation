@@ -29,20 +29,20 @@
 		break
 	if(isnull(host))
 		return NOT_ENOUGH_PLAYERS
-	var/list/candidates = SSpolling.poll_ghost_candidates(check_jobban = ROLE_SENTIENCE, role = ROLE_SENTIENCE, pic_source = /mob/living/basic/blood_slime, role_name_text = "Hemoparasite")
+	var/list/candidates = SSpolling.poll_ghost_candidates(check_jobban = ROLE_SENTIENCE, role = ROLE_SENTIENCE, pic_source = /mob/living/basic/hemoparasite, role_name_text = "Hemoparasite")
 	if(!candidates.len)
 		return NOT_ENOUGH_PLAYERS
 	var/mob/candidate = pick(candidates)
 	var/datum/mind/player_mind = new /datum/mind(candidate.key)
 	player_mind.active = TRUE
 
-	var/mob/living/basic/blood_slime/slime = new(host)
+	var/mob/living/basic/hemoparasite/slime = new(host)
 	player_mind.transfer_to(slime)
 	player_mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
-	player_mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
-	player_mind.add_antag_datum(/datum/antagonist/blood_slime)
+	player_mind.special_role = ROLE_HEMOPARASITE_MIDROUND
+	player_mind.add_antag_datum(/datum/antagonist/hemoparasite)
 
-	var/datum/antagonist/blood_slime/antag = player_mind.has_antag_datum(/datum/antagonist/blood_slime)
+	var/datum/antagonist/hemoparasite/antag = player_mind.has_antag_datum(/datum/antagonist/hemoparasite)
 	antag.enter_host(host, disable_animation = TRUE)
 
 	message_admins("[ADMIN_LOOKUPFLW(slime)]has been made into a Hemoparasite by an event.")

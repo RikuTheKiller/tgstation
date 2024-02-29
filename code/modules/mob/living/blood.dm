@@ -10,9 +10,9 @@
 /mob/living/carbon/human/handle_blood(seconds_per_tick, times_fired)
 
 	if(HAS_TRAIT(src, TRAIT_BLOODSLIME_CONTROL))
-		var/datum/antagonist/blood_slime/blood_slime = mind?.has_antag_datum(/datum/antagonist/blood_slime)
-		if (blood_slime)
-			blood_slime.handle_blood(seconds_per_tick, times_fired) // blood slime has it's own blood handling since it's completely different
+		var/datum/antagonist/hemoparasite/hemoparasite = mind?.has_antag_datum(/datum/antagonist/hemoparasite)
+		if (hemoparasite)
+			hemoparasite.handle_blood(seconds_per_tick, times_fired) // hemoparasite has it's own blood handling since it's completely different
 			return
 
 	if(HAS_TRAIT(src, TRAIT_NOBLOOD) || (HAS_TRAIT(src, TRAIT_FAKEDEATH)))

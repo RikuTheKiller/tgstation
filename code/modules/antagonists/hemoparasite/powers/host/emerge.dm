@@ -1,22 +1,22 @@
-/datum/action/cooldown/blood_slime/delayed/emerge
+/datum/action/cooldown/hemoparasite/delayed/emerge
 	name = "Emerge"
 	desc = "Emerge from your host, leaving them bloodless in the process."
 	button_icon_state = "blood_emerge"
 
-/datum/action/cooldown/blood_slime/delayed/emerge/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
+/datum/action/cooldown/hemoparasite/delayed/emerge/Grant(mob/grant_to, datum/antagonist/hemoparasite/antag_override)
 	. = ..()
 
 	RegisterSignal(grant_to, COMSIG_ATOM_RELAYMOVE, PROC_REF(host_relaymove))
 
-/datum/action/cooldown/blood_slime/delayed/emerge/Remove(mob/removed_from)
+/datum/action/cooldown/hemoparasite/delayed/emerge/Remove(mob/removed_from)
 	. = ..()
 
 	UnregisterSignal(removed_from, COMSIG_ATOM_RELAYMOVE)
 
-/datum/action/cooldown/blood_slime/delayed/emerge/Activate(atom/target)
+/datum/action/cooldown/hemoparasite/delayed/emerge/Activate(atom/target)
 	. = ..()
 
-	var/mob/living/carbon/human/host = blood_slime.current_host
+	var/mob/living/carbon/human/host = hemoparasite.host
 
 	owner.visible_message(
 		message = span_danger("[host] begins to turn pale!"),
@@ -40,11 +40,11 @@
 	playsound(owner, 'sound/effects/butcher.ogg', 25, TRUE)
 	playsound(owner, 'sound/effects/splat.ogg', 50, TRUE)
 
-	blood_slime.leave_host()
+	hemoparasite.leave_host()
 
 	return TRUE
 
-/datum/action/cooldown/blood_slime/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
+/datum/action/cooldown/hemoparasite/delayed/emerge/proc/host_relaymove(mob/living/user, direction)
 	if (user != owner)
 		return
 	owner.balloon_alert(owner, "can't move while in a body!")

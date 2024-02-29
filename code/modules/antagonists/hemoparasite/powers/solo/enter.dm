@@ -1,13 +1,13 @@
-/datum/action/cooldown/blood_slime/enter
+/datum/action/cooldown/hemoparasite/enter
 	name = "Enter Body"
 	desc = "Enter the target's body, turning them into your host."
 	button_icon_state = "blood_enter"
 	click_to_activate = TRUE
 
-/datum/action/cooldown/blood_slime/enter/IsAvailable(feedback = FALSE)
-	return ..() && !blood_slime?.current_host
+/datum/action/cooldown/hemoparasite/enter/IsAvailable(feedback = FALSE)
+	return ..() && !hemoparasite?.host
 
-/datum/action/cooldown/blood_slime/enter/Activate(mob/living/carbon/human/target)
+/datum/action/cooldown/hemoparasite/enter/Activate(mob/living/carbon/human/target)
 	. = ..()
 
 	if (!istype(target))
@@ -21,7 +21,7 @@
 		target.balloon_alert(owner, "not dead!")
 		return
 
-	if (blood_slime.get_host_max_blood(target) <= 0)
+	if (hemoparasite.get_host_max_blood(target) <= 0)
 		target.balloon_alert(owner, "bloodless!")
 		return
 
@@ -44,5 +44,5 @@
 
 	playsound(owner, 'sound/effects/blobattack.ogg', 50, TRUE)
 
-	blood_slime.enter_host(target) // actually enter the host
+	hemoparasite.enter_host(target) // actually enter the host
 

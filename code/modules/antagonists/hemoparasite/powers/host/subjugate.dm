@@ -1,11 +1,11 @@
-/datum/action/cooldown/blood_slime/delayed/subjugate
+/datum/action/cooldown/hemoparasite/delayed/subjugate
 	name = "Subjugate"
 	desc = "Take over your host's body and brain, acquiring a basic level of human intelligence. Only works on hosts that aren't overly injured."
 
-/datum/action/cooldown/blood_slime/delayed/subjugate/Activate(atom/target)
+/datum/action/cooldown/hemoparasite/delayed/subjugate/Activate(atom/target)
 	. = ..()
 
-	var/mob/living/carbon/human/host = blood_slime.current_host
+	var/mob/living/carbon/human/host = hemoparasite.host
 
 	if (host.health <= HEALTH_THRESHOLD_DEAD) // you either have to heal the corpse or use marionette instead
 		host.balloon_alert(owner, "too damaged!")
@@ -33,6 +33,6 @@
 		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
 	)
 
-	blood_slime.subjugate_host()
+	hemoparasite.subjugate_host()
 
 	return TRUE

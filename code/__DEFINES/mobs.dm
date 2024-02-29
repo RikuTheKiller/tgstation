@@ -15,7 +15,7 @@
 #define BLOOD_VOLUME_EXCESS 2100
 #define BLOOD_VOLUME_MAXIMUM 2000
 #define BLOOD_VOLUME_SLIME_SPLIT 1120
-#define BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM 1120
+#define BLOOD_VOLUME_HEMOPARASITE_MAXIMUM 1120
 #define BLOOD_VOLUME_NORMAL 560
 #define BLOOD_VOLUME_SAFE 475
 #define BLOOD_VOLUME_OKAY 336
@@ -24,8 +24,8 @@
 
 /// How efficiently humans regenerate blood.
 #define BLOOD_REGEN_FACTOR 0.25
-/// How efficiently humans controlled by a blood slime regenerate blood.
-#define BLOOD_SLIME_REGEN_FACTOR 0.5
+/// How efficiently humans controlled by a hemoparasite regenerate blood.
+#define HEMOPARASITE_REGEN_FACTOR 0.5
 /// Determines the rate at which humans lose blood when they have the blood deficiency quirk. The default is BLOOD_REGEN_FACTOR + BLOOD_DEFICIENCY_MODIFIER.
 #define BLOOD_DEFICIENCY_MODIFIER 0.025
 

@@ -4,10 +4,10 @@
 * Player-controlled horrid abominations originating from a failed NT cleaning experiment. They're nothing like their relatively docile ancestors.
 */
 
-/mob/living/basic/blood_slime
+/mob/living/basic/hemoparasite
 	name = "hemoparasite" // sentient blood real???
 	desc = "A horrid abomination that takes over the corpses of the deceased and feasts on their blood."
-	icon = 'icons/mob/nonhuman-player/blood_slime.dmi'
+	icon = 'icons/mob/nonhuman-player/hemoparasite.dmi'
 	icon_state = "large"
 	icon_living = "large"
 	icon_dead = "dead"
@@ -55,33 +55,33 @@
 	var/small_threshold = 80
 
 	/// Our antag datum.
-	var/datum/antagonist/blood_slime/blood_slime
+	var/datum/antagonist/hemoparasite/hemoparasite
 
-/mob/living/basic/blood_slime/Initialize(mapload)
+/mob/living/basic/hemoparasite/Initialize(mapload)
 	. = ..()
 
 	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
 
-/mob/living/basic/blood_slime/get_status_tab_items()
+/mob/living/basic/hemoparasite/get_status_tab_items()
 	. = ..()
-	if(isnull(blood_slime))
+	if(isnull(hemoparasite))
 		return
-	. += "Blood: [blood_slime.get_blood_amount()]/[blood_slime.get_max_blood()]"
-	if(isnull(blood_slime.current_host))
+	. += "Blood: [hemoparasite.get_blood_amount()]/[hemoparasite.get_max_blood()]"
+	if(isnull(hemoparasite.host))
 		return
-	. += "Host Blood: [blood_slime.get_host_blood_amount()]"
+	. += "Host Blood: [hemoparasite.get_host_blood_amount()]"
 
-/mob/living/basic/blood_slime/mind_initialize()
+/mob/living/basic/hemoparasite/mind_initialize()
 	..()
 
-	blood_slime = mind.has_antag_datum(/datum/antagonist/blood_slime)
+	hemoparasite = mind.has_antag_datum(/datum/antagonist/hemoparasite)
 
-	if(!blood_slime)
-		blood_slime = mind.add_antag_datum(/datum/antagonist/blood_slime)
+	if(!hemoparasite)
+		hemoparasite = mind.add_antag_datum(/datum/antagonist/hemoparasite)
 		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
-		mind.special_role = ROLE_BLOOD_SLIME_MIDROUND
+		mind.special_role = ROLE_HEMOPARASITE_MIDROUND
 
-/mob/living/basic/blood_slime/updatehealth()
+/mob/living/basic/hemoparasite/updatehealth()
 	. = ..()
 
 	if (stat == DEAD) // dont change size while dead
@@ -92,8 +92,8 @@
 	else if (health > small_threshold && small)
 		become_large()
 
-/// Makes the blood slime turn small with an animation.
-/mob/living/basic/blood_slime/proc/become_small()
+/// Makes the hemoparasite turn small with an animation.
+/mob/living/basic/hemoparasite/proc/become_small()
 	icon_state = "small"
 	icon_living = "small"
 	small = TRUE
@@ -102,8 +102,8 @@
 
 	return
 
-/// Makes the blood slime turn large with an animation.
-/mob/living/basic/blood_slime/proc/become_large()
+/// Makes the hemoparasite turn large with an animation.
+/mob/living/basic/hemoparasite/proc/become_large()
 	icon_state = "large"
 	icon_living = "large"
 	small = FALSE

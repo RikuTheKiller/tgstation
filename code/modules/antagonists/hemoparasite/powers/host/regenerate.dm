@@ -1,19 +1,19 @@
-/datum/action/cooldown/blood_slime/regen
+/datum/action/cooldown/hemoparasite/regen
 	name = "Regeneration"
 	desc = "Rapidly consume yourself to heal your host. More efficient if your host is dead."
 
-/datum/action/cooldown/blood_slime/regen/Activate(atom/target)
+/datum/action/cooldown/hemoparasite/regen/Activate(atom/target)
 	. = ..()
 
-	if (blood_slime.slime.has_status_effect(/datum/status_effect/blood_slime/regen))
+	if (hemoparasite.slime.has_status_effect(/datum/status_effect/hemoparasite/regen))
 		to_chat(owner, span_notice("You will no longer automatically heal your host."))
-		blood_slime.slime.remove_status_effect(/datum/status_effect/blood_slime/regen)
+		hemoparasite.slime.remove_status_effect(/datum/status_effect/hemoparasite/regen)
 	else
 		to_chat(owner, span_notice("You will now automatically heal your host."))
-		blood_slime.slime.apply_status_effect(/datum/status_effect/blood_slime/regen, blood_slime)
+		hemoparasite.slime.apply_status_effect(/datum/status_effect/hemoparasite/regen, hemoparasite)
 
-/datum/status_effect/blood_slime/regen
-	id = "blood_slime_regen"
+/datum/status_effect/hemoparasite/regen
+	id = "hemoparasite_regen"
 
 	/// How often we should notify the player of their regen status.
 	var/update_frequency = 15 SECONDS
@@ -21,15 +21,15 @@
 	/// The time when we will next notify the player of their regen status.
 	var/next_update_time
 
-/datum/status_effect/blood_slime/regen/on_apply()
+/datum/status_effect/hemoparasite/regen/on_apply()
 	. = ..()
 
-	if (!blood_slime?.current_host || !blood_slime?.owner?.current)
+	if (!hemoparasite?.host || !hemoparasite?.owner?.current)
 		return FALSE
 
-/datum/status_effect/blood_slime/regen/tick(seconds_between_ticks)
-	var/mob/living/carbon/human/host = blood_slime?.current_host
-	var/mob/living/slime = blood_slime?.owner?.current
+/datum/status_effect/hemoparasite/regen/tick(seconds_between_ticks)
+	var/mob/living/carbon/human/host = hemoparasite?.host
+	var/mob/living/slime = hemoparasite?.owner?.current
 
 	if (!host || !slime || slime.stat == DEAD)
 		qdel(src)
@@ -43,7 +43,7 @@
 	if (update)
 		next_update_time = world.time + update_frequency
 
-	if (blood_slime.get_host_blood_percentage() <= 0.05) // 5% blood or less, stall
+	if (hemoparasite.get_host_blood_percentage() <= 0.05) // 5% blood or less, stall
 		if (update)
 			to_chat(slime, span_danger("Your regeneration stalls due to a lack of blood."))
 		return
@@ -65,14 +65,14 @@
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
 	if (damage <= 0 && host.all_wounds.len <= 0)
-		blood_slime.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
+		hemoparasite.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
 		return
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks
 
 	bloodloss += 0.004 * potency // -0.4% blood per second per potency (-2% at 200 damage)
 
-	blood_slime.set_host_blood_percentage(max(blood_slime.get_host_blood_percentage() - bloodloss * seconds_between_ticks, 0.04)) // make sure we don't kill ourselves
+	hemoparasite.set_host_blood_percentage(max(hemoparasite.get_host_blood_percentage() - bloodloss * seconds_between_ticks, 0.04)) // make sure we don't kill ourselves
 
 	if (host.stat == DEAD)
 		potency *= 1.5
@@ -85,16 +85,16 @@
 
 	if (SPT_PROB(10, seconds_between_ticks))
 		var/message = pick(list(
-			"[host]'s wounds close as blood spreads all over them!",
-			"Blood gathers on [host] as their flesh regenerates!",
+			"[host]'s wounds are closing up as unnatural amounts of blood spray out!",
+			"[host]'s flesh regenerates as blood surfaces from it!",
 			"[host] wounds are knitting shut as blood keeps pouring out!",
-			"You see [host]'s blood turning into fresh skin and bone!",
-			"Steam rises from [host]'s blood as it sizzles on their wounds!"
+			"[host] blood is turning into fresh skin and bone!",
+			"[host]'s blood sizzles all over their wounds as they are clamped shut!"
 		))
 
 		host.visible_message(
 			message = span_warning(message),
-			self_message = slime == host ? null : span_boldnotice("Your wounds are gushing far more blood than usual, yet somehow you feel better."),
+			self_message = slime == host ? null : span_boldnotice("[hemoparasite.body] is consuming itself to ."),
 			blind_message = span_hear("You hear liquid bubbling and sizzling."),
 			ignored_mobs = slime
 		)

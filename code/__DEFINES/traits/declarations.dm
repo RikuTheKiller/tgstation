@@ -435,13 +435,13 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// Mob is unable to feel pain
 #define TRAIT_ANALGESIA "analgesia"
 
-/// Mob is inhabited by a blood slime
+/// Mob is inhabited by a hemoparasite
 #define TRAIT_BLOODSLIME_CONTROL "control"
-/// Mob is subjugated (taken over) by a blood slime
+/// Mob is subjugated (taken over) by a hemoparasite
 #define TRAIT_BLOODSLIME_SUBJUGATION "subjugation"
-/// Mob is puppeted (taken over as a corpse) by a blood slime
+/// Mob is puppeted (taken over as a corpse) by a hemoparasite
 #define TRAIT_BLOODSLIME_MARIONETTE "marionette"
-/// Mob is in symbiosis (not taken over, buffed) with a blood slime
+/// Mob is in symbiosis (not taken over, buffed) with a hemoparasite
 #define TRAIT_BLOODSLIME_SYMBIOSIS "symbiosis"
 
 /// Trait added when a revenant is visible.
