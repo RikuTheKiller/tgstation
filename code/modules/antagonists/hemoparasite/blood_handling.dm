@@ -1,6 +1,8 @@
 // Collection of methods for handling hemoparasite blood amounts.
 
-/// Gets the maximum blood amount of the slime itself.
+// Amounts (units of blood)
+
+/// Gets the maximum blood amount of the hemoparasite itself.
 /datum/antagonist/hemoparasite/proc/get_max_blood()
 	. = BLOOD_VOLUME_HEMOPARASITE_MAXIMUM
 
@@ -12,7 +14,7 @@
 	var/mob/living/carbon/human/host = host_override ? host_override : host
 
 	if (!host)
-		CRASH("[slime] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
+		CRASH("[parasite] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
 
 	if (HAS_TRAIT(host, TRAIT_NOBLOOD))
 		return 0
@@ -33,12 +35,12 @@
 
 /// Returns how much blood the hemoparasite currently holds.
 /datum/antagonist/hemoparasite/proc/get_blood_amount()
-	return slime.health * BLOOD_VOLUME_HEMOPARASITE_MAXIMUM / slime.maxHealth
+	return parasite.health * BLOOD_VOLUME_HEMOPARASITE_MAXIMUM / parasite.maxHealth
 
 /// Sets the blood amount of the hemoparasite to the given amount.
 /datum/antagonist/hemoparasite/proc/set_blood_amount(amount, ignore_sync)
-	slime.setBruteLoss(slime.maxHealth - amount * slime.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM) // it was bruteloss all along
-	if (slime.loc == host && !ignore_sync)
+	parasite.setBruteLoss(parasite.maxHealth - amount * parasite.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM) // it was bruteloss all along
+	if (parasite.is_in_host() && !ignore_sync)
 		set_host_blood_amount(amount, ignore_sync = TRUE)
 
 /// Adjusts the blood amount of the hemoparasite by the given amount.
@@ -54,14 +56,14 @@
 	if (!host)
 		return
 	host.blood_volume = clamp(amount, 0, get_host_max_blood())
-	if (slime.loc == host && !ignore_sync)
+	if (parasite.is_in_host() && !ignore_sync)
 		set_blood_amount(amount, ignore_sync = TRUE)
 
 /// Adjusts the blood volume of the hemoparasite's host by the given amount.
 /datum/antagonist/hemoparasite/proc/adjust_host_blood_amount(amount, ignore_sync)
 	set_host_blood_amount(get_host_blood_amount() + amount, ignore_sync)
 
-// Percentages
+// Percentages (of BLOOD_VOLUME_HEMOPARASITE_MAXIMUM)
 
 /// Returns the blood amount of the hemoparasite as a percentage. (0-1)
 /datum/antagonist/hemoparasite/proc/get_blood_percentage()

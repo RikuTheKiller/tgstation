@@ -768,17 +768,19 @@
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/Initialize(mapload)
 	. = ..()
 
-	cover_organ_ref = WEAKREF(AddComponent(
-		/datum/component/cover_organ,
-		can_be_extracted = TRUE,
-		show_on_examine = TRUE,
+	cover_organ_ref = WEAKREF(AddComponent( \
+		/datum/component/cover_organ, \
+		can_be_extracted = TRUE, \
+		show_on_examine = TRUE, \
 	))
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_owner_examine(datum/source, mob/user, list/examine_list)
 	. = ..()
 
+	var/datum/component/cover_organ/cover_organ = cover_organ_ref?.resolve()
+
 	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES)) // make sure we aren't in the chest (only happens if the head is dismembered and then it's already obvious something is going on)
-		examine_list += span_boldwarning("[owner.p_Their()] eyes [cover_organ_ref?.resolve()?.covered ? "are covered" : "have been replaced"] by red membranes!")
+		examine_list += span_boldwarning("[owner.p_Their()] eyes [cover_organ?.covered ? "are covered" : "have been replaced"] by red membranes!")
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_life(seconds_per_tick, times_fired)
 	. = ..()

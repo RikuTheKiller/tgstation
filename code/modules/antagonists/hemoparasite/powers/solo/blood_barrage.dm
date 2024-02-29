@@ -3,32 +3,30 @@
 	desc = "Continuously turn yourself into infectious payloads to hurl at your (unfortunate) target."
 	cooldown_time = 10 SECONDS
 
-	/// The ranged attack component used alongside the autofire component. Saved for later deletion.
-	var/datum/component/ranged_attacks/attack
+	/// A weakref to the ranged attack component used alongside the autofire component. Saved for later deletion.
+	var/datum/weakref/attack
 
-	/// The autofire component this uses to make the hemoparasite able to shoot. Saved for later deletion.
-	var/datum/component/ranged_mob_full_auto/blood_barrage/autofire
-
-/datum/action/cooldown/hemoparasite/blood_barrage/New(Target, original)
-	barrage = new()
+	/// A weakref to the autofire component this uses to make the hemoparasite able to shoot. Saved for later deletion.
+	var/datum/weakref/autofire
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Grant(mob/grant_to, datum/antagonist/hemoparasite/antag_override)
 	. = ..()
 	if (!.)
 		return
 
-	owner.AddComponent(
+	/*owner.AddComponent(
 		/datum/component/ranged_attacks,
 		projectile_type = /obj/projectile/hemoparasite,
 		projectile_sound = projectilesound,
 		cooldown_time = ranged_cooldown,
-		burst_shots = burst_shots
-	)
-	autofire = owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2, src)
+		burst_shots = burst_shots,
+	)*/
+	autofire = WEAKREF(owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2, src))
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Remove(mob/removed_from)
 	. = ..()
 
+	qdel(attack)
 	qdel(autofire)
 
 /datum/component/ranged_mob_full_auto/blood_barrage

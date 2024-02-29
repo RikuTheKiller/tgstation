@@ -5,12 +5,12 @@
 /datum/action/cooldown/hemoparasite/regen/Activate(atom/target)
 	. = ..()
 
-	if (hemoparasite.slime.has_status_effect(/datum/status_effect/hemoparasite/regen))
+	if (hemoparasite.parasite.has_status_effect(/datum/status_effect/hemoparasite/regen))
 		to_chat(owner, span_notice("You will no longer automatically heal your host."))
-		hemoparasite.slime.remove_status_effect(/datum/status_effect/hemoparasite/regen)
+		hemoparasite.parasite.remove_status_effect(/datum/status_effect/hemoparasite/regen)
 	else
 		to_chat(owner, span_notice("You will now automatically heal your host."))
-		hemoparasite.slime.apply_status_effect(/datum/status_effect/hemoparasite/regen, hemoparasite)
+		hemoparasite.parasite.apply_status_effect(/datum/status_effect/hemoparasite/regen, hemoparasite)
 
 /datum/status_effect/hemoparasite/regen
 	id = "hemoparasite_regen"
@@ -29,9 +29,9 @@
 
 /datum/status_effect/hemoparasite/regen/tick(seconds_between_ticks)
 	var/mob/living/carbon/human/host = hemoparasite?.host
-	var/mob/living/slime = hemoparasite?.owner?.current
+	var/mob/living/parasite = hemoparasite?.owner?.current
 
-	if (!host || !slime || slime.stat == DEAD)
+	if (!host || !parasite || parasite.stat == DEAD)
 		qdel(src)
 		return
 
@@ -45,7 +45,7 @@
 
 	if (hemoparasite.get_host_blood_percentage() <= 0.05) // 5% blood or less, stall
 		if (update)
-			to_chat(slime, span_danger("Your regeneration stalls due to a lack of blood."))
+			to_chat(parasite, span_danger("Your regeneration stalls due to a lack of blood."))
 		return
 
 	var/bloodloss = 0
@@ -54,13 +54,13 @@
 		host.adjustOxyLoss(-2 * seconds_between_ticks)
 		bloodloss += 0.01 // -1% blood per second
 		if (update)
-			to_chat(slime, span_boldnotice("Your regeneration is reoxygenating your host."))
+			to_chat(parasite, span_boldnotice("Your regeneration is reoxygenating your host."))
 
 	if (host.getToxLoss() > 0) // does not heal on it's own
 		host.adjustToxLoss(-2 * seconds_between_ticks)
 		bloodloss += 0.01 // -1% blood per second
 		if (update)
-			to_chat(slime, span_boldnotice("Your regeneration is detoxifying your host."))
+			to_chat(parasite, span_boldnotice("Your regeneration is detoxifying your host."))
 
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
@@ -94,22 +94,22 @@
 
 		host.visible_message(
 			message = span_warning(message),
-			self_message = slime == host ? null : span_boldnotice("[hemoparasite.body] is consuming itself to ."),
+			self_message = parasite == host ? null : span_boldnotice("Your [parasite] is consuming itself to mend your wounds."),
 			blind_message = span_hear("You hear liquid bubbling and sizzling."),
-			ignored_mobs = slime
+			ignored_mobs = parasite
 		)
 
 	if (!update)
 		return
 
-	var/slime_message = "Your regeneration is "
+	var/parasite_message = "Your regeneration is "
 
 	switch (damage)
 		if (-INFINITY to 100)
-			slime_message += "slowly mending your injured host."
+			parasite_message += "slowly mending your injured host."
 		if (100 to 200)
-			slime_message += "quickly mending your mangled host."
+			parasite_message += "quickly mending your mangled host."
 		if (200 to INFINITY)
-			slime_message += "in overdrive as it mends your unrecognizable wreck of a host."
+			parasite_message += "in overdrive as it mends your unrecognizable wreck of a host."
 
-	to_chat(slime, span_boldnotice(slime_message))
+	to_chat(parasite, span_boldnotice(parasite_message))

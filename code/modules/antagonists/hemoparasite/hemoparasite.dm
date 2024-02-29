@@ -361,13 +361,7 @@
 	if (!ears)
 		ears = new()
 	if (host)
-		if (eyes.owner == host)
-			eyes.Remove(host, special = TRUE)
-			eyes.covered.Insert(host, special = TRUE)
-			eyes.covered.organ_flags &= ~ORGAN_FROZEN
-		if (eyes.owner == host)
-			ears.Remove(host, special = TRUE)
-			ears.covered.Insert(host, special = TRUE)
-			ears.covered.organ_flags &= ~ORGAN_FROZEN
+		eyes.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
+		ears.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
 	eyes.forceMove(parasite)
 	ears.forceMove(parasite)
