@@ -15,6 +15,9 @@
 /obj/item/organ/proc/Insert(mob/living/carbon/receiver, special = FALSE, movement_flags)
 	SHOULD_CALL_PARENT(TRUE)
 
+	if (SEND_SIGNAL(src, COMSIG_ORGAN_INSERT, receiver, special, movement_flags) & COMPONENT_ORGAN_CANCEL_INSERT)
+		return FALSE
+
 	mob_insert(receiver, special, movement_flags)
 	bodypart_insert(limb_owner = receiver, movement_flags = movement_flags)
 
@@ -28,6 +31,9 @@
  */
 /obj/item/organ/proc/Remove(mob/living/carbon/organ_owner, special = FALSE, movement_flags)
 	SHOULD_CALL_PARENT(TRUE)
+
+	if (SEND_SIGNAL(src, COMSIG_ORGAN_REMOVE, organ_owner, special, movement_flags) & COMPONENT_ORGAN_CANCEL_REMOVE)
+		return FALSE
 
 	mob_remove(organ_owner, special, movement_flags)
 	bodypart_remove(limb_owner = organ_owner, movement_flags = movement_flags)
@@ -89,7 +95,7 @@
 		organ_owner.apply_status_effect(effect, type)
 
 	RegisterSignal(owner, COMSIG_ATOM_EXAMINE, PROC_REF(on_owner_examine))
-	SEND_SIGNAL(src, COMSIG_ORGAN_IMPLANTED, organ_owner)
+	SEND_SIGNAL(src, COMSIG_ORGAN_IMPLANTED, organ_owner, special, movement_flags)
 	SEND_SIGNAL(organ_owner, COMSIG_CARBON_GAIN_ORGAN, src, special)
 
 /// Insert an organ into a limb, assume the limb as always detached and include no owner operations here (except the get_bodypart helper here I guess)
@@ -159,7 +165,7 @@
 		organ_owner.remove_status_effect(effect, type)
 
 	UnregisterSignal(organ_owner, COMSIG_ATOM_EXAMINE)
-	SEND_SIGNAL(src, COMSIG_ORGAN_REMOVED, organ_owner)
+	SEND_SIGNAL(src, COMSIG_ORGAN_REMOVED, organ_owner, special, movement_flags)
 	SEND_SIGNAL(organ_owner, COMSIG_CARBON_LOSE_ORGAN, src, special)
 
 	var/list/diseases = organ_owner.get_static_viruses()

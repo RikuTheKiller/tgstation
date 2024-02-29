@@ -762,52 +762,20 @@
 	medium_light_cutoff = list(25, 10, 10)
 	high_light_cutoff = list(40, 15, 15)
 
-	var/obj/item/organ/internal/eyes/covered
+/obj/item/organ/internal/eyes/night_vision/hemoparasite/Initialize(mapload)
+	. = ..()
 
-	var/cut
+	AddComponent(
+		/datum/component/cover_organ,
+		can_be_extracted = TRUE,
+		show_on_examine = TRUE,
+	)
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_owner_examine(datum/source, mob/user, list/examine_list)
 	. = ..()
 
-	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES))
+	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES)) // make sure we aren't in the chest (only happens if the head is dismembered and then it's already obvious something is going on)
 		examine_list += span_boldwarning("[owner.p_Their()] eyes [covered ? "are covered" : "have been replaced"] by red membranes!")
-
-/obj/item/organ/internal/eyes/night_vision/hemoparasite/Insert(mob/living/carbon/receiver, special, movement_flags)
-	covered = receiver.get_organ_slot(ORGAN_SLOT_EYES)
-
-	if (covered)
-		covered.Remove(receiver, special = TRUE)
-		covered.forceMove(src)
-		covered.organ_flags |= ORGAN_FROZEN
-
-	return ..()
-
-/obj/item/organ/internal/eyes/night_vision/hemoparasite/examine(mob/user)
-	. = ..()
-
-	if (covered)
-		. += span_notice("You can see a pair of [covered] underneath. Maybe you can extract them with something sharp?")
-
-/obj/item/organ/internal/eyes/night_vision/hemoparasite/attackby(obj/item/attacking_item, mob/user, params)
-	if (attacking_item.sharpness & SHARP_EDGED || attacking_item.tool_behaviour == TOOL_WIRECUTTER)
-		user.visible_message(
-			message = span_notice("[user] begins cutting \the [src] apart."),
-			self_message = span_notice("You begin cutting \the [src] apart with \the [attacking_item]."),
-			blind_message = span_hear("You hear cutting.")
-		)
-		if (!do_after(user, 2 SECONDS, src))
-			balloon_alert(user, "canceled!")
-			return
-		user.visible_message(
-			message = span_notice("[user] finishes cutting \the [src] apart."),
-			self_message = span_notice("You finish cutting \the [src] apart and a pair of [covered] fall out."),
-			blind_message = span_hear("You hear a splat.")
-		)
-		cut = TRUE
-		user.put_in_hands(covered)
-		covered.organ_flags &= ~ORGAN_FROZEN
-
-	return ..()
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_life(seconds_per_tick, times_fired)
 	. = ..()
