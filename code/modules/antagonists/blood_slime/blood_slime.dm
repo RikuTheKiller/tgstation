@@ -150,17 +150,7 @@
 	eyes = new()
 	ears = new()
 	if (isnull(initialized_actions))
-		var/list/initialized_actions_by_type = list()
-		initialized_actions = state_actions.Copy()
-		for (var/state_key in initialized_actions)
-			for (var/path in initialized_actions[state_key])
-				initialized_actions[state_key] -= path
-				var/action = initialized_actions_by_type[path]
-				if (!action)
-					action = new path(owner)
-					initialized_actions_by_type[path] = action
-				initialized_actions[state_key] += action
-		QDEL_NULL(initialized_actions_by_type)
+		init_actions()
 	if (istype(owner.current, /mob/living/basic/blood_slime))
 		slime = owner.current
 		swap_state(BLOOD_SLIME_STATE_SOLO)
@@ -177,6 +167,18 @@
 
 	return ..()
 
+/datum/antagonist/blood_slime/proc/init_actions()
+	var/list/initialized_actions_by_type = list()
+		initialized_actions = state_actions.Copy()
+		for (var/state_key in initialized_actions)
+			for (var/path in initialized_actions[state_key])
+				initialized_actions[state_key] -= path
+				var/action = initialized_actions_by_type[path]
+				if (!action)
+					action = new path(owner)
+					initialized_actions_by_type[path] = action
+				initialized_actions[state_key] += action
+
 /datum/antagonist/blood_slime/on_removal()
 	if (current_host)
 		for (var/datum/action/cooldown/blood_slime/former in current_host.actions)
@@ -185,6 +187,10 @@
 		former.Remove(former)
 	QDEL_LIST_ASSOC(initialized_actions)
 	return ..()
+
+/// Returns whether or not the blood slime is actually *in* a host. Having a host doesn't mean you're inside them.
+/datum/antagonist/blood_slime/proc/is_in_host()
+	return current_host && slime?.loc == current_host
 
 /**
  * Causes the slime to enter the target with an animation.
