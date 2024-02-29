@@ -9,12 +9,12 @@
 
 /// Gets the maximum blood amount of the host. Prosthetics and missing limbs can't contain blood. (prosthetics since they can't bleed and would be OP otherwise)
 /datum/antagonist/hemoparasite/proc/get_host_max_blood(mob/living/carbon/human/host_override = null)
-	var/mob/living/carbon/human/host = host_override ? host_override : host
+	var/mob/living/carbon/human/target_host = host_override || host
 
-	if (!host)
+	if (isnull(target_host))
 		CRASH("[parasite] ([owner]) tried to check the maximum blood amount of a nonexistent host.")
 
-	if (HAS_TRAIT(host, TRAIT_NOBLOOD))
+	if (HAS_TRAIT(target_host, TRAIT_NOBLOOD))
 		return 0
 
 	. = BLOOD_VOLUME_HEMOPARASITE_MAXIMUM
@@ -24,12 +24,12 @@
 
 	var/suitable_limbs = 0
 
-	for (var/obj/item/bodypart/limb in host.bodyparts)
+	for (var/obj/item/bodypart/limb in target_host.bodyparts)
 		if (!IS_ROBOTIC_LIMB(limb))
 			suitable_limbs += 1
 
 	// preparing for the day that we get more limbs (we probably wont, but magic numbers aren't great either)
-	. = min(., BLOOD_VOLUME_HEMOPARASITE_MAXIMUM * suitable_limbs / (host.bodyparts.len + host.get_missing_limbs().len))
+	. = min(., BLOOD_VOLUME_HEMOPARASITE_MAXIMUM * suitable_limbs / (target_host.bodyparts.len + target_host.get_missing_limbs().len))
 
 /// Returns how much blood the hemoparasite currently holds.
 /datum/antagonist/hemoparasite/proc/get_blood_amount()
