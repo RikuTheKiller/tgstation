@@ -1,6 +1,6 @@
 /// Component for organs that cover other organs. For when you want to "override" organ function temporarily.
 /datum/component/cover_organ
-	/// The organ being covered, if any.
+	/// Weakref to the organ being covered, if any.
 	var/obj/item/organ/covered
 	/// Whether the covered organ can be extracted using a sharp object.
 	var/can_be_extracted
@@ -17,6 +17,11 @@
 	. = ..()
 
 	QDEL_NULL(covered)
+
+/datum/component/cover_organ/proc/clear_covered()
+	SIGNAL_HANDLER
+
+	covered = null
 
 /datum/component/cover_organ/RegisterWithParent()
 	. = ..()
@@ -46,6 +51,7 @@
 
 	covered.Remove(receiver, special = TRUE)
 	covered.forceMove(cover)
+	RegisterSignal(covered, COMSIG_QDELETING, PROC_REF(clear_covered))
 
 /datum/component/cover_organ/proc/on_removed(mob/living/carbon/old_owner, special, movement_flags)
 	SIGNAL_HANDLER
@@ -64,8 +70,10 @@
 	if (!covered)
 		return
 
-	. = COMPONENT_NO_AFTERATTACK
+	INVOKE_ASYNC(src, PROC_REF(cut_open))
+	return COMPONENT_NO_AFTERATTACK
 
+/datum/component/cover_organ/proc/cut_open(obj/item/item, mob/living/user)
 	user.visible_message(
 		message = span_notice("[user] begins cutting \the [src] apart."),
 		self_message = span_notice("You begin cutting \the [src] apart with \the [item]."),
@@ -73,7 +81,7 @@
 	)
 
 	if (!do_after(user, 2 SECONDS, src))
-		balloon_alert(user, "canceled!")
+		user.balloon_alert(user, "canceled!")
 		return
 
 	user.visible_message(
@@ -84,6 +92,7 @@
 
 	user.put_in_hands(covered)
 	covered.organ_flags &= ~ORGAN_FROZEN
+	UnregisterSignal(covered, COMSIG_QDELETING)
 
 /datum/component/cover_organ/proc/on_examine(datum/source, mob/user, list/examine_list)
 	SIGNAL_HANDLER

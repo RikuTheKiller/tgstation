@@ -7,7 +7,7 @@
 // It should never outright stop working, though. That'd be impressive.
 
 /datum/antagonist/hemoparasite
-	name = "\improper Hemoparasite" // blood slime real ?? ? ?
+	name = "\improper Hemoparasite" // blood slime real??
 	antagpanel_category = ANTAG_GROUP_BIOHAZARDS // either biohazard or horror works, but biohazard is more applicable here
 	show_name_in_check_antagonists = TRUE
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
