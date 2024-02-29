@@ -1,6 +1,6 @@
 /// Component for organs that cover other organs. For when you want to "override" organ function temporarily.
 /datum/component/cover_organ
-	/// Weakref to the organ being covered, if any.
+	/// The organ being covered, if any.
 	var/obj/item/organ/covered
 	/// Whether the covered organ can be extracted using a sharp object.
 	var/can_be_extracted
@@ -26,7 +26,7 @@
 /datum/component/cover_organ/RegisterWithParent()
 	. = ..()
 	RegisterSignal(parent, COMSIG_ORGAN_INSERT, PROC_REF(on_insert))
-	RegisterSignal(parent, COMSIG_ORGAN_REMOVED, PROC_REF(on_removed))
+	RegisterSignal(parent, COMSIG_ORGAN_REMOVE, PROC_REF(on_remove))
 	RegisterSignal(parent, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
 	if (show_on_examine)
 		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, PROC_REF(on_examine))
@@ -35,34 +35,37 @@
 	. = ..()
 	UnregisterSignal(parent, list(
 		COMSIG_ORGAN_INSERT,
-		COMSIG_ORGAN_REMOVED,
+		COMSIG_ORGAN_REMOVE,
+		COMSIG_ATOM_ATTACKBY,
 		COMSIG_ATOM_EXAMINE,
 	))
 
-/datum/component/cover_organ/proc/on_insert(mob/living/carbon/receiver, special, movement_flags)
+/datum/component/cover_organ/proc/on_insert(datum/source, mob/living/carbon/receiver, special, movement_flags)
 	SIGNAL_HANDLER
 
 	var/obj/item/organ/cover = parent
 
 	covered = receiver.get_organ_slot(cover.slot)
 
-	if (!istype(covered))
+	if (!covered)
 		return
 
 	covered.Remove(receiver, special = TRUE)
 	covered.forceMove(cover)
 	RegisterSignal(covered, COMSIG_QDELETING, PROC_REF(clear_covered))
 
-/datum/component/cover_organ/proc/on_removed(mob/living/carbon/old_owner, special, movement_flags)
+/datum/component/cover_organ/proc/on_remove(datum/source, mob/living/carbon/organ_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
 	if ((movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
 		return
 
-	covered.Insert(old_owner, special = TRUE)
+	covered.Insert(organ_owner, special = TRUE)
 	covered.organ_flags |= ORGAN_FROZEN
 
-/datum/component/cover_organ/proc/on_attackby(obj/item/item, mob/living/user, params)
+	return COMPONENT_ORGAN_CANCEL_REMOVE // inserting the covered organ removes us, so this would be removing something that isn't even inside the mob anymore
+
+/datum/component/cover_organ/proc/on_attackby(datum/source, obj/item/item, mob/living/user, params)
 	SIGNAL_HANDLER
 
 	if (!(item.sharpness & SHARP_EDGED) && item.tool_behaviour != TOOL_WIRECUTTER)
@@ -70,10 +73,10 @@
 	if (!covered)
 		return
 
-	INVOKE_ASYNC(src, PROC_REF(cut_open))
+	INVOKE_ASYNC(src, PROC_REF(cut_open), item, user, params)
 	return COMPONENT_NO_AFTERATTACK
 
-/datum/component/cover_organ/proc/cut_open(obj/item/item, mob/living/user)
+/datum/component/cover_organ/proc/cut_open(datum/source, obj/item/item, mob/living/user, params)
 	user.visible_message(
 		message = span_notice("[user] begins cutting \the [src] apart."),
 		self_message = span_notice("You begin cutting \the [src] apart with \the [item]."),

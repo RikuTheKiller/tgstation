@@ -10,6 +10,8 @@
 #define COMSIG_ORGAN_REMOVED "organ_removed"
 /// Called when an organ is being regenerated with a new copy in species regenerate_organs (obj/item/organ/replacement)
 #define COMSIG_ORGAN_BEING_REPLACED "organ_being_replaced"
+/// Called after an organ has been replaced in mob_insert() (mob/living/old_owner)
+#define COMSIG_ORGAN_REPLACED "organ_replaced"
 /// Called when an organ gets surgically removed (mob/living/user, mob/living/carbon/old_owner, target_zone, obj/item/tool)
 #define COMSIG_ORGAN_SURGICALLY_REMOVED "organ_surgically_removed"
 /// Called when an organ is inserted via Insert(), but before the insertion process is done (mob/living/carbon/receiver, special, movement_flags)

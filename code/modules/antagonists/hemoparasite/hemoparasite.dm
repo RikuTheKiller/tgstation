@@ -244,7 +244,9 @@
 	if (!host)
 		CRASH("[parasite] ([owner]) attempted to leave a host that doesn't exist.")
 
-	set_host_blood_amount(min(get_host_blood_amount(), max_blood))
+	set_blood_amount(min(get_host_blood_amount(), max_blood), ignore_sync = TRUE)
+
+	adjust_host_blood_amount(-get_blood_amount(), ignore_sync = TRUE)
 
 	if (!disable_animation)
 		flick("emerge", parasite)
@@ -331,7 +333,6 @@
 	if (eyes?.loc != parasite && (!eyes?.owner || eyes.owner != host))
 		eyes = new()
 		eyes.apply_organ_damage(eyes.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		eyes.Insert(host, special = TRUE)
 		host.visible_message(
 			message = span_bolddanger("[host] suddenly grows a pair of [eyes] in place of their eyes!"),
 			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your eyes."),
@@ -342,7 +343,6 @@
 	if (eyes?.loc != parasite && (!ears?.owner || ears.owner != host))
 		ears = new()
 		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		ears.Insert(host, special = TRUE)
 		host.visible_message(
 			message = span_bolddanger("[host] suddenly grows a pair of [ears] in place of their ears!"),
 			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your ears."),
@@ -356,10 +356,6 @@
 
 /// Returns the current host's senses back to their own.
 /datum/antagonist/hemoparasite/proc/return_host_senses()
-	if (!eyes)
-		eyes = new()
-	if (!ears)
-		ears = new()
 	if (host)
 		eyes.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
 		ears.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
