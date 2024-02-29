@@ -78,7 +78,7 @@
 
 	if(!hemoparasite)
 		hemoparasite = mind.add_antag_datum(/datum/antagonist/hemoparasite)
-		mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
+		mind.set_assigned_role(SSjob.GetJobType(/datum/job/hemoparasite))
 		mind.special_role = ROLE_HEMOPARASITE_MIDROUND
 
 /mob/living/basic/hemoparasite/updatehealth()

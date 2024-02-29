@@ -436,13 +436,13 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_ANALGESIA "analgesia"
 
 /// Mob is inhabited by a hemoparasite
-#define TRAIT_BLOODSLIME_CONTROL "control"
+#define TRAIT_HEMOPARASITE_CONTROL "control"
 /// Mob is subjugated (taken over) by a hemoparasite
-#define TRAIT_BLOODSLIME_SUBJUGATION "subjugation"
+#define TRAIT_HEMOPARASITE_SUBJUGATION "subjugation"
 /// Mob is puppeted (taken over as a corpse) by a hemoparasite
-#define TRAIT_BLOODSLIME_MARIONETTE "marionette"
+#define TRAIT_HEMOPARASITE_MARIONETTE "marionette"
 /// Mob is in symbiosis (not taken over, buffed) with a hemoparasite
-#define TRAIT_BLOODSLIME_SYMBIOSIS "symbiosis"
+#define TRAIT_HEMOPARASITE_SYMBIOSIS "symbiosis"
 
 /// Trait added when a revenant is visible.
 #define TRAIT_REVENANT_REVEALED "revenant_revealed"

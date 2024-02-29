@@ -762,20 +762,23 @@
 	medium_light_cutoff = list(25, 10, 10)
 	high_light_cutoff = list(40, 15, 15)
 
+	/// Weakref to the cover organ component so we can access it for the examine message.
+	var/datum/weakref/cover_organ_ref
+
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/Initialize(mapload)
 	. = ..()
 
-	AddComponent(
+	cover_organ_ref = WEAKREF(AddComponent(
 		/datum/component/cover_organ,
 		can_be_extracted = TRUE,
 		show_on_examine = TRUE,
-	)
+	))
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_owner_examine(datum/source, mob/user, list/examine_list)
 	. = ..()
 
 	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES)) // make sure we aren't in the chest (only happens if the head is dismembered and then it's already obvious something is going on)
-		examine_list += span_boldwarning("[owner.p_Their()] eyes [covered ? "are covered" : "have been replaced"] by red membranes!")
+		examine_list += span_boldwarning("[owner.p_Their()] eyes [cover_organ_ref?.resolve()?.covered ? "are covered" : "have been replaced"] by red membranes!")
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_life(seconds_per_tick, times_fired)
 	. = ..()

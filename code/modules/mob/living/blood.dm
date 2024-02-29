@@ -9,7 +9,7 @@
 // Takes care blood loss and regeneration
 /mob/living/carbon/human/handle_blood(seconds_per_tick, times_fired)
 
-	if(HAS_TRAIT(src, TRAIT_BLOODSLIME_CONTROL))
+	if(HAS_TRAIT(src, TRAIT_HEMOPARASITE_CONTROL))
 		var/datum/antagonist/hemoparasite/hemoparasite = mind?.has_antag_datum(/datum/antagonist/hemoparasite)
 		if (hemoparasite)
 			hemoparasite.handle_blood(seconds_per_tick, times_fired) // hemoparasite has it's own blood handling since it's completely different

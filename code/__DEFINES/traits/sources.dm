@@ -97,7 +97,7 @@
 #define SHAPESHIFT_TRAIT "shapeshift_trait"
 
 /// Trait given to you by hemoparasites
-#define BLOODCONTROL_TRAIT "bloodslimecontrol"
+#define BLOODCONTROL_TRAIT "hemoparasitecontrol"
 
 // unique trait sources, still defines
 #define EMP_TRAIT "emp_trait"

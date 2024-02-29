@@ -1,6 +1,6 @@
-/datum/round_event_control/bloodslime_infestation
+/datum/round_event_control/hemoparasite_infestation
 	name = "Hemoparasite Infection"
-	typepath = /datum/round_event/ghost_role/bloodslime_infestation
+	typepath = /datum/round_event/ghost_role/hemoparasite_infestation
 	max_occurrences = 1
 	min_players = 20
 	category = EVENT_CATEGORY_ENTITIES
@@ -8,12 +8,12 @@
 	min_wizard_trigger_potency = 5
 	max_wizard_trigger_potency = 7
 
-/datum/round_event/ghost_role/bloodslime_infestation
+/datum/round_event/ghost_role/hemoparasite_infestation
 	fakeable = FALSE
 	minimum_required = 1
 	role_name = "hemoparasite"
 
-/datum/round_event/ghost_role/bloodslime_infestation/spawn_role()
+/datum/round_event/ghost_role/hemoparasite_infestation/spawn_role()
 	var/mob/host
 	for(var/mob/living/carbon/human/victim as anything in shuffle(GLOB.dead_mob_list))
 		if(!istype(victim))
@@ -38,7 +38,7 @@
 
 	var/mob/living/basic/hemoparasite/slime = new(host)
 	player_mind.transfer_to(slime)
-	player_mind.set_assigned_role(SSjob.GetJobType(/datum/job/bloodslime))
+	player_mind.set_assigned_role(SSjob.GetJobType(/datum/job/hemoparasite))
 	player_mind.special_role = ROLE_HEMOPARASITE_MIDROUND
 	player_mind.add_antag_datum(/datum/antagonist/hemoparasite)
 

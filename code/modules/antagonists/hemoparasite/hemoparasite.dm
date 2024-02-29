@@ -1,4 +1,4 @@
-/datum/job/bloodslime
+/datum/job/hemoparasite
 	title = ROLE_HEMOPARASITE_MIDROUND
 
 // This antag datum is quite volatile. It does a LOT of datum manipulation.
@@ -16,7 +16,7 @@
 	var/current_state = -1 // Uninitialized
 
 	/// The hemoparasite basic mob.
-	var/mob/living/basic/hemoparasite/body
+	var/mob/living/basic/hemoparasite/parasite
 
 	/// The current host of the hemoparasite, if in one.
 	var/mob/living/carbon/human/host
@@ -44,8 +44,8 @@
 
 	/// Traits given to our host during subjugation.
 	var/static/list/subjugation_traits = list(
-		TRAIT_BLOODSLIME_CONTROL,
-		TRAIT_BLOODSLIME_SUBJUGATION,
+		TRAIT_HEMOPARASITE_CONTROL,
+		TRAIT_HEMOPARASITE_SUBJUGATION,
 		TRAIT_MUTE,
 		TRAIT_MADNESS_IMMUNE,
 		TRAIT_SLEEPIMMUNE,
@@ -59,8 +59,8 @@
 
 	/// Traits given to our host during marionette.
 	var/static/list/marionette_traits = list(
-		TRAIT_BLOODSLIME_CONTROL,
-		TRAIT_BLOODSLIME_MARIONETTE,
+		TRAIT_HEMOPARASITE_CONTROL,
+		TRAIT_HEMOPARASITE_MARIONETTE,
 		TRAIT_MUTE,
 		TRAIT_MADNESS_IMMUNE,
 		TRAIT_SLEEPIMMUNE,
@@ -78,8 +78,8 @@
 
 	/// Traits given to our host during symbiosis.
 	var/static/list/symbiosis_traits = list(
-		TRAIT_BLOODSLIME_CONTROL,
-		TRAIT_BLOODSLIME_SYMBIOSIS,
+		TRAIT_HEMOPARASITE_CONTROL,
+		TRAIT_HEMOPARASITE_SYMBIOSIS,
 		TRAIT_NODEATH,
 		TRAIT_NOCRITDAMAGE,
 		TRAIT_NOCRITOVERLAY,
@@ -123,8 +123,8 @@
 
 /datum/antagonist/hemoparasite/New()
 	. = ..()
-	allowed_antags_typecache = typecacheof(allowed_antags_typecache)
-	disallowed_quirks_typecache = typecacheof(disallowed_quirks_typecache)
+	allowed_antags = typecacheof(allowed_antags)
+	disallowed_quirks = typecacheof(disallowed_quirks)
 
 /datum/antagonist/hemoparasite/proc/swap_state(state)
 	if(current_state == state)
@@ -145,12 +145,12 @@
 	if (isnull(initialized_actions))
 		init_actions()
 	if (istype(owner.current, /mob/living/basic/hemoparasite))
-		slime = owner.current
+		parasite = owner.current
 		swap_state(HEMOPARASITE_STATE_SOLO)
-		eyes.forceMove(slime)
-		ears.forceMove(slime)
+		eyes.forceMove(parasite)
+		ears.forceMove(parasite)
 	else if (istype(owner.current, /mob/living/carbon/human))
-		slime = new(owner.current)
+		parasite = new(owner.current)
 		if (!enter_host(owner.current, silent = TRUE, disable_animation = TRUE)) // check if entering the host was successful in case they have incompatible blood or something
 			owner.remove_antag_datum(src.type)
 			return ..()
@@ -160,17 +160,18 @@
 
 	return ..()
 
+/// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
 	var/list/initialized_actions_by_type = list()
-		initialized_actions = state_actions.Copy()
-		for (var/state_key in initialized_actions)
-			for (var/path in initialized_actions[state_key])
-				initialized_actions[state_key] -= path
-				var/action = initialized_actions_by_type[path]
-				if (!action)
-					action = new path(owner)
-					initialized_actions_by_type[path] = action
-				initialized_actions[state_key] += action
+	initialized_actions = state_actions.Copy()
+	for (var/state_key in initialized_actions)
+		for (var/path in initialized_actions[state_key])
+			initialized_actions[state_key] -= path
+			var/action = initialized_actions_by_type[path]
+			if (!action)
+				action = new path(owner)
+				initialized_actions_by_type[path] = action
+			initialized_actions[state_key] += action
 
 /datum/antagonist/hemoparasite/on_removal()
 	if (host)
@@ -183,10 +184,10 @@
 
 /// Returns whether or not the hemoparasite is actually *in* a host. Having a host doesn't mean you're inside them.
 /datum/antagonist/hemoparasite/proc/is_in_host()
-	return host && slime?.loc == host
+	return host && parasite?.loc == host
 
 /**
- * Causes the slime to enter the target with an animation.
+ * Causes the parasite to enter the target with an animation.
  *
  * Arguments:
  * * target - The target to enter.
@@ -195,20 +196,20 @@
  */
 /datum/antagonist/hemoparasite/proc/enter_host(mob/living/carbon/human/target, silent, disable_animation)
 	if (!target)
-		CRASH("[slime] ([owner]) attempted to enter a host that doesn't exist.")
+		CRASH("[parasite] ([owner]) attempted to enter a host that doesn't exist.")
 	if (host)
-		CRASH("[slime] ([owner]) attempted to enter a host while already in another host.")
+		CRASH("[parasite] ([owner]) attempted to enter a host while already in another host.")
 	if (get_host_max_blood(target) <= 0)
 		return FALSE
 
 	if (!silent)
-		slime.visible_message(
-			message = span_danger("\The [slime] enters [target]'s body!"),
+		parasite.visible_message(
+			message = span_danger("\The [parasite] enters [target]'s body!"),
 			self_message = span_notice("You enter [target]'s body."),
 			blind_message = span_hear("You hear a splash."),
 		)
 
-	slime.forceMove(target)
+	parasite.forceMove(target)
 	swap_state(HEMOPARASITE_STATE_DORMANT)
 
 	host = target
@@ -219,41 +220,41 @@
 
 /datum/antagonist/hemoparasite/proc/stop_host_control()
 	if (isnull(host))
-		CRASH("[slime] ([owner]) attempted to stop controlling a nonexistent host.")
+		CRASH("[parasite] ([owner]) attempted to stop controlling a nonexistent host.")
 	UnregisterSignal(host, COMSIG_LIVING_DEATH)
 	swap_state(HEMOPARASITE_STATE_DORMANT)
 	REMOVE_TRAITS_IN(host, BLOODCONTROL_TRAIT)
 	return_host_senses()
 	if(host.mind != owner)
 		return
-	owner.transfer_to(slime)
+	owner.transfer_to(parasite)
 	if(host_mind)
 		host_mind.transfer_to(host)
 		host_mind = null
 
 /**
- * Causes the slime to leave it's current host with an animation.
+ * Causes the parasite to leave it's current host with an animation.
  *
  * Arguments:
- * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_HEMOPARASITE_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_host_max_blood()
+ * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_HEMOPARASITE_MAXIMUM or above will empty the host. The actual amount of blood left for the parasite is further limited by get_host_max_blood()
  * * silent - Disables the visible message.
  * * disable_animation - Disables the animation.
  */
 /datum/antagonist/hemoparasite/proc/leave_host(max_blood = BLOOD_VOLUME_HEMOPARASITE_MAXIMUM, silent = FALSE, disable_animation = FALSE)
 	if (!host)
-		CRASH("[slime] ([owner]) attempted to leave a host that doesn't exist.")
+		CRASH("[parasite] ([owner]) attempted to leave a host that doesn't exist.")
 
 	set_host_blood_amount(min(get_host_blood_amount(), max_blood))
 
 	if (!disable_animation)
-		flick("emerge", slime)
+		flick("emerge", parasite)
 
 	stop_host_control()
-	slime.forceMove(host.drop_location())
+	parasite.forceMove(host.drop_location())
 
 	if (!silent)
-		slime.visible_message(
-			span_danger("\The [slime] emerges from [host]!"),
+		parasite.visible_message(
+			span_danger("\The [parasite] emerges from [host]!"),
 			span_notice("You emerge from your host."),
 			span_hear("You hear a sudden gush of liquid!"),
 			ignored_mobs = host
@@ -267,10 +268,10 @@
 
 	host = null
 
-/// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_BLOODSLIME_CONTROL
+/// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_HEMOPARASITE_CONTROL
 /datum/antagonist/hemoparasite/proc/handle_blood(seconds_per_tick, times_fired)
 	if (!host)
-		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
+		CRASH("[parasite] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
 	adjust_host_blood_amount(HEMOPARASITE_REGEN_FACTOR * seconds_per_tick, ignore_sync = TRUE) // regen blood, desyncs blood_volume from the basic mob's health
 
@@ -281,7 +282,7 @@
 /// Makes the hemoparasite subjugate its host.
 /datum/antagonist/hemoparasite/proc/subjugate_host()
 	if (!host)
-		CRASH("[slime] ([owner]) attempted to subjugate a host that doesn't exist.")
+		CRASH("[parasite] ([owner]) attempted to subjugate a host that doesn't exist.")
 
 	if(host.health <= HEALTH_THRESHOLD_DEAD)
 		return
@@ -296,7 +297,7 @@
 /// Makes the hemoparasite marionette its host.
 /datum/antagonist/hemoparasite/proc/marionette_host()
 	if (!host)
-		CRASH("[slime] ([owner]) attempted to marionette a host that doesn't exist.")
+		CRASH("[parasite] ([owner]) attempted to marionette a host that doesn't exist.")
 
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(host, trait, BLOODCONTROL_TRAIT)
@@ -327,7 +328,7 @@
 	if (!host)
 		return
 
-	if (eyes?.loc != slime && (!eyes?.owner || eyes.owner != host))
+	if (eyes?.loc != parasite && (!eyes?.owner || eyes.owner != host))
 		eyes = new()
 		eyes.apply_organ_damage(eyes.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
 		eyes.Insert(host, special = TRUE)
@@ -338,7 +339,7 @@
 			ignored_mobs = owner.current
 		)
 		to_chat(owner.current, span_warning("You grow a pair of unfinished [eyes] in place of the ones you lost."))
-	if (eyes?.loc != slime && (!ears?.owner || ears.owner != host))
+	if (eyes?.loc != parasite && (!ears?.owner || ears.owner != host))
 		ears = new()
 		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
 		ears.Insert(host, special = TRUE)
@@ -368,5 +369,5 @@
 			ears.Remove(host, special = TRUE)
 			ears.covered.Insert(host, special = TRUE)
 			ears.covered.organ_flags &= ~ORGAN_FROZEN
-	eyes.forceMove(slime)
-	ears.forceMove(slime)
+	eyes.forceMove(parasite)
+	ears.forceMove(parasite)
