@@ -2,5 +2,5 @@
 
 /obj/projectile/hemoparasite/barrage
 	name = "hemoparasitic glob"
-	desc = "A glob made from the body of a hemoparasite, getting hit by it is probably a bad idea."
+	desc = "An infectious glob made from the body of a hemoparasite."
 	icon_state = "blood_barrage"

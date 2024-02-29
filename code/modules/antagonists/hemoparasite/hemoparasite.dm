@@ -7,7 +7,7 @@
 // It should never outright stop working, though. That'd be impressive.
 
 /datum/antagonist/hemoparasite
-	name = "\improper Hemoparasite" // have fun with it being named completely differently lul
+	name = "\improper Hemoparasite" // blood slime real ?? ? ?
 	antagpanel_category = ANTAG_GROUP_BIOHAZARDS // either biohazard or horror works, but biohazard is more applicable here
 	show_name_in_check_antagonists = TRUE
 	show_to_ghosts = TRUE // somewhat stealthy, but not enough to be hidden from ghosts
@@ -243,9 +243,7 @@
 	if (!host)
 		CRASH("[slime] ([owner]) attempted to leave a host that doesn't exist.")
 
-	set_blood_amount(min(get_host_blood_amount(), max_blood), ignore_host_sync = TRUE)
-
-	set_host_blood_amount(get_host_blood_amount() - get_blood_amount(), ignore_slime_sync = TRUE)
+	set_host_blood_amount(min(get_host_blood_amount(), max_blood))
 
 	if (!disable_animation)
 		flick("emerge", slime)
@@ -260,7 +258,7 @@
 			span_hear("You hear a sudden gush of liquid!"),
 			ignored_mobs = host
 		)
-		to_chat(host, span_userdanger("You feel a sudden rush of blood escape your body... you feel woozy..."))
+		to_chat(host, span_userdanger("You feel your hemoparasite escape your body... you feel woozy..."))
 
 	if (host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(host, TRAIT_NODEATH))
 		host.death()
@@ -274,11 +272,11 @@
 	if (!host)
 		CRASH("[slime] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
-	adjust_host_blood_amount(HEMOPARASITE_REGEN_FACTOR * seconds_per_tick, ignore_slime_sync = TRUE) // regen blood, desyncs blood_volume from the basic mob's health
+	adjust_host_blood_amount(HEMOPARASITE_REGEN_FACTOR * seconds_per_tick, ignore_sync = TRUE) // regen blood, desyncs blood_volume from the basic mob's health
 
 	host.handle_bleeding(seconds_per_tick, times_fired) // handle bleeding
 
-	set_blood_amount(host.blood_volume, ignore_host_sync = TRUE) // resync
+	set_blood_amount(host.blood_volume, ignore_sync = TRUE) // resync
 
 /// Makes the hemoparasite subjugate its host.
 /datum/antagonist/hemoparasite/proc/subjugate_host()
