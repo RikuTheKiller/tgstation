@@ -14,13 +14,13 @@
 	if (!.)
 		return
 
-	ranged = owner.AddComponent(
+	/*ranged = owner.AddComponent(
 		/datum/component/ranged_attacks, \
 		projectile_type = /obj/projectile/hemoparasite, \
 		projectile_sound = projectilesound, \
 		cooldown_time = ranged_cooldown, \
 		burst_shots = burst_shots, \
-	)
+	)*/
 	fullauto = owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2, src)
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Remove(mob/removed_from)
