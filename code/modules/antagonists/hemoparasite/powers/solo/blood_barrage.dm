@@ -26,7 +26,7 @@
 /datum/action/cooldown/hemoparasite/blood_barrage/Remove(mob/removed_from)
 	. = ..()
 
-	qdel(attack)
+	qdel(ranged)
 	qdel(fullauto)
 
 /datum/component/ranged_mob_full_auto/blood_barrage
