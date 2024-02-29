@@ -18,7 +18,7 @@
 	/// The hemoparasite basic mob.
 	var/mob/living/basic/hemoparasite/body
 
-	/// The current host.
+	/// The current host of the hemoparasite, if in one.
 	var/mob/living/carbon/human/host
 
 	/// The current host's mind datum.
