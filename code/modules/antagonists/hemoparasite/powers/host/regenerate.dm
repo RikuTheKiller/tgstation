@@ -45,7 +45,7 @@
 
 	if (hemoparasite.get_host_blood_percentage() <= 0.05) // 5% blood or less, stall
 		if (update)
-			to_chat(parasite, span_danger("Your regeneration stalls due to a lack of blood."))
+			to_chat(parasite, span_warning("Your regeneration stalls due to a lack of blood."))
 		return
 
 	var/bloodloss = 0
