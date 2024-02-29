@@ -9,11 +9,23 @@
 	var/autofire_stat = AUTOFIRE_STAT_IDLE
 	var/mouse_parameters
 	/// Time between individual shots.
-	var/autofire_shot_delay = 0.3 SECONDS 
+	var/autofire_shot_delay = 0.3 SECONDS
 	/// This seems hacky but there can be two MouseDown() without a MouseUp() in between if the user holds click and uses alt+tab, printscreen or similar.
-	var/mouse_status = AUTOFIRE_MOUSEUP 
+	var/mouse_status = AUTOFIRE_MOUSEUP
 	/// Should dual wielding be allowed?
-	var/allow_akimbo 
+	var/allow_akimbo
+
+	/// A list of required mouse modifiers to fire. Empty by default. disallowed_mouse_modifiers has this removed from it on init so you don't have to define both in most cases. (unless not using LEFT_CLICK)
+	var/list/required_mouse_modifiers
+
+	/// A list of explicitly disallowed mouse modifiers. If any of these are present, we won't fire. Has everything except LEFT_CLICK by default.
+	var/list/disallowed_mouse_modifiers = list(
+		RIGHT_CLICK,
+		MIDDLE_CLICK,
+		SHIFT_CLICK,
+		CTRL_CLICK,
+		ALT_CLICK
+	)
 
 	///windup autofire vars
 	///Whether the delay between shots increases over time, simulating a spooling weapon
@@ -39,6 +51,7 @@
 	if(autofire_shot_delay)
 		src.autofire_shot_delay = autofire_shot_delay
 	src.allow_akimbo = allow_akimbo
+	disallowed_mouse_modifiers -= required_mouse_modifiers // you should never require a disallowed modifier that's just dumb (saves people from having to do both all the time)
 	if(windup_autofire)
 		src.windup_autofire = windup_autofire
 		src.windup_autofire_reduction_multiplier = windup_autofire_reduction_multiplier
@@ -119,18 +132,14 @@
 
 /datum/component/automatic_fire/proc/on_mouse_down(client/source, atom/_target, turf/location, control, params)
 	SIGNAL_HANDLER
-	var/list/modifiers = params2list(params) //If they're shift+clicking, for example, let's not have them accidentally shoot.
+	var/list/modifiers = params2list(params)
 
-	if(LAZYACCESS(modifiers, SHIFT_CLICK))
-		return
-	if(LAZYACCESS(modifiers, CTRL_CLICK))
-		return
-	if(LAZYACCESS(modifiers, MIDDLE_CLICK))
-		return
-	if(LAZYACCESS(modifiers, RIGHT_CLICK))
-		return
-	if(LAZYACCESS(modifiers, ALT_CLICK))
-		return
+	for(var/required as anything in required_mouse_modifiers) // check required mouse modifiers, if someone wants this gun to shoot only if they're pressing alt+click or something
+		if(!LAZYACCESS(modifiers, required))
+			return
+	for(var/disallowed as anything in disallowed_mouse_modifiers) // check disallowed mouse modifiers, filled out by default so this doesn't fire if any modifiers are present
+		if(LAZYACCESS(modifiers, disallowed))
+			return
 	if(source.mob.throw_mode)
 		return
 	if(!isturf(source.mob.loc)) //No firing inside lockers and stuff.

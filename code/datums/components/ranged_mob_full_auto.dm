@@ -18,12 +18,25 @@
 	/// When will we next try to shoot?
 	COOLDOWN_DECLARE(next_shot_cooldown)
 
+	/// A list of required mouse modifiers to fire. Empty by default. disallowed_mouse_modifiers has this removed from it on init so you don't have to define both in most cases. (unless not using LEFT_CLICK)
+	var/list/required_mouse_modifiers
+
+	/// A list of explicitly disallowed mouse modifiers. If any of these are present, we won't fire. Has everything except LEFT_CLICK by default.
+	var/list/disallowed_mouse_modifiers = list(
+		RIGHT_CLICK,
+		MIDDLE_CLICK,
+		SHIFT_CLICK,
+		CTRL_CLICK,
+		ALT_CLICK
+	)
+
 /datum/component/ranged_mob_full_auto/Initialize(autofire_shot_delay = 0.5 SECONDS)
 	. = ..()
 	if (!isliving(parent))
 		return COMPONENT_INCOMPATIBLE
 
 	src.autofire_shot_delay = autofire_shot_delay
+	disallowed_mouse_modifiers -= required_mouse_modifiers // you should never require a disallowed modifier that's just dumb (saves people from having to do both all the time)
 
 	var/mob/living/living_parent = parent
 	if (isnull(living_parent.client))
@@ -99,16 +112,12 @@
 		return // Avoid a double mousedown with no mouseup
 	var/list/modifiers = params2list(params)
 
-	if (LAZYACCESS(modifiers, SHIFT_CLICK))
-		return
-	if (LAZYACCESS(modifiers, CTRL_CLICK))
-		return
-	if (LAZYACCESS(modifiers, MIDDLE_CLICK))
-		return
-	if (LAZYACCESS(modifiers, RIGHT_CLICK))
-		return
-	if (LAZYACCESS(modifiers, ALT_CLICK))
-		return
+	for(var/required as anything in required_mouse_modifiers) // check required mouse modifiers, if someone wants this gun to shoot only if they're pressing alt+click or something
+		if(!LAZYACCESS(modifiers, required))
+			return
+	for(var/disallowed as anything in disallowed_mouse_modifiers) // check disallowed mouse modifiers, filled out by default so this doesn't fire if any modifiers are present
+		if(LAZYACCESS(modifiers, disallowed))
+			return
 	var/mob/living/living_parent = parent
 	if (!isturf(living_parent.loc) || living_parent.Adjacent(target))
 		return

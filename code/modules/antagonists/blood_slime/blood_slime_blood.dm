@@ -1,3 +1,5 @@
+// Collection of methods for handling blood slime blood amounts.
+
 /// Gets the maximum blood amount of the slime itself.
 /datum/antagonist/blood_slime/proc/get_max_blood()
 	. = BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
@@ -43,9 +45,9 @@
 	if (slime.loc == current_host && !ignore_host_sync)
 		set_host_blood_amount(amount, ignore_slime_sync = TRUE)
 
-/// Sets the blood amount of the blood slime to the given percentage.
+/// Sets the blood amount of the blood slime to the given percentage. (0-1)
 /datum/antagonist/blood_slime/proc/set_blood_percentage(percentage, ignore_host_sync)
-	set_blood_amount(amount * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM, ignore_host_sync)
+	set_blood_amount(percentage * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM, ignore_host_sync)
 
 /// Adjusts the blood amount of the blood slime by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_blood_amount(amount, ignore_host_sync)
@@ -71,14 +73,14 @@
 	if (slime.loc == current_host && !ignore_slime_sync)
 		set_blood_amount(amount, ignore_host_sync = TRUE)
 
-/// Sets the blood amount of the blood slime's host to the given percentage.
+/// Sets the blood amount of the blood slime's host to the given percentage. (0-1)
 /datum/antagonist/blood_slime/proc/set_host_blood_percentage(percentage, ignore_host_sync)
-	set_host_blood_percentage(percentage * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM, ignore_host_sync)
+	set_host_blood_amount(percentage * BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM, ignore_host_sync)
 
 /// Adjusts the blood amount of the blood slime's host by the given amount.
 /datum/antagonist/blood_slime/proc/adjust_host_blood_amount(amount, ignore_slime_sync)
 	set_host_blood_amount(get_host_blood_amount() + amount, ignore_slime_sync)
 
-/// Adjusts the blood amount of the blood slime's host by the given percentage.
-/datum/antagonist/blood_slime/proc/set_host_blood_percentage(percentage, ignore_host_sync)
+/// Adjusts the blood amount of the blood slime's host by the given percentage. (0-1)
+/datum/antagonist/blood_slime/proc/adjust_host_blood_percentage(percentage, ignore_host_sync)
 	set_host_blood_percentage(get_host_blood_percentage() + percentage, ignore_host_sync)

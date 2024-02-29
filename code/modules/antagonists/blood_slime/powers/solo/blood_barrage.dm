@@ -2,35 +2,51 @@
 	name = "Blood Barrage"
 	desc = "Fire a continuous barrage of blood."
 	cooldown_time = 10 SECONDS
-	click_to_activate = TRUE
 
-	/// How much blood this uses per shot. Measured as a percentage of BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM
-	var/blood_cost = 0.02
+	/// The barrage component this uses to make the blood slime able to shoot. Saved for later deletion.
+	var/datum/component/ranged_mob_full_auto/blood_barrage/barrage
 
-	/// The internal barrage item this uses to fire.
-	var/obj/item/gun/barrage/blood_barrage/barrage
+/datum/action/cooldown/blood_slime/blood_barrage/New(Target, original)
+	barrage = new()
 
-/datum/action/cooldown/blood_slime/blood_barrage/Activate(atom/target)
+/datum/action/cooldown/blood_slime/blood_barrage/Grant(mob/grant_to, datum/antagonist/blood_slime/antag_override)
 	. = ..()
+	if (!.)
+		return
 
-	owner.visible_message(
-		message = span_boldwarning("[owner] starts firing a barrage of blood!"),
-		self_message = span_notice("You start firing a barrage of blood."),
-		blind_message = span_hear("You hear constant splashing!")
+	owner.AddComponent(
+		/datum/component/ranged_attacks,
+		projectile_type = /obj/projectile/blood_slime,
+		projectile_sound = projectilesound,
+		cooldown_time = ranged_cooldown,
+		burst_shots = burst_shots
 	)
+	owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2, src)
 
-/obj/item/gun/barrage/blood_barrage
-	name = "Blood Barrage"
-	desc = "adminbuse go brr"
-	slot_flags = NONE
-	obj_flags = NEEDS_PERMIT | DROPDEL | ABSTRACT | NOBLUDGEON
-
-	/// How quickly this fires.
-	var/fire_rate = 0.2 SECONDS
-
-	/// What ammo this uses.
-	var/obj/item/ammo_casing/ammo
-
-/obj/item/gun/barrage/Initialize(mapload)
+/datum/action/cooldown/blood_slime/blood_barrage/Remove(mob/removed_from)
 	. = ..()
-	AddComponent(/datum/component/automatic_fire, fire_rate)
+
+	QDEL_NULL(barrage)
+
+/datum/component/ranged_mob_full_auto/blood_barrage
+
+	/// The barrage action this is firing for. Used to keep track of cooldowns and give feedback to the player.
+	var/datum/action/cooldown/blood_slime/blood_barrage/barrage
+
+/datum/component/ranged_mob_full_auto/blood_barrage/Initialize(autofire_shot_delay, datum/action/cooldown/blood_slime/blood_barrage/barrage)
+	. = ..()
+	src.barrage = barrage
+
+/datum/component/ranged_mob_full_auto/blood_barrage/on_mouse_down(client/source, atom/target, turf/location, control, params)
+	var/mob/living/owner = barrage?.owner
+
+	if (!istype(owner))
+		return
+	if (!barrage.IsAvailable(feedback = TRUE))
+		return
+
+	return ..()
+
+/datum/component/ranged_mob_full_auto/blood_barrage/stop_firing()
+	. = ..()
+	barrage.StartCooldown()

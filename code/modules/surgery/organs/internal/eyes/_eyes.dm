@@ -749,6 +749,8 @@
 	name = "bloody visual membranes"
 	desc = "The \"eyes\" of an abomination. They shift around unnervingly. Despite their looks, they see really well."
 
+	item_flags = NO_BLOOD_ON_ITEM // these get bloody in the nightvision action after 1 host swap without this
+
 	healing_factor = 0 // we handle this ourselves
 	decay_factor = 0 // don't decay
 

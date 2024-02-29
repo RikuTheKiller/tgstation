@@ -236,7 +236,7 @@
  * Causes the slime to leave it's current host with an animation.
  *
  * Arguments:
- * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_max_blood()
+ * * max_blood - The maximum amount of blood this can take. Setting it to BLOOD_VOLUME_BLOOD_SLIME_MAXIMUM or above will empty the host. The actual amount of blood left for the slime is further limited by get_host_max_blood()
  * * silent - Disables the visible message.
  * * disable_animation - Disables the animation.
  */
