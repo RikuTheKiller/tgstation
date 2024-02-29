@@ -768,10 +768,10 @@
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/Initialize(mapload)
 	. = ..()
 
-	cover_organ_ref = WEAKREF(AddComponent(
-		/datum/component/cover_organ,
-		can_be_extracted = TRUE,
-		show_on_examine = TRUE,
+	cover_organ_ref = WEAKREF(AddComponent( \
+		/datum/component/cover_organ, \
+		can_be_extracted = TRUE, \
+		show_on_examine = TRUE, \
 	))
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_owner_examine(datum/source, mob/user, list/examine_list)

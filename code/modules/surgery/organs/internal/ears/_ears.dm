@@ -162,10 +162,10 @@
 /obj/item/organ/internal/ears/hemoparasite/Initialize(mapload)
 	. = ..()
 
-	AddComponent(
-		/datum/component/cover_organ,
-		can_be_extracted = TRUE,
-		show_on_examine = TRUE,
+	AddComponent( \
+		/datum/component/cover_organ, \
+		can_be_extracted = TRUE, \
+		show_on_examine = TRUE, \
 	)
 
 /obj/item/organ/internal/ears/hemoparasite/on_life(seconds_per_tick, times_fired)

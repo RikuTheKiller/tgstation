@@ -5,12 +5,12 @@
 /datum/action/cooldown/hemoparasite/regen/Activate(atom/target)
 	. = ..()
 
-	if (hemoparasite.slime.has_status_effect(/datum/status_effect/hemoparasite/regen))
+	if (hemoparasite.parasite.has_status_effect(/datum/status_effect/hemoparasite/regen))
 		to_chat(owner, span_notice("You will no longer automatically heal your host."))
-		hemoparasite.slime.remove_status_effect(/datum/status_effect/hemoparasite/regen)
+		hemoparasite.parasite.remove_status_effect(/datum/status_effect/hemoparasite/regen)
 	else
 		to_chat(owner, span_notice("You will now automatically heal your host."))
-		hemoparasite.slime.apply_status_effect(/datum/status_effect/hemoparasite/regen, hemoparasite)
+		hemoparasite.parasite.apply_status_effect(/datum/status_effect/hemoparasite/regen, hemoparasite)
 
 /datum/status_effect/hemoparasite/regen
 	id = "hemoparasite_regen"
