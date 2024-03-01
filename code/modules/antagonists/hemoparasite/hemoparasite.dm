@@ -201,7 +201,6 @@
 
 /// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
-	initialized_actions = TRUE
 	var/list/initialized_actions_by_type = list()
 	initialized_actions = state_actions.Copy()
 	for (var/state_key as anything in initialized_actions)
