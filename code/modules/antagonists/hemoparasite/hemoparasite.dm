@@ -118,7 +118,7 @@
 	/// The "ears" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/ears/hemoparasite/ears
 
-	var/atom/blood_hud //todo use correct type
+	var/atom/movable/screen/ling/chems/blood_hud //todo use correct type
 
 /datum/antagonist/hemoparasite/New()
 	. = ..()
