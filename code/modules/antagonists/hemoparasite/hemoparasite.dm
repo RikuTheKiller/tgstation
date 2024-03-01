@@ -113,7 +113,7 @@
 	)
 
 	/// Associative list of initialized action datums sorted by state.
-	var/list/initialized_actions
+	var/list/initialized_actions = list()
 
 	/// The "eyes" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/eyes/night_vision/hemoparasite/eyes
@@ -159,10 +159,9 @@
 /// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
 	var/list/initialized_actions_by_type = list()
-	initialized_actions = state_actions.Copy()
-	for (var/state_key as anything in initialized_actions)
-		for (var/path as anything in initialized_actions[state_key])
-			initialized_actions[state_key] -= path
+	for (var/state_key as anything in state_actions)
+		initialized_actions += state_key
+		for (var/path as anything in state_actions[state_key])
 			var/action = initialized_actions_by_type[path]
 			if (!action)
 				action = new path(owner)
