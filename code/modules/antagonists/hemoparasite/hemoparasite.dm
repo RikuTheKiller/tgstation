@@ -121,6 +121,8 @@
 	/// The "ears" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/ears/hemoparasite/ears
 
+	var/atom/blood_hud //todo use correct type
+
 /datum/antagonist/hemoparasite/New()
 	. = ..()
 	allowed_antags = typecacheof(allowed_antags)
@@ -155,6 +157,46 @@
 		former.Remove(former)
 	QDEL_LIST_ASSOC(state_actions)
 	return ..()
+
+/datum/antagonist/hemoparasite/apply_innate_effects(mob/living/mob_override = owner.current)
+	if(!istype(mob_override))
+		return
+
+	if(mob_override.hud_used)
+		var/datum/hud/hud_used = mob_override.hud_used
+
+		blood_hud = new /atom/movable/screen/ling/chems(null, hud_used)
+		hud_used.infodisplay += blood_hud
+
+		hud_used.show_hud(hud_used.hud_version)
+	else
+		RegisterSignal(mob_override, COMSIG_MOB_HUD_CREATED, PROC_REF(on_hud_created))
+
+	update_hudtext()
+	RegisterSignal(mob_override, COMSIG_LIVING_HEALTH_UPDATE, PROC_REF(update_hudtext))
+
+/datum/antagonist/hemoparasite/proc/on_hud_created(datum/source)
+	SIGNAL_HANDLER
+
+	var/datum/hud/hud = owner.current.hud_used
+
+	blood_hud = new(null, hud)
+	hud.infodisplay += blood_hud
+
+	hud.show_hud(hud.hud_version)
+
+/datum/antagonist/hemoparasite/proc/update_hudtext(datum/source)
+	SIGNAL_HANDLER
+	blood_hud?.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
+
+/datum/antagonist/hemoparasite/remove_innate_effects(mob/living/mob_override = owner.current)
+	UnregisterSignal(mob_override, list(COMSIG_MOB_HUD_CREATED, COMSIG_LIVING_HEALTH_UPDATE))
+
+	if(mob_override.hud_used)
+		var/datum/hud/hud_used = mob_override.hud_used
+
+		hud_used.infodisplay -= blood_hud
+		QDEL_NULL(blood_hud)
 
 /// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
