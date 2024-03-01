@@ -118,7 +118,7 @@
 	/// The "ears" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/ears/hemoparasite/ears
 
-	var/atom/movable/screen/ling/chems/blood_hud //todo use correct type
+	var/atom/movable/screen/hemoparasite/blood/blood_hud //todo use correct type
 
 /datum/antagonist/hemoparasite/New()
 	. = ..()
@@ -161,7 +161,7 @@
 	if(mob_override.hud_used)
 		var/datum/hud/hud_used = mob_override.hud_used
 
-		blood_hud = new /atom/movable/screen/ling/chems(null, hud_used)
+		blood_hud = new(null, hud_used)
 		hud_used.infodisplay += blood_hud
 
 		hud_used.show_hud(hud_used.hud_version)
