@@ -112,13 +112,6 @@
 		),
 	)
 
-	/// Associative list of initialized action datums sorted by state.
-<<<<<<< HEAD
-	var/initialized_actions = FALSE
-=======
-	var/list/initialized_actions = list()
->>>>>>> b8b78f7d6e107ca3c33afea941054dd19e7c9345
-
 	/// The "eyes" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/eyes/night_vision/hemoparasite/eyes
 
