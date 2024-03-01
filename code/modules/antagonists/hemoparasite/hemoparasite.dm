@@ -160,8 +160,8 @@
 /datum/antagonist/hemoparasite/proc/init_actions()
 	var/list/initialized_actions_by_type = list()
 	initialized_actions = state_actions.Copy()
-	for (var/state_key in initialized_actions)
-		for (var/path in initialized_actions[state_key])
+	for (var/state_key as anything in initialized_actions)
+		for (var/path as anything in initialized_actions[state_key])
 			initialized_actions[state_key] -= path
 			var/action = initialized_actions_by_type[path]
 			if (!action)
