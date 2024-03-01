@@ -65,7 +65,7 @@
 	var/damage = host.getBruteLoss() + host.getFireLoss()
 
 	if (damage <= 0 && host.all_wounds.len <= 0)
-		hemoparasite.adjust_host_blood_amount(-bloodloss * seconds_between_ticks)
+		hemoparasite.set_host_blood_percentage(max(hemoparasite.get_host_blood_percentage() - bloodloss * seconds_between_ticks, 0.04)) // make sure we don't kill ourselves
 		return
 
 	var/potency = 3 + damage * 0.01 * seconds_between_ticks

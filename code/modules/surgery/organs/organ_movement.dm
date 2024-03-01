@@ -38,6 +38,8 @@
 	mob_remove(organ_owner, special, movement_flags)
 	bodypart_remove(limb_owner = organ_owner, movement_flags = movement_flags)
 
+	SEND_SIGNAL(src, COMSIG_ORGAN_POST_REMOVE, organ_owner, special, movement_flags)
+
 	return TRUE
 
 /*

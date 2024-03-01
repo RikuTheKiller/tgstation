@@ -26,7 +26,7 @@
 /datum/component/cover_organ/RegisterWithParent()
 	. = ..()
 	RegisterSignal(parent, COMSIG_ORGAN_INSERT, PROC_REF(on_insert))
-	RegisterSignal(parent, COMSIG_ORGAN_REMOVE, PROC_REF(on_remove))
+	RegisterSignal(parent, COMSIG_ORGAN_POST_REMOVE, PROC_REF(on_remove))
 	RegisterSignal(parent, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
 	if (show_on_examine)
 		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, PROC_REF(on_examine))
@@ -54,16 +54,17 @@
 	covered.forceMove(cover)
 	RegisterSignal(covered, COMSIG_QDELETING, PROC_REF(clear_covered))
 
-/datum/component/cover_organ/proc/on_remove(datum/source, mob/living/carbon/organ_owner, special, movement_flags)
+/datum/component/cover_organ/proc/on_remove(datum/source, mob/living/carbon/old_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
-	if ((movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
+	// not sure if parent can be deleted like that but this is a signal handler for the same proc possibly doing the deletion, can't be too safe
+	if (!parent || (movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
 		return
 
-	covered.Insert(organ_owner, special = TRUE)
+	covered.Insert(old_owner, special = TRUE)
 	covered.organ_flags |= ORGAN_FROZEN
-
-	return COMPONENT_ORGAN_CANCEL_REMOVE // inserting the covered organ removes us, so this would be removing something that isn't even inside the mob anymore
+	UnregisterSignal(covered, COMSIG_QDELETING)
+	covered = null
 
 /datum/component/cover_organ/proc/on_attackby(datum/source, obj/item/item, mob/living/user, params)
 	SIGNAL_HANDLER

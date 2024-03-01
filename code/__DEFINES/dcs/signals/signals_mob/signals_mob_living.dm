@@ -10,8 +10,6 @@
 #define COMSIG_ORGAN_REMOVED "organ_removed"
 /// Called when an organ is being regenerated with a new copy in species regenerate_organs (obj/item/organ/replacement)
 #define COMSIG_ORGAN_BEING_REPLACED "organ_being_replaced"
-/// Called after an organ has been replaced in mob_insert() (mob/living/old_owner)
-#define COMSIG_ORGAN_REPLACED "organ_replaced"
 /// Called when an organ gets surgically removed (mob/living/user, mob/living/carbon/old_owner, target_zone, obj/item/tool)
 #define COMSIG_ORGAN_SURGICALLY_REMOVED "organ_surgically_removed"
 /// Called when an organ is inserted via Insert(), but before the insertion process is done (mob/living/carbon/receiver, special, movement_flags)
@@ -22,6 +20,8 @@
 #define COMSIG_ORGAN_REMOVE "organ_remove"
 	/// Cancel organ Remove() proc
 	#define COMPONENT_ORGAN_CANCEL_REMOVE (1<<0)
+/// Called *after* an organ has been removed through the Remove() proc, at this point the organ is most likely on the floor or destroyed, but surely you've handled both, right? (mob/living/carbon/old_owner, special, movement_flags)
+#define COMSIG_ORGAN_POST_REMOVE "organ_replaced"
 
 ///from base of mob/update_transform()
 #define COMSIG_LIVING_POST_UPDATE_TRANSFORM "living_post_update_transform"
