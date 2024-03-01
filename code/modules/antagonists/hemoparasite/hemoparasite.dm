@@ -320,6 +320,7 @@
 
 /datum/antagonist/hemoparasite/proc/on_host_death(mob/living/source, gibbed)
 	SIGNAL_HANDLER
+
 	if(gibbed)
 		leave_host(silent = TRUE, disable_animation = TRUE)
 		return
