@@ -88,7 +88,7 @@
 		TRAIT_STABLEHEART,
 	)
 
-	/// Associative typecache of states to lists of action types. Use initialized_actions for accessing them instead.
+	/// Associative typecache of states to lists of action types.
 	var/list/state_actions = list(
 		HEMOPARASITE_STATE_SOLO = list(
 			/datum/action/cooldown/hemoparasite/enter
@@ -128,8 +128,7 @@
 /datum/antagonist/hemoparasite/on_gain()
 	eyes = new()
 	ears = new()
-	if (!initialized_actions)
-		init_actions()
+	init_actions()
 	if (istype(owner.current, /mob/living/basic/hemoparasite))
 		parasite = owner.current
 		swap_state(HEMOPARASITE_STATE_SOLO)
