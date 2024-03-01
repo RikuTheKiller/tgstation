@@ -126,19 +126,6 @@
 	allowed_antags = typecacheof(allowed_antags)
 	disallowed_quirks = typecacheof(disallowed_quirks)
 
-/datum/antagonist/hemoparasite/proc/swap_state(state)
-	if(current_state == state)
-		return
-
-	for(var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
-		former.Remove(owner.current)
-
-	current_state = state
-	var/list/actions = initialized_actions[current_state]
-
-	for(var/datum/action/action as anything in actions)
-		action.Grant(owner.current)
-
 /datum/antagonist/hemoparasite/on_gain()
 	eyes = new()
 	ears = new()
@@ -160,6 +147,15 @@
 
 	return ..()
 
+/datum/antagonist/hemoparasite/on_removal()
+	if (host)
+		for (var/datum/action/cooldown/hemoparasite/former in host.actions)
+			former.Remove(former)
+	for (var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
+		former.Remove(former)
+	QDEL_LIST_ASSOC(initialized_actions)
+	return ..()
+
 /// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
 	var/list/initialized_actions_by_type = list()
@@ -173,14 +169,18 @@
 				initialized_actions_by_type[path] = action
 			initialized_actions[state_key] += action
 
-/datum/antagonist/hemoparasite/on_removal()
-	if (host)
-		for (var/datum/action/cooldown/hemoparasite/former in host.actions)
-			former.Remove(former)
-	for (var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
-		former.Remove(former)
-	QDEL_LIST_ASSOC(initialized_actions)
-	return ..()
+/datum/antagonist/hemoparasite/proc/swap_state(state)
+	if(current_state == state)
+		return
+
+	for(var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
+		former.Remove(owner.current)
+
+	current_state = state
+	var/list/actions = initialized_actions[current_state]
+
+	for(var/datum/action/action as anything in actions)
+		action.Grant(owner.current)
 
 /// Returns whether or not the hemoparasite is actually *in* a host. Having a host doesn't mean you're inside them.
 /datum/antagonist/hemoparasite/proc/is_in_host()
