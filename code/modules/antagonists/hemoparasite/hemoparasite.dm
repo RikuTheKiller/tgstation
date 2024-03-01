@@ -216,12 +216,13 @@
 
 	set_host_blood_amount(get_host_blood_amount() + get_blood_amount())
 
+	RegisterSignal(host, COMSIG_LIVING_DEATH, on_host_death)
+
 	return TRUE
 
 /datum/antagonist/hemoparasite/proc/stop_host_control()
 	if (isnull(host))
 		CRASH("[parasite] ([owner]) attempted to stop controlling a nonexistent host.")
-	UnregisterSignal(host, COMSIG_LIVING_DEATH)
 	swap_state(HEMOPARASITE_STATE_DORMANT)
 	REMOVE_TRAITS_IN(host, BLOODCONTROL_TRAIT)
 	return_host_senses()
@@ -267,6 +268,7 @@
 		host.death()
 
 	swap_state(HEMOPARASITE_STATE_SOLO)
+	UnregisterSignal(host, COMSIG_LIVING_DEATH)
 
 	host = null
 
@@ -324,7 +326,8 @@
 	if(gibbed)
 		leave_host(silent = TRUE, disable_animation = TRUE)
 		return
-	stop_host_control()
+	if (is_in_host() && state != HEMOPARASITE_STATE_DORMANT)
+		stop_host_control()
 
 /// Replaces the current host's senses with our own. Grows new (unfinished/damaged) ones if they're somehow removed.
 /datum/antagonist/hemoparasite/proc/replace_host_senses()
