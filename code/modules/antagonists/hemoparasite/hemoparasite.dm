@@ -89,7 +89,7 @@
 	)
 
 	/// Associative typecache of states to lists of action types. Use initialized_actions for accessing them instead.
-	var/static/list/state_actions = list(
+	var/list/state_actions = list(
 		HEMOPARASITE_STATE_SOLO = list(
 			/datum/action/cooldown/hemoparasite/enter
 		),
@@ -113,7 +113,7 @@
 	)
 
 	/// Associative list of initialized action datums sorted by state.
-	var/list/initialized_actions
+	var/initialized_actions = FALSE
 
 	/// The "eyes" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/eyes/night_vision/hemoparasite/eyes
@@ -129,7 +129,7 @@
 /datum/antagonist/hemoparasite/on_gain()
 	eyes = new()
 	ears = new()
-	if (isnull(initialized_actions))
+	if (!initialized_actions)
 		init_actions()
 	if (istype(owner.current, /mob/living/basic/hemoparasite))
 		parasite = owner.current
@@ -153,21 +153,23 @@
 			former.Remove(former)
 	for (var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
 		former.Remove(former)
-	QDEL_LIST_ASSOC(initialized_actions)
+	QDEL_LIST_ASSOC(state_actions)
 	return ..()
 
 /// Initializes the actions of the hemoparasite.
 /datum/antagonist/hemoparasite/proc/init_actions()
+	initialized_actions = TRUE
 	var/list/initialized_actions_by_type = list()
-	initialized_actions = state_actions.Copy()
-	for (var/state_key in initialized_actions)
-		for (var/path in initialized_actions[state_key])
-			initialized_actions[state_key] -= path
+	for (var/state_key in state_actions)
+		for (var/path in state_actions[state_key])
+			if(!ispath(path))
+				continue
+			state_actions[state_key] -= path
 			var/action = initialized_actions_by_type[path]
 			if (!action)
 				action = new path(owner)
 				initialized_actions_by_type[path] = action
-			initialized_actions[state_key] += action
+			state_actions[state_key] += action
 
 /datum/antagonist/hemoparasite/proc/swap_state(state)
 	if(current_state == state)
@@ -177,7 +179,7 @@
 		former.Remove(owner.current)
 
 	current_state = state
-	var/list/actions = initialized_actions[current_state]
+	var/list/actions = state_actions[current_state]
 
 	for(var/datum/action/action as anything in actions)
 		action.Grant(owner.current)
