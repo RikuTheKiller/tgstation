@@ -109,7 +109,7 @@
 		HEMOPARASITE_STATE_SYMBIOSIS = list(
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
 			/datum/action/cooldown/hemoparasite/regen
-		)
+		),
 	)
 
 	/// Associative list of initialized action datums sorted by state.
