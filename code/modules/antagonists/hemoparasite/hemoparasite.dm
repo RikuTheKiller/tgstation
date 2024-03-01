@@ -187,6 +187,7 @@
 
 /datum/antagonist/hemoparasite/proc/update_hudtext(datum/source)
 	SIGNAL_HANDLER
+
 	blood_hud?.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
 
 /datum/antagonist/hemoparasite/remove_innate_effects(mob/living/mob_override = owner.current)
