@@ -1,6 +1,7 @@
 /datum/action/cooldown/hemoparasite/regen
 	name = "Regeneration"
 	desc = "Rapidly consume yourself to heal your host. More efficient if your host is dead."
+	button_icon_state = "blood_mend"
 
 /datum/action/cooldown/hemoparasite/regen/Activate(atom/target)
 	. = ..()
