@@ -216,7 +216,7 @@
 
 	set_host_blood_amount(get_host_blood_amount() + get_blood_amount())
 
-	RegisterSignal(host, COMSIG_LIVING_DEATH, on_host_death)
+	RegisterSignal(host, COMSIG_LIVING_DEATH, PROC_REF(on_host_death))
 
 	return TRUE
 
@@ -326,7 +326,7 @@
 	if(gibbed)
 		leave_host(silent = TRUE, disable_animation = TRUE)
 		return
-	if (is_in_host() && state != HEMOPARASITE_STATE_DORMANT)
+	if (is_in_host() && current_state != HEMOPARASITE_STATE_DORMANT)
 		stop_host_control()
 
 /// Replaces the current host's senses with our own. Grows new (unfinished/damaged) ones if they're somehow removed.
