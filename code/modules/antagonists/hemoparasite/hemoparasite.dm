@@ -183,6 +183,8 @@
 
 	hud.show_hud(hud.hud_version)
 
+	update_hudtext()
+
 /datum/antagonist/hemoparasite/proc/update_hudtext(datum/source)
 	SIGNAL_HANDLER
 	if(isnull(blood_hud))
