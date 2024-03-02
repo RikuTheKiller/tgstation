@@ -220,18 +220,18 @@
 				initialized_actions_by_type[path] = action
 			state_actions[state_key] += action
 
-/datum/antagonist/hemoparasite/proc/swap_state(state)
+/datum/antagonist/hemoparasite/proc/swap_state(state, from = owner.current, give_to = owner.current)
 	if(current_state == state)
 		return
 
-	for(var/datum/action/cooldown/hemoparasite/former in owner.current.actions)
-		former.Remove(owner.current)
+	for(var/datum/action/cooldown/hemoparasite/former in from.actions)
+		former.Remove(from)
 
 	current_state = state
 	var/list/actions = state_actions[current_state]
 
 	for(var/datum/action/action as anything in actions)
-		action.Grant(owner.current)
+		action.Grant(give_to) // Reminder that if give_to is not the owner of the action it will be removed and then granted to the new owner
 
 /// Returns whether or not the hemoparasite is actually *in* a host. Having a host doesn't mean you're inside them.
 /datum/antagonist/hemoparasite/proc/is_in_host()
@@ -274,15 +274,14 @@
 /datum/antagonist/hemoparasite/proc/stop_host_control()
 	if (isnull(host))
 		CRASH("[parasite] ([owner]) attempted to stop controlling a nonexistent host.")
-	swap_state(HEMOPARASITE_STATE_DORMANT)
 	REMOVE_TRAITS_IN(host, BLOODCONTROL_TRAIT)
 	return_host_senses()
-	if(host.mind != owner)
-		return
-	owner.transfer_to(parasite)
-	if(host_mind)
-		host_mind.transfer_to(host)
+	if(host.mind == owner)
+		owner.transfer_to(parasite)
+		host_mind?.transfer_to(host)
 		host_mind = null
+
+	swap_state(HEMOPARASITE_STATE_DORMANT)
 
 /**
  * Causes the parasite to leave it's current host with an animation.
@@ -412,7 +411,7 @@
 /// Returns the current host's senses back to their own.
 /datum/antagonist/hemoparasite/proc/return_host_senses()
 	if (host)
-		eyes.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
-		ears.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
-	eyes.forceMove(parasite)
-	ears.forceMove(parasite)
+		eyes?.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
+		ears?.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
+	eyes?.forceMove(parasite)
+	ears?.forceMove(parasite)
