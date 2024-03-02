@@ -18,11 +18,7 @@
 
 	var/mob/living/carbon/human/host = hemoparasite.host
 
-	owner.visible_message(
-		message = span_danger("[host] begins to turn pale!"),
-		self_message = span_notice("You prepare to emerge from your host..."),
-		ignored_mobs = host
-	)
+	to_chat(owner, span_notice("You prepare to emerge from your host..."))
 
 	if (owner != host)
 		to_chat(host, span_userdanger("Your skin begins to turn pale!")) // symbiosis
@@ -32,9 +28,8 @@
 	host.set_jitter_if_lower(50 SECONDS)
 
 	if (!do_delay(owner, 2 SECONDS, target = host))
-		owner.visible_message(span_notice("[host] stops turning pale and recovers."), ignored_mobs = host)
 		if (owner != host)
-			to_chat(host, span_boldnotice("Your skin stops turning pale and recovers!"))
+			to_chat(host, span_boldnotice("Your skin stops turning pale!"))
 		return FALSE
 
 	playsound(owner, 'sound/effects/butcher.ogg', 25, TRUE)

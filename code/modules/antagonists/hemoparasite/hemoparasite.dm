@@ -99,14 +99,16 @@
 			/datum/action/cooldown/hemoparasite/delayed/subjugate
 		),
 		HEMOPARASITE_STATE_SUBJUGATION = list(
+			/datum/action/cooldown/hemoparasite/delayed/relinquish,
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
 			/datum/action/cooldown/hemoparasite/regen
 		),
 		HEMOPARASITE_STATE_MARIONETTE = list(
-			/datum/action/cooldown/hemoparasite/delayed/emerge,
+			/datum/action/cooldown/hemoparasite/delayed/relinquish, // emerge isn't supposed to be here, that's intentional
 			/datum/action/cooldown/hemoparasite/regen
 		),
 		HEMOPARASITE_STATE_SYMBIOSIS = list(
+			/datum/action/cooldown/hemoparasite/delayed/relinquish,
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
 			/datum/action/cooldown/hemoparasite/regen
 		),
