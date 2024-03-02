@@ -127,6 +127,11 @@
 	allowed_antags = typecacheof(allowed_antags)
 	disallowed_quirks = typecacheof(disallowed_quirks)
 
+/datum/antagonist/hemoparasite/forge_objectives()
+	var/datum/objective/survive/survive = new
+	survive.owner = owner
+	objectives += survive
+
 /datum/antagonist/hemoparasite/on_gain()
 	eyes = new()
 	ears = new()
@@ -220,7 +225,7 @@
 				initialized_actions_by_type[path] = action
 			state_actions[state_key] += action
 
-/datum/antagonist/hemoparasite/proc/swap_state(state, from = owner.current, give_to = owner.current)
+/datum/antagonist/hemoparasite/proc/swap_state(state, mob/living/from = owner.current, mob/living/give_to = owner.current)
 	if(current_state == state)
 		return
 
