@@ -88,7 +88,7 @@
 		TRAIT_STABLEHEART,
 	)
 
-	/// Associative typecache of states to lists of action types.
+	/// Associative list of states to lists of action typepaths which on init get turned into action references
 	var/list/state_actions = list(
 		HEMOPARASITE_STATE_SOLO = list(
 			/datum/action/cooldown/hemoparasite/enter
@@ -118,7 +118,7 @@
 	/// The "ears" of the hemoparasite. These can get damaged while in a host.
 	var/obj/item/organ/internal/ears/hemoparasite/ears
 
-	var/atom/blood_hud //todo use correct type
+	var/atom/movable/screen/hemoparasite/blood/blood_hud //todo use correct type
 
 /datum/antagonist/hemoparasite/New()
 	. = ..()
@@ -161,7 +161,7 @@
 	if(mob_override.hud_used)
 		var/datum/hud/hud_used = mob_override.hud_used
 
-		blood_hud = new /atom/movable/screen/ling/chems(null, hud_used)
+		blood_hud = new(null, hud_used)
 		hud_used.infodisplay += blood_hud
 
 		hud_used.show_hud(hud_used.hud_version)
@@ -183,8 +183,14 @@
 
 /datum/antagonist/hemoparasite/proc/update_hudtext(datum/source)
 	SIGNAL_HANDLER
+	if(isnull(blood_hud))
+		return
+	if(!isnull(blood_hud.progress_overlay))
+		blood_hud.cut_overlay(blood_hud.progress_overlay)
 
-	blood_hud?.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
+	blood_hud.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
+	var/percentage = (get_blood_amount() / get_max_blood()) * 100
+	blood_hud.progress_overlay = blood_hud.add_overlay("bloodmeter_[round(percentage, 10)]")
 
 /datum/antagonist/hemoparasite/remove_innate_effects(mob/living/mob_override = owner.current)
 	UnregisterSignal(mob_override, list(COMSIG_MOB_HUD_CREATED, COMSIG_LIVING_HEALTH_UPDATE))
