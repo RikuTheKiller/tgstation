@@ -187,9 +187,11 @@
 		return
 
 	blood_hud.cut_overlays()
-	blood_hud.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
 	var/percentage = (get_blood_amount() / get_max_blood()) * 100
-	blood_hud.add_overlay("bloodmeter_[round(percentage, 10)]") //potentially the maptext could be on this overlay so it doesnt show below it but i think it looks cool
+	var/mutable_appearance/newer_overlay = mutable_appearance(blood_hud.icon, "bloodmeter_[round(percentage, 10)]")
+	newer_overlay.maptext_width = 64
+	newer_overlay.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#8b2626'>[round(get_blood_amount())]/[round(get_max_blood())]</font></div>")
+	blood_hud.add_overlay(newer_overlay)
 
 /datum/antagonist/hemoparasite/remove_innate_effects(mob/living/mob_override = owner.current)
 	UnregisterSignal(mob_override, list(COMSIG_MOB_HUD_CREATED, COMSIG_LIVING_HEALTH_UPDATE))
