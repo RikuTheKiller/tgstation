@@ -108,6 +108,6 @@
 	icon_living = "large"
 	small = FALSE
 
-	to_chat(src, span_boldwarning("You increase in size as you grow a new outer membrane."))
+	to_chat(src, span_boldnotice("You increase in size as you grow a new outer membrane."))
 
 	return
