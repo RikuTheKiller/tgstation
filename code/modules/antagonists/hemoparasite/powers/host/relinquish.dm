@@ -2,7 +2,7 @@
 	name = "Relinquish Control"
 	desc = "Stop controlling your host, allowing their lifeless body to drop dead to the ground once more. This is much slower in marionette."
 
-/datum/action/cooldown/hemoparasite/delayed/relinquish/Trigger(trigger_flags, atom/target)
+/datum/action/cooldown/hemoparasite/delayed/relinquish/Activate(atom/target)
 	. = ..()
 
 	var/mob/living/carbon/human/host = hemoparasite.host
@@ -22,3 +22,5 @@
 		return FALSE
 
 	host.death() // yep we literally just murder them lmao (on_host_death handles the rest)
+
+	return TRUE
