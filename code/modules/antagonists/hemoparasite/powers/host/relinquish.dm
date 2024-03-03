@@ -21,5 +21,5 @@
 			to_chat(host, span_boldnotice("You feel much better again!"))
 		return FALSE
 
-	stop_host_control()
+	hemoparasite.stop_host_control()
 	host.death()
