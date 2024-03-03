@@ -21,6 +21,5 @@
 			to_chat(host, span_boldnotice("You feel much better again!"))
 		return FALSE
 
-	host.death() // yep we literally just murder them lmao (on_host_death handles the rest)
-
-	return TRUE
+	hemoparasite.stop_host_control()
+	host.death()
