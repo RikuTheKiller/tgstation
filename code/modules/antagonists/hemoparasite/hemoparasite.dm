@@ -387,7 +387,7 @@
 
 /// Used to register created senses (eyes, ears) to the hemoparasite.
 /datum/antagonist/hemoparasite/proc/register_sense(obj/item/organ/internal/sense)
-	if (istype(sense, obj/item/organ/internal/eyes))
+	if (istype(sense, /obj/item/organ/internal/eyes))
 		eyes = sense
 	else
 		ears = sense
@@ -396,7 +396,7 @@
 
 /// Used to unregister created senses (eyes, ears) from the hemoparasite.
 /datum/antagonist/hemoparasite/proc/unregister_sense(obj/item/organ/internal/sense)
-	if (istype(sense, obj/item/organ/internal/eyes))
+	if (istype(sense, /obj/item/organ/internal/eyes))
 		eyes = null
 	else
 		ears = null
