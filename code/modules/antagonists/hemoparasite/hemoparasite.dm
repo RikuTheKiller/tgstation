@@ -280,6 +280,7 @@
 	if (isnull(host))
 		CRASH("[parasite] ([owner]) attempted to stop controlling a nonexistent host.")
 	REMOVE_TRAITS_IN(host, BLOODCONTROL_TRAIT)
+	UnregisterSignal(host, COMSIG_LIVING_ADJUST_STANDARD_DAMAGE_TYPES)
 	return_host_senses()
 	if(host.mind == owner)
 		owner.transfer_to(parasite)
@@ -364,6 +365,19 @@
 	control_host()
 
 	swap_state(HEMOPARASITE_STATE_MARIONETTE)
+	RegisterSignals(host, COMSIG_LIVING_ADJUST_STANDARD_DAMAGE_TYPES, PROC_REF(marionette_damaged))
+
+/datum/antagonist/hemoparasite/proc/marionette_damaged(mob/living/our_mob, type, amount, forced)
+	SIGNAL_HANDLER
+	if (forced)
+		return
+	if(isnull(host))
+		UnregisterSignal(our_mob, COMSIG_LIVING_ADJUST_STANDARD_DAMAGE_TYPES)
+		return
+	amount *= our_mob.get_damage_mod(type)
+
+	adjust_blood_amount(-amount * 2)
+
 
 /// Makes the hemoparasite control its host. Not sanity checked.
 /datum/antagonist/hemoparasite/proc/control_host()
