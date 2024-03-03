@@ -58,7 +58,7 @@
 	SIGNAL_HANDLER
 
 	// not sure if parent can be deleted like that but this is a signal handler for the same proc possibly doing the deletion, can't be too safe
-	if (!parent || (movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
+	if (QDELING(parent) || (movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
 		return
 
 	covered.Insert(old_owner, special = TRUE)

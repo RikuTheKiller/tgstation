@@ -1908,10 +1908,6 @@
 "qQ" = (
 /turf/open/floor/engine,
 /area/station/cargo/miningoffice)
-"rh" = (
-/obj/effect/mob_spawn/corpse/human/assistant,
-/turf/open/floor/iron,
-/area/station/commons/storage/primary)
 "rn" = (
 /obj/structure/cable,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden{
@@ -2118,10 +2114,6 @@
 /obj/structure/cable,
 /turf/open/floor/iron,
 /area/station/medical/chemistry)
-"De" = (
-/mob/living/basic/hemoparasite,
-/turf/open/floor/iron,
-/area/station/commons/storage/primary)
 "Df" = (
 /obj/machinery/light/directional/east,
 /obj/item/integrated_circuit/loaded/hello_world,
@@ -7733,7 +7725,7 @@ dJ
 dD
 dJ
 dI
-De
+dJ
 XZ
 dJ
 dJ
@@ -7825,7 +7817,7 @@ dJ
 dJ
 dJ
 dI
-rh
+dJ
 dJ
 dJ
 dJ
