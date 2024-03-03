@@ -65,8 +65,8 @@
 	var/burn = host.getFireLoss()
 	var/damage = brute + burn
 
-	if (damage > 0)
-
+	if (damage < 0)
+		return
 
 	var/potency = 3 + damage * 0.01
 

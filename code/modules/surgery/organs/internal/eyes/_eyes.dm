@@ -775,7 +775,7 @@
 	. = ..()
 
 	if (zone == BODY_ZONE_PRECISE_EYES && !(owner.check_obscured_slots() & ITEM_SLOT_EYES)) // make sure we aren't in the chest (only happens if the head is dismembered and then it's already obvious something is going on)
-		examine_list += span_boldwarning("[owner.p_Their()] eyes [contents?.len ? "are covered" : "have been replaced"] by red membranes!")
+		examine_list += span_boldwarning("[owner.p_Their()] eyes [!contents?.len ? "are covered" : "have been replaced"] by red membranes!")
 
 /obj/item/organ/internal/eyes/night_vision/hemoparasite/on_life(seconds_per_tick, times_fired)
 	. = ..()
