@@ -1,7 +1,6 @@
 /datum/action/cooldown/hemoparasite/blood_barrage
 	name = "Blood Barrage"
 	desc = "Continuously turn yourself into infectious payloads to hurl at your (unfortunate) target."
-	cooldown_time = 10 SECONDS
 
 	/// The ranged attack component used alongside the autofire component. Saved for later deletion.
 	var/datum/component/ranged_attacks/ranged
@@ -14,20 +13,30 @@
 	if (!.)
 		return
 
-	/*ranged = owner.AddComponent(
+	ranged = owner.AddComponent(
 		/datum/component/ranged_attacks, \
 		projectile_type = /obj/projectile/hemoparasite, \
-		projectile_sound = projectilesound, \
-		cooldown_time = ranged_cooldown, \
-		burst_shots = burst_shots, \
-	)*/
-	fullauto = owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2, src)
+		projectile_sound = 'sound/effects/wounds/blood3.ogg', \
+		cooldown_time = 0.2 SECONDS, \
+	)
+	fullauto = owner.AddComponent(/datum/component/ranged_mob_full_auto/blood_barrage, 0.2 SECONDS, src)
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Remove(mob/removed_from)
 	. = ..()
 
+	clear_components()
+
+/datum/action/cooldown/hemoparasite/blood_barrage/Destroy()
+	. = ..()
+
+	clear_components()
+
+/datum/action/cooldown/hemoparasite/blood_barrage/proc/clear_components()
 	qdel(ranged)
-	qdel(fullauto)
+
+	if (fullauto)
+		fullauto.barrage = null
+		QDEL_NULL(fullauto)
 
 /datum/component/ranged_mob_full_auto/blood_barrage
 
@@ -50,4 +59,4 @@
 
 /datum/component/ranged_mob_full_auto/blood_barrage/stop_firing()
 	. = ..()
-	barrage.StartCooldown()
+	barrage.StartCooldown(10 SECONDS)

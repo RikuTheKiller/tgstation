@@ -7,6 +7,8 @@
 	name = "hemoparasitic glob"
 	desc = "A completely normal glob of blood. Clearly."
 	icon_state = "blood_barrage"
+	damage = 15
+	armour_penetration = 10
 
 /obj/projectile/hemoparasite/bullet
 	name = "hemoparasitic bullet"

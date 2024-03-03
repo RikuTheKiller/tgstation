@@ -91,7 +91,8 @@
 	/// Associative list of states to lists of action typepaths which on init get turned into action references
 	var/list/state_actions = list(
 		HEMOPARASITE_STATE_SOLO = list(
-			/datum/action/cooldown/hemoparasite/enter
+			/datum/action/cooldown/hemoparasite/enter,
+			/datum/action/cooldown/hemoparasite/blood_barrage
 		),
 		HEMOPARASITE_STATE_DORMANT = list(
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
@@ -384,10 +385,40 @@
 	if (is_in_host() && current_state != HEMOPARASITE_STATE_DORMANT)
 		stop_host_control()
 
+/// Used to register created senses (eyes, ears) to the hemoparasite.
+/datum/antagonist/hemoparasite/proc/register_sense(obj/item/organ/internal/sense)
+	if (istype(sense, obj/item/organ/internal/eyes))
+		eyes = sense
+	else
+		ears = sense
+
+	RegisterSignal(sense, COMSIG_ORGAN_REMOVED, PROC_REF(on_sense_removed))
+
+/// Used to unregister created senses (eyes, ears) from the hemoparasite.
+/datum/antagonist/hemoparasite/proc/unregister_sense(obj/item/organ/internal/sense)
+	if (istype(sense, obj/item/organ/internal/eyes))
+		eyes = null
+	else
+		ears = null
+
+	UnregisterSignal(sense, COMSIG_ORGAN_REMOVED)
+
+/datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, special, movement_flags)
+	SIGNAL_HANDLER
+
+	if (movement_flags & UNCOVER_ORGAN)
+		return
+
+	unregister_sense(source)
+
 /// Replaces the current host's senses with our own. Grows new (unfinished/damaged) ones if they're somehow removed.
 /datum/antagonist/hemoparasite/proc/replace_host_senses()
 	if (!host)
 		return
+
+	for (var/obj/item/organ/internal/sense as anything in list(eyes, ears))
+		if (!sense)
+			sense = new()
 
 	if (eyes?.loc != parasite && (!eyes?.owner || eyes.owner != host))
 		eyes = new()
