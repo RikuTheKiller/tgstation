@@ -1,6 +1,6 @@
 /datum/action/cooldown/hemoparasite/blood_barrage
 	name = "Blood Barrage"
-	desc = "Continuously turn yourself into infectious payloads to hurl at your (unfortunate) target."
+	desc = "Continuously turn yourself into infectious payloads to hurl at your target."
 
 	/// The ranged attack component used alongside the autofire component. Saved for later deletion.
 	var/datum/component/ranged_attacks/ranged
