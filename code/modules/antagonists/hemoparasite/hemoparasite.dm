@@ -407,7 +407,6 @@
 		ears = sense
 
 	RegisterSignal(sense, COMSIG_ORGAN_REMOVED, PROC_REF(on_sense_removed))
-	RegisterSignal(sense, COMSIG_QDELETING, PROC_REF(unregister_sense))
 
 /// Used to unregister created senses (eyes, ears) from the hemoparasite.
 /datum/antagonist/hemoparasite/proc/unregister_sense(obj/item/organ/internal/sense)
@@ -417,13 +416,18 @@
 		ears = null
 
 	UnregisterSignal(sense, COMSIG_ORGAN_REMOVED)
-	UnregisterSignal(sense, COMSIG_QDELETING)
 
-/datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, special, movement_flags)
+/datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, old_owner, special, movement_flags)
 	SIGNAL_HANDLER
+
+	to_chat(world, span_notice("1"))
 
 	if (movement_flags & UNCOVER_ORGAN)
 		return
+
+	to_chat(world, span_notice("2"))
+
+	unregister_sense(source)
 
 	var/obj/item/organ/internal/new_sense = new source.type()
 
@@ -434,8 +438,10 @@
 	to_chat(owner.current, span_warning("You grow a pair of unfinished [new_sense] in place of the ones you lost."))
 
 	if (QDELETED(host))
+		to_chat(world, span_notice("3"))
 		new_sense.forceMove(parasite)
 	else
+		to_chat(world, span_notice("4"))
 		new_sense.Insert(host, special = TRUE)
 		host.visible_message(
 			message = span_bolddanger("[host] suddenly grows a pair of [new_sense] in place of their [new_sense.zone]!"),
