@@ -52,12 +52,12 @@
 	var/bloodloss = 0
 
 	if (host.getOxyLoss() > 0)
-		bloodloss += host.adjustOxyLoss(-2 * seconds_between_ticks) * 0.005 // -0.5% blood/s per point healed
+		bloodloss += host.adjustOxyLoss(-2 * seconds_between_ticks) * 0.005 // -0.5% blood per point healed per second
 		if (update)
 			to_chat(parasite, span_boldnotice("Your regeneration is reoxygenating your host."))
 
 	if (host.getToxLoss() > 0)
-		bloodloss += host.adjustToxLoss(-2 * seconds_between_ticks) * 0.005  // -0.5% blood/s per point healed
+		bloodloss += host.adjustToxLoss(-2 * seconds_between_ticks) * 0.005  // -0.5% blood per point healed per second
 		if (update)
 			to_chat(parasite, span_boldnotice("Your regeneration is detoxifying your host."))
 
