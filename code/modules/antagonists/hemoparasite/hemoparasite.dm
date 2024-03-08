@@ -407,6 +407,7 @@
 		ears = sense
 
 	RegisterSignal(sense, COMSIG_ORGAN_REMOVED, PROC_REF(on_sense_removed))
+	RegisterSignal(sense, COMSIG_QDELETING, PROC_REF(unregister_sense))
 
 /// Used to unregister created senses (eyes, ears) from the hemoparasite.
 /datum/antagonist/hemoparasite/proc/unregister_sense(obj/item/organ/internal/sense)
@@ -416,6 +417,7 @@
 		ears = null
 
 	UnregisterSignal(sense, COMSIG_ORGAN_REMOVED)
+	UnregisterSignal(sense, COMSIG_QDELETING)
 
 /datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, special, movement_flags)
 	SIGNAL_HANDLER
@@ -423,45 +425,38 @@
 	if (movement_flags & UNCOVER_ORGAN)
 		return
 
-	unregister_sense(source)
+	var/obj/item/organ/internal/new_sense = new source.type()
 
-/// Replaces the current host's senses with our own. Grows new (unfinished/damaged) ones if they're somehow removed.
+	register_sense(new_sense)
+
+	new_sense.set_organ_damage(new_sense.maxHealth) // start out failing so you can't rip out damaged ones to grow new healthy ones
+
+	to_chat(owner.current, span_warning("You grow a pair of unfinished [new_sense] in place of the ones you lost."))
+
+	if (QDELETED(host))
+		new_sense.forceMove(parasite)
+	else
+		new_sense.Insert(host, special = TRUE)
+		host.visible_message(
+			message = span_bolddanger("[host] suddenly grows a pair of [new_sense] in place of their [new_sense.zone]!"),
+			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your [new_sense.zone]."),
+			blind_message = span_hear("You hear a loud and wet crunch."),
+			ignored_mobs = owner.current
+		)
+
+/// Replaces the current host's senses with our own. Not sanity checked.
 /datum/antagonist/hemoparasite/proc/replace_host_senses()
 	if (!host)
 		return
 
-	for (var/obj/item/organ/internal/sense as anything in list(eyes, ears))
-		if (!sense)
-			sense = new()
-
-	if (eyes?.loc != parasite && (!eyes?.owner || eyes.owner != host))
-		eyes = new()
-		eyes.apply_organ_damage(eyes.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		host.visible_message(
-			message = span_bolddanger("[host] suddenly grows a pair of [eyes] in place of their eyes!"),
-			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your eyes."),
-			blind_message = span_hear("You hear a loud and wet crunch."),
-			ignored_mobs = owner.current
-		)
-		to_chat(owner.current, span_warning("You grow a pair of unfinished [eyes] in place of the ones you lost."))
-	if (eyes?.loc != parasite && (!ears?.owner || ears.owner != host))
-		ears = new()
-		ears.apply_organ_damage(ears.maxHealth) // start out really damaged so you can't rip failing ones out to grow functioning ones
-		host.visible_message(
-			message = span_bolddanger("[host] suddenly grows a pair of [ears] in place of their ears!"),
-			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your ears."),
-			blind_message = span_hear("You hear a loud and wet crunch."),
-			ignored_mobs = owner.current
-		)
-		to_chat(owner.current, span_warning("You grow a pair of unfinished [ears] in place of the ones you lost."))
-
 	eyes.Insert(host, special = TRUE)
 	ears.Insert(host, special = TRUE)
 
-/// Returns the current host's senses back to their own.
+/// Returns the current host's senses back to their own. Not sanity checked.
 /datum/antagonist/hemoparasite/proc/return_host_senses()
 	if (host)
-		eyes?.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
-		ears?.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
-	eyes?.forceMove(parasite)
-	ears?.forceMove(parasite)
+		eyes.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
+		ears.Remove(host, special = TRUE, movement_flags = UNCOVER_ORGAN)
+
+	eyes.forceMove(parasite)
+	ears.forceMove(parasite)

@@ -2078,6 +2078,10 @@
 	},
 /turf/open/floor/iron,
 /area/station/science)
+"Bd" = (
+/obj/effect/mob_spawn/corpse/human,
+/turf/open/floor/iron,
+/area/station/commons/storage/primary)
 "BD" = (
 /obj/structure/closet/secure_closet/chief_medical{
 	locked = 0
@@ -2314,6 +2318,10 @@
 /obj/structure/cable,
 /turf/open/floor/iron,
 /area/station/medical/medbay)
+"NP" = (
+/mob/living/basic/hemoparasite,
+/turf/open/floor/iron,
+/area/station/commons/storage/primary)
 "NZ" = (
 /obj/machinery/rnd/production/protolathe/department,
 /turf/open/floor/iron,
@@ -7725,7 +7733,7 @@ dJ
 dD
 dJ
 dI
-dJ
+NP
 XZ
 dJ
 dJ
@@ -7817,7 +7825,7 @@ dJ
 dJ
 dJ
 dI
-dJ
+Bd
 dJ
 dJ
 dJ

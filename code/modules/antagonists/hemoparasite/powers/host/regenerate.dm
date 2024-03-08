@@ -65,26 +65,29 @@
 	var/burn = host.getFireLoss()
 	var/damage = brute + burn
 
-	if (damage < 0)
-		return
+	if (damage > 0)
+		var/potency = 3 + damage * 0.01
 
-	var/potency = 3 + damage * 0.01
+		if (host.stat == DEAD)
+			potency *= 1.5
 
-	bloodloss += 0.004 * potency * seconds_between_ticks // -0.4% blood per second per potency (-2% at 200 damage)
+		var/ratio = min(brute, burn) / max(brute, burn)
 
-	if (host.stat == DEAD)
-		potency *= 1.5
+		// -0.4% blood per second per potency (-2% at 200 damage)
+		bloodloss += host.adjustBruteLoss(-potency * (brute > burn ? 1 - ratio : ratio) * seconds_between_ticks) * 0.004
+		bloodloss += host.adjustFireLoss(-potency * (burn > brute ? 1 - ratio : ratio) * seconds_between_ticks) * 0.004
 
-	bloodloss += host.adjustBruteLoss(-potency * (burn > 0 ? brute / burn : brute) * seconds_between_ticks)
-	bloodloss += host.adjustFireLoss(-potency * (brute > 0 ? burn / brute : burn) * seconds_between_ticks)
+	for (var/datum/wound/wound in host.all_wounds)
+		wound.on_xadone((host.stat == DEAD ? 3 : 2) * seconds_between_ticks) // if i ever rework med/chem im going to fix whatever the fuck this is (skeleton/plasmeme livers use this too)
+		bloodloss += 0.001 * seconds_between_ticks // -0.1% blood per second per wound (this stacks up quick given a mangled enough corpse)
 
 	if (host.stat == DEAD)
 		bloodloss *= 0.5
 
 	hemoparasite.set_host_blood_percentage(max(hemoparasite.get_host_blood_percentage() - bloodloss, 0.04)) // make sure we don't kill ourselves
 
-	for (var/datum/wound/wound in host.all_wounds)
-		wound.on_xadone(host.stat == DEAD ? 3 : 2) // if i ever rework med/chem im going to fix whatever the fuck this is (skeleton/plasmeme livers use this too)
+	if (damage <= 0 && host.all_wounds.len <= 0)
+		return
 
 	if (SPT_PROB(10, seconds_between_ticks))
 		var/message = pick(list(
