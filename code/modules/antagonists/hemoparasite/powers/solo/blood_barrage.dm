@@ -10,8 +10,6 @@
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Grant(mob/grant_to, datum/antagonist/hemoparasite/antag_override)
 	. = ..()
-	if (!.)
-		return
 
 	ranged = owner.AddComponent(
 		/datum/component/ranged_attacks, \
