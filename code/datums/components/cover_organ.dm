@@ -8,8 +8,6 @@
 	var/show_on_examine
 
 /datum/component/cover_organ/Initialize(can_be_extracted, show_on_examine)
-	. = ..()
-
 	if (!istype(parent, /obj/item/organ))
 		return COMPONENT_INCOMPATIBLE
 
@@ -21,10 +19,11 @@
 /datum/component/cover_organ/proc/clear_covered()
 	SIGNAL_HANDLER
 
+	UnregisterSignal(covered, list(COMSIG_QDELETING, COMSIG_MOVABLE_MOVED))
+	covered.organ_flags &= ~ORGAN_FROZEN
 	covered = null
 
 /datum/component/cover_organ/RegisterWithParent()
-	. = ..()
 	RegisterSignal(parent, COMSIG_ORGAN_INSERT, PROC_REF(on_insert))
 	RegisterSignal(parent, COMSIG_ORGAN_POST_REMOVE, PROC_REF(on_remove))
 	RegisterSignal(parent, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
@@ -32,7 +31,6 @@
 		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, PROC_REF(on_examine))
 
 /datum/component/cover_organ/UnregisterFromParent()
-	. = ..()
 	UnregisterSignal(parent, list(
 		COMSIG_ORGAN_INSERT,
 		COMSIG_ORGAN_REMOVE,
@@ -52,19 +50,16 @@
 
 	covered.Remove(receiver, special = TRUE)
 	covered.forceMove(cover)
-	RegisterSignal(covered, COMSIG_QDELETING, PROC_REF(clear_covered))
+	RegisterSignals(covered, list(COMSIG_QDELETING, COMSIG_MOVABLE_MOVED), PROC_REF(clear_covered))
 
 /datum/component/cover_organ/proc/on_remove(datum/source, mob/living/carbon/old_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
 	// not sure if parent can be deleted like that but this is a signal handler for the same proc possibly doing the deletion, can't be too safe
-	if (QDELING(parent) || (movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
+	if (!covered || QDELING(parent) || (movement_flags & DELETE_IF_REPLACED) || !(movement_flags & UNCOVER_ORGAN))
 		return
 
-	covered.Insert(old_owner, special = TRUE)
-	covered.organ_flags |= ORGAN_FROZEN
-	UnregisterSignal(covered, COMSIG_QDELETING)
-	covered = null
+	covered.Insert(old_owner)
 
 /datum/component/cover_organ/proc/on_attackby(datum/source, obj/item/item, mob/living/user, params)
 	SIGNAL_HANDLER
@@ -79,8 +74,8 @@
 
 /datum/component/cover_organ/proc/cut_open(datum/source, obj/item/item, mob/living/user, params)
 	user.visible_message(
-		message = span_notice("[user] begins cutting \the [src] apart."),
-		self_message = span_notice("You begin cutting \the [src] apart with \the [item]."),
+		message = span_notice("[user] begins cutting \the [parent] apart."),
+		self_message = span_notice("You begin cutting \the [parent] apart with \the [item]."),
 		blind_message = span_hear("You hear cutting.")
 	)
 
@@ -89,14 +84,12 @@
 		return
 
 	user.visible_message(
-		message = span_notice("[user] finishes cutting \the [src] apart."),
-		self_message = span_notice("You finish cutting \the [src] apart and \a [covered] fall[covered.p_s()] out."),
+		message = span_notice("[user] finishes cutting \the [parent] apart."),
+		self_message = span_notice("You finish cutting \the [parent] apart and \a [covered] fall[covered.p_s()] out."),
 		blind_message = span_hear("You hear a splat.")
 	)
 
 	user.put_in_hands(covered)
-	covered.organ_flags &= ~ORGAN_FROZEN
-	UnregisterSignal(covered, COMSIG_QDELETING)
 
 /datum/component/cover_organ/proc/on_examine(datum/source, mob/user, list/examine_list)
 	SIGNAL_HANDLER

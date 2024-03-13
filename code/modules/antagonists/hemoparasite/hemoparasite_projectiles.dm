@@ -4,18 +4,19 @@
 /obj/projectile/hemoparasite
 
 /obj/projectile/hemoparasite/barrage
-	name = "hemoparasitic glob"
+	name = "blood glob"
 	desc = "A completely normal glob of blood. Clearly."
 	icon_state = "blood_barrage"
-	damage = 15
+	damage = 10
 	armour_penetration = 10
+	spread = 10
 
 /obj/projectile/hemoparasite/bullet
-	name = "hemoparasitic bullet"
+	name = "blood bullet"
 	desc = "How the hell does the damn thing make bullets?!"
 	icon_state = "blood_bullet"
 
 /obj/projectile/hemoparasite/bullet/hardened
-	name = "hardened bullet"
+	name = "hardened blood bullet"
 	desc = "Well, it's not infectious, but it sure does hurt."
 	icon_state = "bb_hardened"

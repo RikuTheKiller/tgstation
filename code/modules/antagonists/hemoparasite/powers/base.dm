@@ -10,13 +10,13 @@
 	return ..() && owner.stat != DEAD // emerging when you've actually died and magically being revived is like, kind of bad
 
 /datum/action/cooldown/hemoparasite/Grant(mob/grant_to, datum/antagonist/hemoparasite/antag_override)
-	. = ..()
-
 	hemoparasite = antag_override ? antag_override : grant_to?.mind?.has_antag_datum(/datum/antagonist/hemoparasite)
 
 	if (!hemoparasite)
 		Remove(grant_to)
 		CRASH("[grant_to] had [src] granted to them without the hemoparasite antag datum.") // the hemoparasite datum is rather volatile due to it's body-swapping nature
+
+	return ..()
 
 /datum/action/cooldown/hemoparasite/Remove(mob/removed_from)
 	. = ..()
