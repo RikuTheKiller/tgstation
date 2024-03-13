@@ -134,8 +134,7 @@
 	objectives += survive
 
 /datum/antagonist/hemoparasite/on_gain()
-	eyes = new()
-	ears = new()
+	init_senses()
 	init_actions()
 	if (istype(owner.current, /mob/living/basic/hemoparasite))
 		parasite = owner.current
@@ -399,6 +398,12 @@
 	if (is_in_host() && current_state != HEMOPARASITE_STATE_DORMANT)
 		stop_host_control()
 
+/datum/antagonist/hemoparasite/proc/init_senses()
+	eyes = new()
+	ears = new()
+	register_sense(eyes)
+	register_sense(ears)
+
 /// Used to register created senses (eyes, ears) to the hemoparasite.
 /datum/antagonist/hemoparasite/proc/register_sense(obj/item/organ/internal/sense)
 	if (istype(sense, /obj/item/organ/internal/eyes))
@@ -420,12 +425,8 @@
 /datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, old_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
-	to_chat(world, span_notice("1"))
-
-	if (movement_flags & UNCOVER_ORGAN)
-		return
-
-	to_chat(world, span_notice("2"))
+	if (QDELETED(src) || movement_flags & UNCOVER_ORGAN)
+		return // goodbye
 
 	unregister_sense(source)
 
@@ -433,22 +434,21 @@
 
 	register_sense(new_sense)
 
+	if (QDELING(source) && !(movement_flags & DELETE_IF_REPLACED))
+		new_sense.forceMove(parasite)
+		return // odd, but okay
+
 	new_sense.set_organ_damage(new_sense.maxHealth) // start out failing so you can't rip out damaged ones to grow new healthy ones
 
 	to_chat(owner.current, span_warning("You grow a pair of unfinished [new_sense] in place of the ones you lost."))
 
-	if (QDELETED(host))
-		to_chat(world, span_notice("3"))
-		new_sense.forceMove(parasite)
-	else
-		to_chat(world, span_notice("4"))
-		new_sense.Insert(host, special = TRUE)
-		host.visible_message(
-			message = span_bolddanger("[host] suddenly grows a pair of [new_sense] in place of their [new_sense.zone]!"),
-			self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your [new_sense.zone]."),
-			blind_message = span_hear("You hear a loud and wet crunch."),
-			ignored_mobs = owner.current
-		)
+	new_sense.Insert(host, special = TRUE)
+	host.visible_message(
+		message = span_bolddanger("[host] suddenly grows a pair of [new_sense] in place of their [new_sense.zone]!"),
+		self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your [new_sense.zone]."),
+		blind_message = span_hear("You hear a loud and wet crunch."),
+		ignored_mobs = owner.current
+	)
 
 /// Replaces the current host's senses with our own. Not sanity checked.
 /datum/antagonist/hemoparasite/proc/replace_host_senses()
