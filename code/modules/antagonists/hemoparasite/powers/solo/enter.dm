@@ -4,9 +4,6 @@
 	button_icon_state = "blood_enter"
 	click_to_activate = TRUE
 
-/datum/action/cooldown/hemoparasite/enter/IsAvailable(feedback = FALSE)
-	return ..() && !hemoparasite?.host
-
 /datum/action/cooldown/hemoparasite/enter/Activate(mob/living/carbon/human/target)
 	. = ..()
 
