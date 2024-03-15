@@ -25,7 +25,7 @@
 
 /datum/component/cover_organ/RegisterWithParent()
 	RegisterSignal(parent, COMSIG_ORGAN_INSERT, PROC_REF(on_insert))
-	RegisterSignal(parent, COMSIG_ORGAN_REMOVE, PROC_REF(on_remove))
+	RegisterSignal(parent, COMSIG_ORGAN_POST_REMOVE, PROC_REF(on_post_remove))
 	RegisterSignal(parent, COMSIG_ATOM_ATTACKBY, PROC_REF(on_attackby))
 	if (show_on_examine)
 		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, PROC_REF(on_examine))
@@ -52,14 +52,13 @@
 	covered.forceMove(cover)
 	RegisterSignals(covered, list(COMSIG_QDELETING, COMSIG_MOVABLE_MOVED), PROC_REF(clear_covered))
 
-/datum/component/cover_organ/proc/on_remove(datum/source, mob/living/carbon/organ_owner, special, movement_flags)
+/datum/component/cover_organ/proc/on_post_remove(datum/source, mob/living/carbon/old_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
 	if (!covered || QDELETED(parent) || !(movement_flags & UNCOVER_ORGAN))
 		return
 
-	covered.Insert(organ_owner)
-	return COMPONENT_ORGAN_CANCEL_REMOVE // it's annoying to do it in this order but for whatever reason post remove doesn't work properly for this
+	covered.Insert(old_owner, special = TRUE)
 
 /datum/component/cover_organ/proc/on_attackby(datum/source, obj/item/item, mob/living/user, params)
 	SIGNAL_HANDLER

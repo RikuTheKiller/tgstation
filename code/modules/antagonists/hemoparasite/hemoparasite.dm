@@ -221,30 +221,22 @@
 			state_actions[state_key] -= path
 			var/action = initialized_actions_by_type[path]
 			if (!action)
-				action = new path(owner)
+				action = new path(src)
 				initialized_actions_by_type[path] = action
 			state_actions[state_key] += action
 
 /datum/antagonist/hemoparasite/proc/swap_state(state, mob/living/from = owner.current, mob/living/give_to = owner.current)
 	if(current_state == state)
-		to_chat(world, span_notice("Equivalent State: [state]"))
 		return
 
-	to_chat(world, span_notice("Current State: [current_state]"))
-	to_chat(world, span_notice("Future State: [state]"))
-
-	to_chat(world, span_notice("From: [from]"))
 	for(var/datum/action/cooldown/hemoparasite/former in from.actions)
-		to_chat(world, span_notice("Action: [former]"))
 		former.Remove(from)
 
 	current_state = state
 	var/list/actions = state_actions[current_state]
 
-	to_chat(world, span_notice("To: [give_to]"))
 	for(var/datum/action/action as anything in actions)
-		to_chat(world, span_notice("Action: [action]"))
-		action.Grant(give_to) // Reminder that if give_to is not the owner of the action it will be removed and then granted to the new owner
+		action.Grant(give_to, src) // Reminder that if give_to is not the owner of the action it will be removed and then granted to the new owner
 
 /// Returns whether or not the hemoparasite is actually *in* a host. Having a host doesn't mean you're inside them.
 /datum/antagonist/hemoparasite/proc/is_in_host()
