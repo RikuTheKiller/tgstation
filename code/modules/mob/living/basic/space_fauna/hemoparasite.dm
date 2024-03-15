@@ -8,9 +8,9 @@
 	name = "hemoparasite" // sentient blood real???
 	desc = "A horrid abomination that takes over the corpses of the deceased and feasts on their blood."
 	icon = 'icons/mob/nonhuman-player/hemoparasite.dmi'
-	icon_state = "large"
-	icon_living = "large"
-	icon_dead = "dead"
+	icon_state = "glob"
+	icon_living = "glob"
+	icon_dead = "glob_dead"
 	gender = NEUTER
 	mob_biotypes = MOB_SLIME
 	faction = list(FACTION_SLIME, FACTION_HOSTILE)
@@ -48,12 +48,6 @@
 	minimum_survivable_temperature = 200
 	maximum_survivable_temperature = 500
 
-	/// If we're currently small or not. Used for animations.
-	var/small = FALSE
-
-	/// The health threshold below which we automatically become small.
-	var/small_threshold = 80
-
 	/// Our antag datum.
 	var/datum/antagonist/hemoparasite/hemoparasite
 
@@ -80,34 +74,3 @@
 		hemoparasite = mind.add_antag_datum(/datum/antagonist/hemoparasite)
 		mind.set_assigned_role(SSjob.GetJobType(/datum/job/hemoparasite))
 		mind.special_role = ROLE_HEMOPARASITE_MIDROUND
-
-/mob/living/basic/hemoparasite/updatehealth()
-	. = ..()
-
-	if (stat == DEAD) // dont change size while dead
-		return
-
-	if (health < small_threshold && !small)
-		become_small()
-	else if (health > small_threshold && small)
-		become_large()
-
-/// Makes the hemoparasite turn small with an animation.
-/mob/living/basic/hemoparasite/proc/become_small()
-	icon_state = "small"
-	icon_living = "small"
-	small = TRUE
-
-	to_chat(src, span_boldwarning("Your outer membrane collapses as you struggle to maintain your form!"))
-
-	return
-
-/// Makes the hemoparasite turn large with an animation.
-/mob/living/basic/hemoparasite/proc/become_large()
-	icon_state = "large"
-	icon_living = "large"
-	small = FALSE
-
-	to_chat(src, span_boldnotice("You increase in size as you grow a new outer membrane."))
-
-	return
