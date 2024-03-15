@@ -58,12 +58,12 @@
 
 /mob/living/basic/hemoparasite/get_status_tab_items()
 	. = ..()
-	if(isnull(hemoparasite))
+	if(!hemoparasite)
 		return
 	. += "Blood: [hemoparasite.get_blood_amount()]/[hemoparasite.get_max_blood()]"
-	if(isnull(hemoparasite.host))
+	if(!hemoparasite.host || hemoparasite.is_in_host())
 		return
-	. += "Host Blood: [hemoparasite.get_host_blood_amount()]"
+	. += "Host Blood: [hemoparasite.get_host_blood_amount()]/[hemoparasite.get_host_max_blood()]"
 
 /mob/living/basic/hemoparasite/mind_initialize()
 	..()
