@@ -227,15 +227,23 @@
 
 /datum/antagonist/hemoparasite/proc/swap_state(state, mob/living/from = owner.current, mob/living/give_to = owner.current)
 	if(current_state == state)
+		to_chat(world, span_notice("Equivalent State: [state]"))
 		return
 
+	to_chat(world, span_notice("Current State: [current_state]"))
+	to_chat(world, span_notice("Future State: [state]"))
+
+	to_chat(world, span_notice("From: [from]"))
 	for(var/datum/action/cooldown/hemoparasite/former in from.actions)
+		to_chat(world, span_notice("Action: [former]"))
 		former.Remove(from)
 
 	current_state = state
 	var/list/actions = state_actions[current_state]
 
+	to_chat(world, span_notice("To: [give_to]"))
 	for(var/datum/action/action as anything in actions)
+		to_chat(world, span_notice("Action: [action]"))
 		action.Grant(give_to) // Reminder that if give_to is not the owner of the action it will be removed and then granted to the new owner
 
 /// Returns whether or not the hemoparasite is actually *in* a host. Having a host doesn't mean you're inside them.
@@ -282,12 +290,11 @@
 	REMOVE_TRAITS_IN(host, BLOODCONTROL_TRAIT)
 	UnregisterSignal(host, COMSIG_LIVING_ADJUST_STANDARD_DAMAGE_TYPES)
 	return_host_senses()
+	swap_state(HEMOPARASITE_STATE_DORMANT, give_to = parasite)
 	if(host.mind == owner)
 		owner.transfer_to(parasite)
 		host_mind?.transfer_to(host)
 		host_mind = null
-
-	swap_state(HEMOPARASITE_STATE_DORMANT)
 
 /**
  * Causes the parasite to leave it's current host with an animation.
@@ -309,6 +316,7 @@
 		flick("emerge", parasite)
 
 	stop_host_control()
+	swap_state(HEMOPARASITE_STATE_SOLO, give_to = parasite)
 	parasite.forceMove(host.drop_location())
 
 	if (!silent)
@@ -323,7 +331,6 @@
 	if (host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(host, TRAIT_NODEATH))
 		host.death()
 
-	swap_state(HEMOPARASITE_STATE_SOLO)
 	UnregisterSignal(host, COMSIG_LIVING_DEATH)
 
 	host = null
@@ -350,9 +357,8 @@
 	for(var/trait in subjugation_traits)
 		ADD_TRAIT(host, trait, BLOODCONTROL_TRAIT)
 
+	swap_state(HEMOPARASITE_STATE_SUBJUGATION, give_to = host)
 	control_host()
-
-	swap_state(HEMOPARASITE_STATE_SUBJUGATION)
 
 /// Makes the hemoparasite marionette its host.
 /datum/antagonist/hemoparasite/proc/marionette_host()
@@ -362,9 +368,9 @@
 	for(var/trait in marionette_traits)
 		ADD_TRAIT(host, trait, BLOODCONTROL_TRAIT)
 
+	swap_state(HEMOPARASITE_STATE_MARIONETTE, give_to = host)
 	control_host()
 
-	swap_state(HEMOPARASITE_STATE_MARIONETTE)
 	RegisterSignals(host, COMSIG_LIVING_ADJUST_STANDARD_DAMAGE_TYPES, PROC_REF(marionette_damaged))
 
 /datum/antagonist/hemoparasite/proc/marionette_damaged(mob/living/our_mob, type, amount, forced)
@@ -435,14 +441,18 @@
 	register_sense(new_sense)
 
 	if (QDELING(source) && !(movement_flags & DELETE_IF_REPLACED))
-		new_sense.forceMove(parasite)
-		return // odd, but okay
+		if (!QDELETED(host))
+			new_sense.Insert(host, special = TRUE) // in case of stuff like aheal
+		else
+			new_sense.forceMove(parasite)
+		return
 
 	new_sense.set_organ_damage(new_sense.maxHealth) // start out failing so you can't rip out damaged ones to grow new healthy ones
 
 	to_chat(owner.current, span_warning("You grow a pair of unfinished [new_sense] in place of the ones you lost."))
 
 	new_sense.Insert(host, special = TRUE)
+
 	host.visible_message(
 		message = span_bolddanger("[host] suddenly grows a pair of [new_sense] in place of their [new_sense.zone]!"),
 		self_message = host == owner.current ? null : span_boldnotice("You feel something growing in place of your [new_sense.zone]."),

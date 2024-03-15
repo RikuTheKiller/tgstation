@@ -7,7 +7,7 @@
 
 	var/mob/living/carbon/human/host = hemoparasite.host
 
-	to_chat(owner, "You begin to relinquish control over your host...")
+	to_chat(owner, span_notice("You begin to relinquish control over your host..."))
 
 	if (owner != host)
 		to_chat(host, span_userdanger("You feel weak...")) // symbiosis

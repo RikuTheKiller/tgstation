@@ -20,19 +20,17 @@
 		projectile_sound = 'sound/effects/wounds/blood3.ogg', \
 		cooldown_time = 0.1 SECONDS, \
 	)
-	fullauto = owner.AddComponent(/datum/component/ranged_mob_full_auto, 0.1 SECONDS, src)
+	fullauto = owner.AddComponent(/datum/component/ranged_mob_full_auto, 0.1 SECONDS)
 
 	RegisterSignal(owner, COMSIG_BASICMOB_PRE_ATTACK_RANGED, PROC_REF(check_can_fire))
 
 /datum/action/cooldown/hemoparasite/blood_barrage/Remove(mob/removed_from)
 	. = ..()
 
-	clear_components()
+	QDEL_NULL(ranged)
+	QDEL_NULL(fullauto)
 
-/datum/action/cooldown/hemoparasite/blood_barrage/Destroy()
-	. = ..()
-
-	clear_components()
+	UnregisterSignal(removed_from, list(COMSIG_BASICMOB_PRE_ATTACK_RANGED))
 
 /datum/action/cooldown/hemoparasite/blood_barrage/proc/check_can_fire(datum/source)
 	SIGNAL_HANDLER
@@ -40,9 +38,3 @@
 		return
 	if (!IsAvailable(feedback = TRUE))
 		return COMPONENT_CANCEL_RANGED_ATTACK
-
-/datum/action/cooldown/hemoparasite/blood_barrage/proc/clear_components()
-	QDEL_NULL(ranged)
-	QDEL_NULL(fullauto)
-
-	UnregisterSignal(owner, list(COMSIG_BASICMOB_PRE_ATTACK_RANGED))
