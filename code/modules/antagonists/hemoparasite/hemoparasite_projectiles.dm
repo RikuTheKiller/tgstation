@@ -9,7 +9,7 @@
 	icon_state = "blood_barrage"
 	damage = 10
 	armour_penetration = 10
-	spread = 10
+	spread = 15
 
 /obj/projectile/hemoparasite/bullet
 	name = "blood bullet"
