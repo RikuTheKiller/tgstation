@@ -44,7 +44,7 @@
 
 /// Sets the blood amount of the hemoparasite to the given amount.
 /datum/antagonist/hemoparasite/proc/set_blood_amount(amount, ignore_sync)
-	parasite.setBruteLoss(clamp(parasite.maxHealth - amount * (parasite.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM), 0, parasite.maxHealth * (get_max_blood() / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM))) // it was bruteloss all along
+	parasite.setBruteLoss(clamp(parasite.maxHealth - amount * (parasite.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM), 0, parasite.maxHealth * (get_max_blood(ignore_sync) / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM))) // it was bruteloss all along
 	if (!ignore_sync && is_in_host())
 		set_host_blood_amount(amount, ignore_sync = TRUE)
 	update_hudtext()
