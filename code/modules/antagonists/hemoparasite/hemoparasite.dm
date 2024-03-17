@@ -300,16 +300,16 @@
 	if (!host)
 		CRASH("[parasite] ([owner]) attempted to leave a host that doesn't exist.")
 
+	stop_host_control()
+	swap_state(HEMOPARASITE_STATE_SOLO, give_to = parasite)
+	parasite.forceMove(host.drop_location())
+
 	set_blood_amount(min(get_host_blood_amount(), max_blood), ignore_sync = TRUE)
 
 	adjust_host_blood_amount(-get_blood_amount(), ignore_sync = TRUE)
 
 	if (!disable_animation)
 		flick("emerge", parasite)
-
-	stop_host_control()
-	swap_state(HEMOPARASITE_STATE_SOLO, give_to = parasite)
-	parasite.forceMove(host.drop_location())
 
 	if (!silent)
 		parasite.visible_message(
@@ -409,7 +409,7 @@
 	else
 		ears = sense
 
-	RegisterSignal(sense, COMSIG_ORGAN_REMOVED, PROC_REF(on_sense_removed))
+	RegisterSignal(sense, COMSIG_ORGAN_POST_REMOVE, PROC_REF(on_sense_removed))
 
 /// Used to unregister created senses (eyes, ears) from the hemoparasite.
 /datum/antagonist/hemoparasite/proc/unregister_sense(obj/item/organ/internal/sense)
@@ -418,12 +418,12 @@
 	else
 		ears = null
 
-	UnregisterSignal(sense, COMSIG_ORGAN_REMOVED)
+	UnregisterSignal(sense, COMSIG_ORGAN_POST_REMOVE)
 
 /datum/antagonist/hemoparasite/proc/on_sense_removed(obj/item/organ/internal/source, old_owner, special, movement_flags)
 	SIGNAL_HANDLER
 
-	if (QDELETED(src) || movement_flags & UNCOVER_ORGAN)
+	if (QDELETED(src) || (movement_flags & UNCOVER_ORGAN))
 		return // goodbye
 
 	unregister_sense(source)

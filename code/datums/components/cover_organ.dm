@@ -16,7 +16,7 @@
 
 	qdel(covered)
 
-/datum/component/cover_organ/proc/clear_covered()
+/datum/component/cover_organ/proc/clear_covered(datum/source)
 	SIGNAL_HANDLER
 
 	UnregisterSignal(covered, list(COMSIG_QDELETING, COMSIG_MOVABLE_MOVED))
@@ -43,14 +43,17 @@
 
 	var/obj/item/organ/cover = parent
 
-	covered = receiver.get_organ_slot(cover.slot)
+	var/obj/item/organ/to_cover = receiver.get_organ_slot(cover.slot)
 
-	if (!covered)
+	if (!to_cover)
 		return
+
+	qdel(covered)
+	covered = to_cover
 
 	covered.Remove(receiver, special = TRUE)
 	covered.forceMove(cover)
-	RegisterSignals(covered, list(COMSIG_QDELETING, COMSIG_MOVABLE_MOVED), PROC_REF(clear_covered))
+	RegisterSignal(covered, COMSIG_QDELETING, PROC_REF(clear_covered))
 
 /datum/component/cover_organ/proc/on_post_remove(datum/source, mob/living/carbon/old_owner, special, movement_flags)
 	SIGNAL_HANDLER
@@ -59,6 +62,7 @@
 		return
 
 	covered.Insert(old_owner, special = TRUE)
+	clear_covered()
 
 /datum/component/cover_organ/proc/on_attackby(datum/source, obj/item/item, mob/living/user, params)
 	SIGNAL_HANDLER

@@ -37,14 +37,12 @@
 	. = min(., BLOOD_VOLUME_HEMOPARASITE_MAXIMUM * suitable_limbs / (target_host.bodyparts.len + target_host.get_missing_limbs().len))
 
 /// Returns how much blood the hemoparasite currently holds.
-/datum/antagonist/hemoparasite/proc/get_blood_amount(ignore_sync)
-	if (!ignore_sync && is_in_host())
-		return get_host_blood_amount()
+/datum/antagonist/hemoparasite/proc/get_blood_amount()
 	return parasite.health * BLOOD_VOLUME_HEMOPARASITE_MAXIMUM / parasite.maxHealth
 
 /// Sets the blood amount of the hemoparasite to the given amount.
 /datum/antagonist/hemoparasite/proc/set_blood_amount(amount, ignore_sync)
-	parasite.setBruteLoss(clamp(parasite.maxHealth - amount * (parasite.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM), 0, parasite.maxHealth * (get_max_blood(ignore_sync) / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM))) // it was bruteloss all along
+	parasite.setBruteLoss(clamp(parasite.maxHealth - amount * (parasite.maxHealth / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM), 0, parasite.maxHealth * (get_max_blood() / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM))) // it was bruteloss all along
 	if (!ignore_sync && is_in_host())
 		set_host_blood_amount(amount, ignore_sync = TRUE)
 	update_hudtext()
@@ -72,8 +70,8 @@
 // Percentages (of BLOOD_VOLUME_HEMOPARASITE_MAXIMUM)
 
 /// Returns the blood amount of the hemoparasite as a percentage. (0-1)
-/datum/antagonist/hemoparasite/proc/get_blood_percentage(ignore_sync)
-	return get_blood_amount(ignore_sync) / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM
+/datum/antagonist/hemoparasite/proc/get_blood_percentage()
+	return get_blood_amount() / BLOOD_VOLUME_HEMOPARASITE_MAXIMUM
 
 /// Sets the blood amount of the hemoparasite to the given percentage. (0-1)
 /datum/antagonist/hemoparasite/proc/set_blood_percentage(percentage, ignore_sync)
