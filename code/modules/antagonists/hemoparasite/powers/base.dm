@@ -6,7 +6,13 @@
 	/// Our owner's hemoparasite antag datum.
 	var/datum/antagonist/hemoparasite/hemoparasite
 
+	/// How much blood this costs to use. (percentage, implementation is ability-specific)
+	var/cost
+
 /datum/action/cooldown/hemoparasite/IsAvailable(feedback)
+	if (hemoparasite.get_blood_percentage() < cost)
+		if (feedback)
+			owner.balloon_alert("not enough blood!")
 	return ..() && owner.stat != DEAD // emerging when you've actually died and magically being revived is like, kind of bad
 
 /datum/action/cooldown/hemoparasite/Grant(mob/grant_to, datum/antagonist/hemoparasite/antag_override)

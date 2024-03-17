@@ -273,6 +273,7 @@
 	set_host_blood_amount(get_host_blood_amount() + get_blood_amount())
 
 	RegisterSignal(host, COMSIG_LIVING_DEATH, PROC_REF(on_host_death))
+	RegisterSignal(host, COMSIG_HUMAN_HANDLE_BLOOD, PROC_REF(handle_blood))
 
 	return TRUE
 
@@ -323,12 +324,14 @@
 	if (host.blood_volume < BLOOD_VOLUME_SURVIVE && !HAS_TRAIT(host, TRAIT_NODEATH))
 		host.death()
 
-	UnregisterSignal(host, COMSIG_LIVING_DEATH)
+	UnregisterSignal(host, list(COMSIG_LIVING_DEATH, COMSIG_HUMAN_HANDLE_BLOOD))
 
 	host = null
 
-/// Handles blood processing in a host, called from /mob/living/carbon/human/handle_blood() after a check for TRAIT_HEMOPARASITE_CONTROL
-/datum/antagonist/hemoparasite/proc/handle_blood(seconds_per_tick, times_fired)
+/// Handles blood processing in a host.
+/datum/antagonist/hemoparasite/proc/handle_blood(datum/source, seconds_per_tick, times_fired)
+	SIGNAL_HANDLER
+
 	if (!host)
 		CRASH("[parasite] ([owner]) is somehow processing blood in a host while it doesn't even have a reference to them. Something has gone hilariously wrong.")
 
@@ -337,6 +340,8 @@
 	host.handle_bleeding(seconds_per_tick, times_fired) // handle bleeding
 
 	set_blood_amount(host.blood_volume, ignore_sync = TRUE) // resync
+
+	return COMPONENT_CANCEL_HANDLE_BLOOD
 
 /// Makes the hemoparasite subjugate its host.
 /datum/antagonist/hemoparasite/proc/subjugate_host()
