@@ -14,7 +14,7 @@
 	owner.visible_message(
 		message = span_danger("[host] starts convulsing!"),
 		self_message = span_notice("You begin to subjugate your host..."),
-		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
+		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeatedly.") : null, // not overengineered at all
 	)
 
 	host.do_jitter_animation(200) // fluff
@@ -30,7 +30,6 @@
 	owner.visible_message(
 		message = span_danger("[host] suddenly wakes up!"),
 		self_message = span_notice("You subjugate your host."),
-		blind_message = isturf(host.loc) && host.has_gravity() ? span_hear("You hear something hitting the [isfloorturf(host.loc) ? "floor" : "ground"] repeadetly.") : null, // not overengineered at all
 	)
 
 	hemoparasite.subjugate_host()

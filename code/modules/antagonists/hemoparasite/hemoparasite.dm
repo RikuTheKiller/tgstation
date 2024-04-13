@@ -92,26 +92,27 @@
 	var/list/state_actions = list(
 		HEMOPARASITE_STATE_SOLO = list(
 			/datum/action/cooldown/hemoparasite/enter,
-			/datum/action/cooldown/hemoparasite/blood_barrage
+			/datum/action/cooldown/hemoparasite/blood_barrage,
 		),
 		HEMOPARASITE_STATE_DORMANT = list(
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
 			/datum/action/cooldown/hemoparasite/regen,
-			/datum/action/cooldown/hemoparasite/delayed/subjugate
+			/datum/action/cooldown/hemoparasite/delayed/subjugate,
+			/datum/action/cooldown/hemoparasite/delayed/marionette,
 		),
 		HEMOPARASITE_STATE_SUBJUGATION = list(
 			/datum/action/cooldown/hemoparasite/delayed/relinquish,
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
-			/datum/action/cooldown/hemoparasite/regen
+			/datum/action/cooldown/hemoparasite/regen,
 		),
 		HEMOPARASITE_STATE_MARIONETTE = list(
 			/datum/action/cooldown/hemoparasite/delayed/relinquish, // emerge isn't supposed to be here, that's intentional
-			/datum/action/cooldown/hemoparasite/regen
+			/datum/action/cooldown/hemoparasite/regen,
 		),
 		HEMOPARASITE_STATE_SYMBIOSIS = list(
 			/datum/action/cooldown/hemoparasite/delayed/relinquish,
 			/datum/action/cooldown/hemoparasite/delayed/emerge,
-			/datum/action/cooldown/hemoparasite/regen
+			/datum/action/cooldown/hemoparasite/regen,
 		),
 	)
 
