@@ -18,10 +18,6 @@
 	/// The name of the blueprint type in plural, e.g. "walls"
 	var/type_name_plural = ""
 
-	/// Flags checked by [proc/can_interact_with_blueprint].
-	/// Refer to [_DEFINES/blueprints.dm] for more info.
-	var/build_flags = NONE
-
 	/// The current turf this blueprint is registered to.
 	/// Changes if the blueprint is moved.
 	var/turf/current_turf = null
