@@ -64,39 +64,38 @@
 	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND | CRAFT_APPLIES_MATS
 	category = CAT_DOORS
 
-/datum/crafting_recipe/alien_airlock_assembly
+/datum/crafting_recipe/door_assembly
+	reqs = list(/obj/item/stack/sheet/iron = 4)
+	time = 5 SECONDS
+	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND
+	category = CAT_DOORS
+
+/datum/crafting_recipe/door_assembly/alien
 	name = "Alien Airlock Assembly"
 	reqs = list(/obj/item/stack/sheet/mineral/abductor = 4)
 	result = /obj/structure/door_assembly/door_assembly_abductor
-	time = 5 SECONDS
-	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND
-	category = CAT_DOORS
 
-/datum/crafting_recipe/high_security_airlock_assembly
+/datum/crafting_recipe/door_assembly/high_security
 	name = "High Security Airlock Assembly"
 	reqs = list(/obj/item/stack/sheet/plasteel = 4)
 	result = /obj/structure/door_assembly/door_assembly_highsecurity
-	time = 5 SECONDS
-	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND
-	category = CAT_DOORS
 
-/datum/crafting_recipe/vault_door_assembly
+/datum/crafting_recipe/door_assembly/vault
 	name = "Vault Door Assembly"
 	reqs = list(/obj/item/stack/sheet/plasteel = 6)
 	result = /obj/structure/door_assembly/door_assembly_vault
-	time = 5 SECONDS
-	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND
-	category = CAT_DOORS
 
-/datum/crafting_recipe/bronze_airlock_assembly
+/datum/crafting_recipe/door_assembly/tram
+	name = "Tram Door Assembly"
+	reqs = list(/obj/item/stack/sheet/mineral/titanium = 8)
+	result = /obj/structure/door_assembly/multi_tile/door_assembly_tram
+
+/datum/crafting_recipe/door_assembly/bronze
 	name = "pinion airlock assembly"
 	reqs = list(/obj/item/stack/sheet/bronze = 4)
 	result = /obj/structure/door_assembly/door_assembly_bronze
-	time = 5 SECONDS
-	crafting_flags = CRAFT_CHECK_DENSITY | CRAFT_ONE_PER_TURF | CRAFT_ON_SOLID_GROUND
-	category = CAT_DOORS
 
-/datum/crafting_recipe/bronze_airlock_assembly/transparent
+/datum/crafting_recipe/door_assembly/bronze/transparent
 	name = "transparent pinion airlock assembly"
 	result = /obj/structure/door_assembly/door_assembly_bronze/seethru
 
