@@ -73,7 +73,7 @@
 		var/needed_amount = recipe.reqs[requirement_path]
 		for(var/content_item_path in contents)
 			// Right path and not blacklisted
-			if(!ispath(content_item_path, requirement_path) || recipe.blacklist.Find(content_item_path))
+			if(!recipe.filter_req_item_type(content_item_path, requirement_path))
 				continue
 
 			needed_amount -= contents[content_item_path]
@@ -86,7 +86,7 @@
 		// Store the instances of what we will use for recipe.check_requirements() for requirement_path
 		var/list/instances_list = list()
 		for(var/instance_path in item_instances)
-			if(ispath(instance_path, requirement_path))
+			if(recipe.filter_req_item_type(instance_path, requirement_path))
 				instances_list += item_instances[instance_path]
 
 		requirements_list[requirement_path] = instances_list

@@ -1362,6 +1362,7 @@
 #include "code\datums\components\wormborn.dm"
 #include "code\datums\components\container_item\container_item.dm"
 #include "code\datums\components\container_item\tank_holder.dm"
+#include "code\datums\components\crafting\_material.dm"
 #include "code\datums\components\crafting\_recipes.dm"
 #include "code\datums\components\crafting\atmospheric.dm"
 #include "code\datums\components\crafting\chemistry.dm"

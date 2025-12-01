@@ -107,6 +107,15 @@
 		requirements_mats_blacklist = list(material) //the item is not intended to have mats :shrug:
 
 /**
+ * Check if an object type is eligible for being used as a requirement of this recipe. Don't add feedback messages in this, because it will spam the client.
+ *
+ * item_path: The type of the item that's being checked, this can be basically anything that works in [var/reqs] like a [datum/reagent] path
+ * req_path: The type in [var/reqs] that's being checked against
+ */
+/datum/crafting_recipe/proc/filter_req_item_type(item_path, req_path)
+	return ispath(item_path, req_path) && !blacklist.Find(item_path)
+
+/**
  * Run custom pre-craft checks for this recipe, don't add feedback messages in this because it will spam the client
  *
  * user: The /mob that initiated the crafting
