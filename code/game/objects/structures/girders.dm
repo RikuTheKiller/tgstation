@@ -26,6 +26,14 @@
 		exotic_material = 2 // this needs to be refactored properly
 	)
 
+	var/static/list/construction_steps = list(
+		/datum/construction_step/girder/slice_apart
+	)
+
+/obj/structure/girder/Initialize(mapload)
+	. = ..()
+	AddComponent(/datum/component/complex_construction, step_types = construction_steps)
+
 /obj/structure/girder/examine(mob/user)
 	. = ..()
 	switch(state)
@@ -47,6 +55,7 @@
 
 	add_fingerprint(user)
 
+	/*
 	if(istype(W, /obj/item/gun/energy/plasmacutter))
 		balloon_alert(user, "slicing apart...")
 		if(W.use_tool(src, user, 40, volume=100))
@@ -60,6 +69,7 @@
 					M.add_fingerprint(user)
 			qdel(src)
 		return
+	*/
 
 	if(isstack(W))
 		var/obj/item/stack/stack = W
