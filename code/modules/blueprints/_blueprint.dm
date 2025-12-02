@@ -18,6 +18,13 @@
 	/// The name of the blueprint type in plural, e.g. "walls"
 	var/type_name_plural = ""
 
+	/// The path of the object that the blueprint will try to make if you use a sheet stack on it.
+	/// Only supports objects for now. The code will complain if it's not an object path.
+	var/sheet_stack_build_path = null
+
+	/// A multiplier that dictates how much the blueprint speeds up construction.
+	var/build_speed_multiplier = 2
+
 	/// The current turf this blueprint is registered to.
 	/// Changes if the blueprint is moved.
 	var/turf/current_turf = null

@@ -508,11 +508,11 @@
 	return ..()
 
 /// Checks if we can build here, validly.
-/obj/item/stack/proc/building_checks(mob/builder, datum/stack_recipe/recipe, multiplier)
+/obj/item/stack/proc/building_checks(mob/builder, datum/stack_recipe/recipe, multiplier, turf/turf_override)
 	if (get_amount() < recipe.req_amount * multiplier)
 		builder.balloon_alert(builder, "not enough material!")
 		return FALSE
-	var/turf/dest_turf = get_turf(builder)
+	var/turf/dest_turf = turf_override || get_turf(builder)
 
 	if((recipe.crafting_flags & CRAFT_ONE_PER_TURF) && (locate(recipe.result_type) in dest_turf))
 		builder.balloon_alert(builder, "already one here!")
