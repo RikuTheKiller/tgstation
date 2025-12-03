@@ -429,8 +429,13 @@
 	return FALSE
 
 /obj/structure/girder/atom_deconstruct(disassembled = TRUE)
-	var/remains = pick(/obj/item/stack/rods, /obj/item/stack/sheet/iron)
-	new remains(loc)
+	var/sheet_type = state == GIRDER_TRAM ? /obj/item/stack/sheet/mineral/titanium : /obj/item/stack/sheet/iron
+
+	if (disassembled)
+		new sheet_type(loc, 2)
+	else
+		var/remains = pick(/obj/item/stack/rods, sheet_type)
+		new remains(loc)
 
 /obj/structure/girder/narsie_act()
 	new /obj/structure/girder/cult(loc)

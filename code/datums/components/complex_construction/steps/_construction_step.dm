@@ -3,7 +3,7 @@
 // A basic setup is incredibly easy and usually sufficient.
 
 // Basic setup:
-// - Use the basic duration, req_x and resulting_x vars.
+// - Use the basic duration, req_x and result_x vars.
 // - Put feedback in on_started and on_completed.
 // - Congrats, you have a construction step.
 
@@ -24,22 +24,32 @@
 	/// You can use [proc/get_req_tool_behaviour] to dynamically override the final value.
 	var/req_tool_behaviour = null
 
-	/// An assoc list of the types of the resulting atoms. Format is [type = amount]
-	/// You can use [proc/get_resulting_atom_types] to dynamically override the final value.
-	var/resulting_atom_types = list()
-	/// The type of the resulting turf, if any.
-	/// You can use [proc/get_resulting_turf_type] to dynamically override the final value.
-	var/resulting_turf_type = null
+	/// An assoc list of the types of the result movables. Format is [type = amount]
+	/// You can use [proc/get_result_types] to dynamically override the final value.
+	/// Putting turf types here is fully supported.
+	var/result_types = list()
 
-	/// Construction flags, as defined in _DEFINES/complex_construction.dm
-	var/construction_flags = CONSTRUCTION_APPLY_FINGERPRINTS
+	/// Construction flags, the default is always NONE.
+	/// Defined in _DEFINES/complex_construction.dm
+	var/construction_flags = NONE
 
+	/// Target handling type, such as deletion, destruction or disassembly.
+	/// Defined in _DEFINES/complex_construction.dm
+	var/target_handling = NONE
+
+	/// The text in the starting balloon alert for this step. (e.g. "adding plating...")
+	var/starting_alert_text = null
+	/// The text in the completion balloon alert for this step. (e.g. "added plating")
+	/// Usually not necessary unless you need to communicate a specific result.
+	var/completion_alert_text = null
 	/// The volume of the sound made by the tool used.
 	var/tool_use_volume = 100
 
 /// Has the user attempt this step and returns whether they succeeded. Blocking.
 /// For a non-blocking variant, use [proc/try_start_async] instead.
 /datum/construction_step/proc/try_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
+	SHOULD_NOT_OVERRIDE(TRUE)
+
 	var/list/reqs = get_reqs(user, used_item, target, modifiers)
 
 	if (!can_start(user, used_item, target, modifiers, reqs))
@@ -50,6 +60,9 @@
 /// Has the user attempt this step and returns whether they were able to start. Non-blocking.
 /// For a blocking variant, use [proc/try_start] instead.
 /datum/construction_step/proc/try_start_async(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
+	SHOULD_NOT_OVERRIDE(TRUE)
+	SHOULD_NOT_SLEEP(TRUE)
+
 	var/list/reqs = get_reqs(user, used_item, target, modifiers)
 
 	if (!can_start(user, used_item, target, modifiers, reqs))
@@ -62,6 +75,7 @@
 /// Don't call this directly, call [proc/try_start] or [proc/try_start_async] instead.
 /datum/construction_step/proc/try_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	PRIVATE_PROC(TRUE)
+	SHOULD_NOT_OVERRIDE(TRUE)
 
 	on_started(user, used_item, target, modifiers)
 
@@ -74,13 +88,15 @@
 
 	var/list/results = get_results(user, used_item, target, modifiers)
 
-	on_completed(user, used_item, target, modifiers, reqs, results)
+	on_completed(user, used_item, target, modifiers, results)
 
 	return TRUE
 
 /// Returns a list of requirements for this step.
 /// List indices are defined in _DEFINES/complex_construction.dm
 /datum/construction_step/proc/get_reqs(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
+	SHOULD_CALL_PARENT(TRUE)
+
 	return list(
 		CONSTRUCTION_REQ_ITEM_TYPE = get_req_item_type(user, used_item, target, modifiers),
 		CONSTRUCTION_REQ_ITEM_AMOUNT = get_req_item_amount(user, used_item, target, modifiers),
@@ -89,6 +105,8 @@
 
 /// Returns whether the user can start this step. Called only at the start of the step. Can be used for feedback.
 /datum/construction_step/proc/can_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	SHOULD_CALL_PARENT(TRUE)
+
 	var/req_item_type = reqs[CONSTRUCTION_REQ_ITEM_TYPE]
 	if (req_item_type && !istype(used_item, req_item_type))
 		return FALSE
@@ -109,51 +127,93 @@
 
 /// Called when the step is started. Can be used for feedback.
 /datum/construction_step/proc/on_started(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	return
+	SHOULD_CALL_PARENT(TRUE)
 
-/// Returns the list of results.
+	if (!(construction_flags & CONSTRUCTION_NO_FINGERPRINTS))
+		used_item.add_fingerprint(user)
+		target.add_fingerprint(user)
+
+/// Returns the list of result /atom/movable instances.
+/// Post processing like fingerprints should be done in [proc/on_completed].
 /// List indices are defined in _DEFINES/complex_construction.dm
 /datum/construction_step/proc/get_results(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	return list(
-		CONSTRUCTION_RESULTING_ATOMS = get_resulting_atoms(user, used_item, target, modifiers),
-		CONSTRUCTION_RESULTING_TURF = get_resulting_turf(user, used_item, target, modifiers),
-	)
+	SHOULD_NOT_OVERRIDE(TRUE)
 
-/// Returns the list of resulting atom instances.
-/datum/construction_step/proc/get_resulting_atoms(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	var/list/resulting_atoms = list()
+	var/list/results = list()
 
-	var/list/resulting_atom_types = get_resulting_atom_types(user, used_item, target, modifiers)
-	for (var/atom_type in resulting_atom_types)
-		var/atom/new_atom = new atom_type(target.loc)
-		if (!QDELETED(new_atom)) // Stack mergers, mainly.
-			resulting_atoms += new_atom
+	for (var/result_type in result_types)
+		var/result_amount = result_types[result_type]
+		if (result_amount)
+			results += get_results_of_type(user, used_item, target, modifiers, result_type, result_amount)
 
-	if (construction_flags & CONSTRUCTION_APPLY_FINGERPRINTS)
-		for (var/atom/atom as anything in resulting_atoms)
-			atom.add_fingerprint(user)
+	var/list/valid_results = list()
+	for (var/atom/movable/result as anything in results)
+		if (!QDELETED(result)) // Evil instant stack mergers, mainly.
+			valid_results += result
 
-/// Returns the resulting turf instance.
-/datum/construction_step/proc/get_resulting_turf(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	var/turf/target_turf = get_turf(target)
-	if (!target_turf)
-		return null
+	return valid_results
 
-	var/resulting_turf_type = get_resulting_turf_type(user, used_item, target, modifiers)
-	if (!resulting_turf_type)
-		return null
+/// Returns a list of /atom/movable instances based on a result type and an amount.
+/// You can override this to add custom getters for any specific types you want.
+/datum/construction_step/proc/get_results_of_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, result_type, result_amount)
+	if (ispath(result_type, /turf))
+		return get_result_turfs_of_type(user, used_item, target, modifiers, result_type, result_amount)
+	if (ispath(result_type, /obj/item/stack))
+		return get_result_stacks_of_type(user, used_item, target, modifiers, result_type, result_amount)
+	if (ispath(result_type, /atom/movable))
+		return get_result_atoms_of_type(user, used_item, target, modifiers, result_type, result_amount)
 
-	var/turf/resulting_turf = target_turf.place_on_top(resulting_turf_type)
+	CRASH("Construction step of type \"[type]\" failed to create construction step result of type \"[result_type]\"")
 
-	if (construction_flags & CONSTRUCTION_APPLY_FINGERPRINTS)
-		resulting_turf.add_fingerprint(user)
+/// Returns a list of result turfs based on a result type and an amount.
+/datum/construction_step/proc/get_result_turfs_of_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, turf/result_type, result_amount)
+	. = list()
+	for (var/i in 1 to result_amount)
+		var/turf/current_turf = get_turf(target)
+		if (!current_turf)
+			break
+		. += current_turf.place_on_top(result_type)
 
-	return resulting_turf
+/// Returns a list of result stacks based on a result type and an amount.
+/datum/construction_step/proc/get_result_stacks_of_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, obj/item/stack/result_type, result_amount)
+	. = list()
+	var/max_amount = result_type::max_amount
+	if (!max_amount)
+		return
+
+	while (result_amount > 0)
+		var/drop_loc = target.drop_location()
+		if (!drop_loc)
+			break
+		var/stack_amount = min(result_amount, max_amount)
+		. += new result_type(drop_loc, stack_amount)
+		result_amount -= stack_amount
+
+/// Returns a list of result generic atoms based on a result type and an amount.
+/datum/construction_step/proc/get_result_atoms_of_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, atom/movable/result_type, result_amount)
+	. = list()
+	for (var/i in 1 to result_amount)
+		var/drop_loc = target.drop_location()
+		if (!drop_loc)
+			break
+		. += new result_type(drop_loc)
 
 /// Called after the step is completed. Can be used for feedback.
 /// Passes in the reqs and results of the step, indices are defined in _DEFINES/complex_construction.dm
-/datum/construction_step/proc/on_completed(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs, list/results)
-	return
+/datum/construction_step/proc/on_completed(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/results)
+	SHOULD_CALL_PARENT(TRUE)
+
+	if (!(construction_flags & CONSTRUCTION_NO_FINGERPRINTS))
+		for (var/atom/movable/result as anything in results)
+			result.add_fingerprint(user)
+
+	switch (target_handling)
+		if (CONSTRUCTION_DELETE_TARGET)
+			qdel(target)
+		if (CONSTRUCTION_DESTROY_TARGET)
+			astype(target, /obj)?.deconstruct(disassembled = FALSE)
+		if (CONSTRUCTION_DISASSEMBLE_TARGET)
+			astype(target, /obj)?.deconstruct(disassembled = TRUE)
 
 /// Returns the final duration.
 /datum/construction_step/proc/get_duration(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
@@ -171,10 +231,6 @@
 /datum/construction_step/proc/get_req_tool_behaviour(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	return req_tool_behaviour
 
-/// Returns the final list of the resulting atom types.
-/datum/construction_step/proc/get_resulting_atom_types(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	return resulting_atom_types
-
-/// Returns the final resulting turf type.
-/datum/construction_step/proc/get_resulting_turf_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	return resulting_turf_type
+/// Returns the final list of the result types.
+/datum/construction_step/proc/get_result_types(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
+	return result_types
