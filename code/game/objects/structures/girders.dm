@@ -27,7 +27,19 @@
 	)
 
 	var/static/list/construction_steps = list(
-		/datum/construction_step/girder/slice_apart
+		/datum/construction_step/girder/slice_apart,
+		/datum/construction_step/girder/reinforce_frame,
+		/datum/construction_step/girder/make_wall/iron,
+		/datum/construction_step/girder/make_wall/false/iron,
+		/datum/construction_step/girder/make_wall/rods,
+		/datum/construction_step/girder/make_wall/false/rods,
+		/datum/construction_step/girder/make_wall/tram/titaniumglass,
+		/datum/construction_step/girder/make_wall/plasteel,
+		/datum/construction_step/girder/make_wall/false/plasteel,
+		/datum/construction_step/girder/make_wall/plastitanium,
+		/datum/construction_step/girder/make_wall/material/normal,
+		/datum/construction_step/girder/make_wall/material/concat/false,
+		/datum/construction_step/girder/make_wall/material/concat/tram,
 	)
 
 /obj/structure/girder/Initialize(mapload)
@@ -88,7 +100,7 @@
 				balloon_alert(user, "need tram floors!")
 				return
 
-		make_wall(stack, user)
+		//make_wall(stack, user)
 		return
 
 	if(istype(W, /obj/item/pipe))

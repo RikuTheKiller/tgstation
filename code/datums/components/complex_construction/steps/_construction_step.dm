@@ -88,7 +88,7 @@
 
 	var/list/results = get_results(user, used_item, target, modifiers)
 
-	on_completed(user, used_item, target, modifiers, results)
+	on_completed(user, used_item, target, modifiers, reqs, results)
 
 	return TRUE
 
@@ -106,6 +106,10 @@
 /// Returns whether the user can start this step. Called only at the start of the step. Can be used for feedback.
 /datum/construction_step/proc/can_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	SHOULD_CALL_PARENT(TRUE)
+
+	if (DOING_INTERACTION_WITH_TARGET(user, target))
+		target.balloon_alert(user, "busy!")
+		return FALSE
 
 	var/req_item_type = reqs[CONSTRUCTION_REQ_ITEM_TYPE]
 	if (req_item_type && !istype(used_item, req_item_type))
@@ -129,6 +133,9 @@
 /datum/construction_step/proc/on_started(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	SHOULD_CALL_PARENT(TRUE)
 
+	if (starting_alert_text)
+		target.balloon_alert(user, starting_alert_text)
+
 	if (!(construction_flags & CONSTRUCTION_NO_FINGERPRINTS))
 		used_item.add_fingerprint(user)
 		target.add_fingerprint(user)
@@ -140,6 +147,7 @@
 	SHOULD_NOT_OVERRIDE(TRUE)
 
 	var/list/results = list()
+	var/list/result_types = get_result_types(user, used_item, target, modifiers)
 
 	for (var/result_type in result_types)
 		var/result_amount = result_types[result_type]
@@ -200,12 +208,18 @@
 
 /// Called after the step is completed. Can be used for feedback.
 /// Passes in the reqs and results of the step, indices are defined in _DEFINES/complex_construction.dm
-/datum/construction_step/proc/on_completed(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/results)
+/datum/construction_step/proc/on_completed(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs, list/results)
 	SHOULD_CALL_PARENT(TRUE)
+
+	if (completion_alert_text)
+		target.balloon_alert(user, completion_alert_text)
 
 	if (!(construction_flags & CONSTRUCTION_NO_FINGERPRINTS))
 		for (var/atom/movable/result as anything in results)
 			result.add_fingerprint(user)
+
+	if (construction_flags & CONSTRUCTION_APPLY_MATS)
+		apply_mats_to_results(user, used_item, target, modifiers, reqs, results)
 
 	switch (target_handling)
 		if (CONSTRUCTION_DELETE_TARGET)
@@ -214,6 +228,28 @@
 			astype(target, /obj)?.deconstruct(disassembled = FALSE)
 		if (CONSTRUCTION_DISASSEMBLE_TARGET)
 			astype(target, /obj)?.deconstruct(disassembled = TRUE)
+
+/// Applies the materials of the used item to the results. Used if CONSTRUCTION_APPLY_MATS is set.
+/datum/construction_step/proc/apply_mats_to_results(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs, list/results)
+	if (!istype(used_item, /obj/item/stack/sheet))
+		return
+	if (!length(results))
+		return
+
+	var/total_material_users = 0
+	for (var/atom/movable/result as anything in results)
+		total_material_users += astype(result, /obj/item/stack)?.get_amount() || 1
+
+	if (!total_material_users)
+		return
+
+	var/obj/item/stack/sheet/used_sheets = used_item
+
+	var/materials = used_sheets.mats_per_unit
+	var/multiplier = 1 / total_material_users * reqs[CONSTRUCTION_REQ_ITEM_AMOUNT]
+
+	for (var/atom/movable/result as anything in results)
+		result.set_custom_materials(materials, multiplier * (astype(result, /obj/item/stack)?.get_amount() || 1))
 
 /// Returns the final duration.
 /datum/construction_step/proc/get_duration(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)

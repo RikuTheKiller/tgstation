@@ -11,6 +11,8 @@
 /// This step can be modified by construction speed modifiers.
 /// This is for things that progress towards a structure of some kind. (e.g. plating a girder)
 #define CONSTRUCTION_APPLY_SPEED_MODS (1 << 1)
+/// This step applies the materials of the used stack to the results.
+#define CONSTRUCTION_APPLY_MATS (1 << 2)
 
 // Mutually exclusive target handling types
 
