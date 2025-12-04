@@ -7,7 +7,12 @@
 // - Put feedback in on_started and on_completed.
 // - Congrats, you have a construction step.
 
+/// A construction step, these can do basically any construction action you need.
+/// Simply check _construction_step.dm for all the different vars and such that you can tweak.
+/// A basic construction step setup is incredibly simple, but this supports highly advanced stuff too.
+/// Properly setting [var/abstract_type] for parent types is recommended so they don't get initialized.
 /datum/construction_step
+	// Setting this isn't absolutely necessary, but doing so enables a failsafe and will prevent it from going into GLOB.crafting_steps altogether.
 	abstract_type = /datum/construction_step
 
 	/// The base duration of the construction step in deciseconds.

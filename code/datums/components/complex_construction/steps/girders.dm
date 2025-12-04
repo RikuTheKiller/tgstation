@@ -11,6 +11,8 @@ var/static/list/construction_cost = list(
 */
 
 /datum/construction_step/girder
+	abstract_type = /datum/construction_step/girder
+
 	/// The required state of the girder, if any.
 	var/req_girder_state = null
 
@@ -35,6 +37,7 @@ var/static/list/construction_cost = list(
 	starting_alert_text = "reinforcing frame..."
 
 /datum/construction_step/girder/make_wall
+	abstract_type = /datum/construction_step/girder/make_wall
 	duration = 4 SECONDS
 	req_item_type = /obj/item/stack
 	req_girder_state = GIRDER_NORMAL
@@ -67,11 +70,13 @@ var/static/list/construction_cost = list(
 	return TRUE
 
 /datum/construction_step/girder/make_wall/false
+	abstract_type = /datum/construction_step/girder/make_wall/false
 	duration = 2 SECONDS
 	req_girder_state = GIRDER_DISPLACED
 	starting_alert_text = "concealing entrance..."
 
 /datum/construction_step/girder/make_wall/tram
+	abstract_type = /datum/construction_step/girder/make_wall/tram
 	duration = 2 SECONDS
 	req_girder_state = GIRDER_TRAM
 
@@ -121,6 +126,7 @@ var/static/list/construction_cost = list(
 	result_types = list(/turf/closed/wall/r_wall/plastitanium = 1)
 
 /datum/construction_step/girder/make_wall/material
+	abstract_type = /datum/construction_step/girder/make_wall/material
 	duration = 4 SECONDS
 	req_item_type = /obj/item/stack/sheet
 	req_item_amount = 2
@@ -135,6 +141,8 @@ var/static/list/construction_cost = list(
 	return used_sheets.walltype ? list(used_sheets.walltype = 1) : ..()
 
 /datum/construction_step/girder/make_wall/material/concat
+	abstract_type = /datum/construction_step/girder/make_wall/material/concat
+
 	/// The base type of the resulting wall for sheets with unique wall types. This is then string concatenated into the final type.
 	/// If the sheet's construction path is null, then the default [var/result_types] will be used instead.
 	var/result_type_base = null
@@ -154,3 +162,10 @@ var/static/list/construction_cost = list(
 	req_girder_state = GIRDER_TRAM
 	result_types = list(/obj/structure/tram = 1)
 	result_type_base = /obj/structure/tram/alt
+
+// For runed metal girders only.
+/datum/construction_step/girder/make_wall/runed_metal
+	duration = 5 SECONDS
+	req_item_type = /obj/item/stack/sheet/runed_metal
+	req_item_amount = 1
+	result_types = list(/turf/closed/wall/mineral/cult = 1)

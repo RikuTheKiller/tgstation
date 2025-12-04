@@ -565,6 +565,7 @@
 #include "code\_globalvars\lists\clothing.dm"
 #include "code\_globalvars\lists\color.dm"
 #include "code\_globalvars\lists\communication.dm"
+#include "code\_globalvars\lists\complex_construction.dm"
 #include "code\_globalvars\lists\crafting.dm"
 #include "code\_globalvars\lists\department.dm"
 #include "code\_globalvars\lists\disposals.dm"

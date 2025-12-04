@@ -225,6 +225,7 @@
 	smoothing_flags = NONE
 	smoothing_groups = null
 	canSmoothWith = null
+	construction_steps = parent_type::construction_steps + /datum/construction_step/girder/make_wall/runed_metal
 
 /obj/structure/girder/cult/attackby(obj/item/W, mob/user, list/modifiers, list/attack_modifiers)
 	add_fingerprint(user)
