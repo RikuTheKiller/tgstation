@@ -52,7 +52,10 @@
 
 	var/list/reqs = get_reqs(user, used_item, target, modifiers)
 
+	// Don't merge these, otherwise the [proc/can_start] feedback of overrides may come after [proc/can_complete] feedback.
 	if (!can_start(user, used_item, target, modifiers, reqs))
+		return FALSE
+	if (!can_complete(user, used_item, target, modifiers, reqs))
 		return FALSE
 
 	return try_complete(user, used_item, target, modifiers, reqs)
@@ -65,7 +68,10 @@
 
 	var/list/reqs = get_reqs(user, used_item, target, modifiers)
 
+	// Don't merge these, otherwise the [proc/can_start] feedback of overrides may come after [proc/can_complete] feedback.
 	if (!can_start(user, used_item, target, modifiers, reqs))
+		return FALSE
+	if (!can_complete(user, used_item, target, modifiers, reqs))
 		return FALSE
 
 	INVOKE_ASYNC(src, PROC_REF(try_complete), user, used_item, target, modifiers, reqs)
@@ -104,6 +110,8 @@
 	)
 
 /// Returns whether the user can start this step. Called only at the start of the step. Can be used for feedback.
+/// Note that this doesn't call [proc/can_complete] by itself for the sake of messaging order coherency with overrides.
+/// That means you'll have to call both [proc/can_start] and [proc/can_complete] to verify that the step is good to go.
 /datum/construction_step/proc/can_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	SHOULD_CALL_PARENT(TRUE)
 
@@ -123,7 +131,7 @@
 	if (req_tool_behaviour && used_item.tool_behaviour != req_tool_behaviour)
 		return FALSE
 
-	return can_complete(user, used_item, target, modifiers, reqs)
+	return TRUE
 
 /// Returns whether the user can do this step. Called every tick during the step. Can be used for feedback.
 /datum/construction_step/proc/can_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)

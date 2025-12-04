@@ -36,10 +36,35 @@ var/static/list/construction_cost = list(
 
 /datum/construction_step/girder/make_wall
 	duration = 4 SECONDS
+	req_item_type = /obj/item/stack
 	req_girder_state = GIRDER_NORMAL
 	construction_flags = CONSTRUCTION_APPLY_SPEED_MODS
 	target_handling = CONSTRUCTION_DELETE_TARGET
 	starting_alert_text = "adding plating..."
+
+/datum/construction_step/girder/make_wall/can_start(mob/living/user, obj/item/stack/used_stack, obj/structure/girder/girder, list/modifiers, list/reqs)
+	. = ..()
+	if (!.) // Base checks come first, like required item type and such.
+		return FALSE
+	if (!used_stack.usable_for_construction)
+		girder.balloon_alert(user, "unusable material!")
+		return FALSE
+	return TRUE
+
+/datum/construction_step/girder/make_wall/can_complete(mob/living/user, obj/item/stack/used_stack, obj/structure/girder/girder, list/modifiers, list/reqs)
+	. = ..()
+	if (!.) // Base checks come first, like girder state and such.
+		return FALSE
+	if(iswallturf(girder.loc) || (locate(/obj/structure/falsewall) in girder.loc.contents))
+		girder.balloon_alert(user, "wall already present!")
+		return FALSE
+	if (!isfloorturf(girder.loc) && girder.state != GIRDER_TRAM)
+		girder.balloon_alert(user, "requires a floor!")
+		return FALSE
+	if (girder.state == GIRDER_TRAM && !(locate(/obj/structure/transport/linear/tram) in girder.loc.contents))
+		girder.balloon_alert(user, "requires a tram floor!")
+		return FALSE
+	return TRUE
 
 /datum/construction_step/girder/make_wall/false
 	duration = 2 SECONDS
@@ -100,15 +125,6 @@ var/static/list/construction_cost = list(
 	req_item_type = /obj/item/stack/sheet
 	req_item_amount = 2
 	construction_flags = CONSTRUCTION_APPLY_SPEED_MODS | CONSTRUCTION_APPLY_MATS
-
-/datum/construction_step/girder/make_wall/material/can_start(mob/living/user, obj/item/stack/sheet/used_sheets, atom/movable/target, list/modifiers, list/reqs)
-	. = ..()
-	if (!.) // Base checks like required item type and such come first.
-		return FALSE
-	if (!used_sheets.usable_for_construction)
-		target.balloon_alert(user, "unusable material!")
-		return FALSE
-	return TRUE
 
 /datum/construction_step/girder/make_wall/material/normal
 	req_girder_state = GIRDER_NORMAL
