@@ -10,9 +10,9 @@
 /// A construction step, these can do basically any construction action you need.
 /// Simply check _construction_step.dm for all the different vars and such that you can tweak.
 /// A basic construction step setup is incredibly simple, but this supports highly advanced stuff too.
-/// Properly setting [var/abstract_type] for parent types is recommended so they don't get initialized.
+/// Properly setting [var/abstract_type] for parent types is recommended so they aren't initialized.
 /datum/construction_step
-	// Setting this isn't absolutely necessary, but doing so enables a failsafe and will prevent it from going into GLOB.crafting_steps altogether.
+	// Setting this for abstract parents isn't absolutely necessary, but doing so enables a failsafe and prevents them from being initialized.
 	abstract_type = /datum/construction_step
 
 	/// The base duration of the construction step in deciseconds.
@@ -50,40 +50,8 @@
 	/// The volume of the sound made by the tool used.
 	var/tool_use_volume = 100
 
-/// Has the user attempt this step and returns whether they succeeded. Blocking.
-/// For a non-blocking variant, use [proc/try_start_async] instead.
-/datum/construction_step/proc/try_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	SHOULD_NOT_OVERRIDE(TRUE)
-
-	var/list/reqs = get_reqs(user, used_item, target, modifiers)
-
-	// Don't merge these, otherwise the [proc/can_start] feedback of overrides may come after [proc/can_complete] feedback.
-	if (!can_start(user, used_item, target, modifiers, reqs))
-		return FALSE
-	if (!can_complete(user, used_item, target, modifiers, reqs))
-		return FALSE
-
-	return try_complete(user, used_item, target, modifiers, reqs)
-
-/// Has the user attempt this step and returns whether they were able to start. Non-blocking.
-/// For a blocking variant, use [proc/try_start] instead.
-/datum/construction_step/proc/try_start_async(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
-	SHOULD_NOT_OVERRIDE(TRUE)
-	SHOULD_NOT_SLEEP(TRUE)
-
-	var/list/reqs = get_reqs(user, used_item, target, modifiers)
-
-	// Don't merge these, otherwise the [proc/can_start] feedback of overrides may come after [proc/can_complete] feedback.
-	if (!can_start(user, used_item, target, modifiers, reqs))
-		return FALSE
-	if (!can_complete(user, used_item, target, modifiers, reqs))
-		return FALSE
-
-	INVOKE_ASYNC(src, PROC_REF(try_complete), user, used_item, target, modifiers, reqs)
-	return TRUE
-
 /// Has the user attempt this step and returns whether they succeeded.
-/// Don't call this directly, call [proc/try_start] or [proc/try_start_async] instead.
+/// Handle the return value of [proc/check_interaction] first.
 /datum/construction_step/proc/try_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	PRIVATE_PROC(TRUE)
 	SHOULD_NOT_OVERRIDE(TRUE)
@@ -114,22 +82,22 @@
 		CONSTRUCTION_REQ_TOOL_BEHAVIOUR = get_req_tool_behaviour(user, used_item, target, modifiers),
 	)
 
-/// Returns whether the user can start this step. Called only at the start of the step. Can be used for feedback.
-/// Note that this doesn't call [proc/can_complete] by itself for the sake of messaging order coherency with overrides.
-/// That means you'll have to call both [proc/can_start] and [proc/can_complete] to verify that the step is good to go.
-/datum/construction_step/proc/can_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
-	SHOULD_CALL_PARENT(TRUE)
+/// Returns item interaction flags define, as a composite of [proc/check_is_valid_item], [proc/can_start] and [proc/can_complete].
+/// If this returns blocking, then that means the used item was valid but the step couldn't start, meaning the user shouldn't whack the target.
+/// If this returns success, then that means the construction step can start, and the user shouldn't attempt to run any other construction steps.
+/datum/construction_step/proc/check_interaction(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	SHOULD_NOT_OVERRIDE(TRUE)
 
-	if (DOING_INTERACTION_WITH_TARGET(user, target))
-		target.balloon_alert(user, "busy!")
-		return FALSE
+	if (!check_is_valid(user, used_item, target, modifiers, reqs))
+		return NONE
+	if (!can_start(user, used_item, target, modifiers, reqs) || !can_complete(user, used_item, target, modifiers, reqs))
+		return ITEM_INTERACT_BLOCKING
+	return ITEM_INTERACT_SUCCESS
 
+/// Returns whether the used item and target are valid for this step. If this returns true, whacking the target is blocked.
+/datum/construction_step/proc/check_is_valid(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	var/req_item_type = reqs[CONSTRUCTION_REQ_ITEM_TYPE]
 	if (req_item_type && !istype(used_item, req_item_type))
-		return FALSE
-
-	var/req_item_amount = reqs[CONSTRUCTION_REQ_ITEM_AMOUNT]
-	if (!used_item.tool_start_check(user, req_item_amount))
 		return FALSE
 
 	var/req_tool_behaviour = reqs[CONSTRUCTION_REQ_TOOL_BEHAVIOUR]
@@ -138,7 +106,24 @@
 
 	return TRUE
 
-/// Returns whether the user can do this step. Called every tick during the step. Can be used for feedback.
+/// Returns whether the user can start this step. By this point, the used item is known to be valid. This is for stuff that's independent of the item type.
+/// You can put failure feedback in here as long as there are no other construction steps on the same target with conflicting valid items.
+/// To solve such conflicts, use a [datum/construction_controller] type.
+/datum/construction_step/proc/can_start(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	SHOULD_CALL_PARENT(TRUE)
+
+	if (DOING_INTERACTION_WITH_TARGET(user, target))
+		return FALSE
+
+	var/req_item_amount = reqs[CONSTRUCTION_REQ_ITEM_AMOUNT]
+	if (!used_item.tool_start_check(user, req_item_amount))
+		return FALSE
+
+	return TRUE
+
+/// Returns whether the user can do this step. Called every tick during the step. Be careful with feedback. Base checks should always come first.
+/// You can put failure feedback in here as long as there are no other construction steps on the same target with conflicting valid items.
+/// To solve such conflicts, use a [datum/construction_controller] type.
 /datum/construction_step/proc/can_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
 	return TRUE
 
@@ -155,7 +140,6 @@
 
 /// Returns the list of result /atom/movable instances.
 /// Post processing like fingerprints should be done in [proc/on_completed].
-/// List indices are defined in _DEFINES/complex_construction.dm
 /datum/construction_step/proc/get_results(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	SHOULD_NOT_OVERRIDE(TRUE)
 

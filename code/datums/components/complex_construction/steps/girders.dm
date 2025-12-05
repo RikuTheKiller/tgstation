@@ -1,14 +1,65 @@
-/* For referencing costs.
-var/static/list/construction_cost = list(
-		/obj/item/stack/sheet/iron = 2,
-		/obj/item/stack/rods = 5,
-		/obj/item/stack/sheet/plasteel = 2,
-		/obj/item/stack/sheet/bronze = 2,
-		/obj/item/stack/sheet/runed_metal = 1,
-		/obj/item/stack/sheet/titaniumglass = 2,
-		exotic_material = 2 // this needs to be refactored properly
+/datum/construction_controller/girder
+	var/list/base_steps = list(
+		/datum/construction_step/girder/slice_apart,
+		/datum/construction_step/girder/reinforce_frame,
 	)
-*/
+
+	var/list/base_wall_steps = list(
+		/datum/construction_step/girder/make_wall/iron,
+		/datum/construction_step/girder/make_wall/false/iron,
+		/datum/construction_step/girder/make_wall/rods,
+		/datum/construction_step/girder/make_wall/false/rods,
+		/datum/construction_step/girder/make_wall/tram/titaniumglass,
+		/datum/construction_step/girder/make_wall/plasteel,
+		/datum/construction_step/girder/make_wall/false/plasteel,
+		/datum/construction_step/girder/make_wall/plastitanium,
+		/datum/construction_step/girder/make_wall/runed_metal,
+		/datum/construction_step/girder/make_wall/bronze,
+	)
+
+	var/list/material_wall_steps = list(
+		/datum/construction_step/girder/make_wall/material/normal,
+		/datum/construction_step/girder/make_wall/material/concat/false,
+		/datum/construction_step/girder/make_wall/material/concat/tram,
+	)
+
+/datum/construction_controller/girder/run_controller(mob/living/user, obj/item/used_item, obj/structure/girder/girder, list/modifiers)
+	. = run_steps(base_steps)
+	if (. & ITEM_INTERACT_SUCCESS)
+		return // One of the base steps succeeded, let's stop here.
+	if (!isstack(used_item))
+		return // This returns ITEM_INTERACT_BLOCKING if one of the base steps was valid, otherwise it makes you whack the girder.
+
+	// Don't whack it with any stack, even if you can't make anything with it.
+	. = ITEM_INTERACT_BLOCKING
+
+	var/obj/item/stack/used_stack = used_item
+
+	if (!used_stack.usable_for_construction)
+		girder.balloon_alert(user, "unusable material!")
+		return
+
+	var/obj/structure/girder/unique_girder_type = used_stack.unique_girder_type
+	if (unique_girder_type && !istype(girder, unique_girder_type))
+		girder.balloon_alert(user, "needs a different girder!")
+		return
+
+	if(iswallturf(girder.loc) || (locate(/obj/structure/falsewall) in girder.loc.contents))
+		girder.balloon_alert(user, "wall already present!")
+		return
+	if (!isfloorturf(girder.loc) && girder.state != GIRDER_TRAM)
+		girder.balloon_alert(user, "needs a floor!")
+		return
+	if (girder.state == GIRDER_TRAM && !(locate(/obj/structure/transport/linear/tram) in girder.loc.contents))
+		girder.balloon_alert(user, "needs a tram floor!")
+		return
+
+	// If any of the base wall steps were valid, then we stop here.
+	if (run_steps(base_wall_steps) & ITEM_INTERACT_ANY_BLOCKER)
+		return
+
+	// The amalgamation of all remaining material wall recipes.
+	run_steps(material_wall_steps)
 
 /datum/construction_step/girder
 	abstract_type = /datum/construction_step/girder
@@ -16,8 +67,16 @@ var/static/list/construction_cost = list(
 	/// The required state of the girder, if any.
 	var/req_girder_state = null
 
-/datum/construction_step/girder/can_complete(mob/living/user, obj/item/used_item, obj/structure/girder/girder, list/modifiers, list/reqs)
-	return ..() && (isnull(req_girder_state) || girder.state == req_girder_state)
+// Makes it such that if the girder state is invalid, this doesn't block material wall steps.
+/datum/construction_step/girder/check_is_valid(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	return ..() && is_valid_girder(target)
+
+// Just in case the girder state somehow changes midway through the action.
+/datum/construction_step/girder/can_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	return ..() && is_valid_girder(target)
+
+/datum/construction_step/girder/proc/is_valid_girder(obj/structure/girder/girder)
+	return isnull(req_girder_state) || girder.state == req_girder_state
 
 /datum/construction_step/girder/slice_apart
 	duration = 4 SECONDS
@@ -44,30 +103,6 @@ var/static/list/construction_cost = list(
 	construction_flags = CONSTRUCTION_APPLY_SPEED_MODS
 	target_handling = CONSTRUCTION_DELETE_TARGET
 	starting_alert_text = "adding plating..."
-
-/datum/construction_step/girder/make_wall/can_start(mob/living/user, obj/item/stack/used_stack, obj/structure/girder/girder, list/modifiers, list/reqs)
-	. = ..()
-	if (!.) // Base checks come first, like required item type and such.
-		return FALSE
-	if (!used_stack.usable_for_construction)
-		girder.balloon_alert(user, "unusable material!")
-		return FALSE
-	return TRUE
-
-/datum/construction_step/girder/make_wall/can_complete(mob/living/user, obj/item/stack/used_stack, obj/structure/girder/girder, list/modifiers, list/reqs)
-	. = ..()
-	if (!.) // Base checks come first, like girder state and such.
-		return FALSE
-	if(iswallturf(girder.loc) || (locate(/obj/structure/falsewall) in girder.loc.contents))
-		girder.balloon_alert(user, "wall already present!")
-		return FALSE
-	if (!isfloorturf(girder.loc) && girder.state != GIRDER_TRAM)
-		girder.balloon_alert(user, "requires a floor!")
-		return FALSE
-	if (girder.state == GIRDER_TRAM && !(locate(/obj/structure/transport/linear/tram) in girder.loc.contents))
-		girder.balloon_alert(user, "requires a tram floor!")
-		return FALSE
-	return TRUE
 
 /datum/construction_step/girder/make_wall/false
 	abstract_type = /datum/construction_step/girder/make_wall/false
@@ -125,6 +160,26 @@ var/static/list/construction_cost = list(
 	req_girder_state = GIRDER_REINF
 	result_types = list(/turf/closed/wall/r_wall/plastitanium = 1)
 
+// For runed girders only.
+/datum/construction_step/girder/make_wall/runed_metal
+	duration = 5 SECONDS
+	req_item_type = /obj/item/stack/sheet/runed_metal
+	req_item_amount = 1
+	result_types = list(/turf/closed/wall/mineral/cult = 1)
+
+/datum/construction_step/girder/make_wall/runed_metal/is_valid_girder(obj/structure/girder/girder)
+	return ..() && istype(girder, /obj/structure/girder/bronze)
+
+// For wall gears only.
+/datum/construction_step/girder/make_wall/bronze
+	duration = 5 SECONDS
+	req_item_type = /obj/item/stack/sheet/bronze
+	req_item_amount = 2
+	result_types = list(/turf/closed/wall/mineral/bronze = 1)
+
+/datum/construction_step/girder/make_wall/bronze/is_valid_girder(obj/structure/girder/girder)
+	return ..() && istype(girder, /obj/structure/girder/bronze)
+
 /datum/construction_step/girder/make_wall/material
 	abstract_type = /datum/construction_step/girder/make_wall/material
 	duration = 4 SECONDS
@@ -162,10 +217,3 @@ var/static/list/construction_cost = list(
 	req_girder_state = GIRDER_TRAM
 	result_types = list(/obj/structure/tram = 1)
 	result_type_base = /obj/structure/tram/alt
-
-// For runed metal girders only.
-/datum/construction_step/girder/make_wall/runed_metal
-	duration = 5 SECONDS
-	req_item_type = /obj/item/stack/sheet/runed_metal
-	req_item_amount = 1
-	result_types = list(/turf/closed/wall/mineral/cult = 1)

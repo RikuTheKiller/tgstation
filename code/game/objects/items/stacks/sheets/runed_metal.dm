@@ -79,7 +79,7 @@ GLOBAL_LIST_INIT(runed_metal_recipes, list( \
 	merge_type = /obj/item/stack/sheet/runed_metal
 	grind_results = list(/datum/reagent/iron = 5, /datum/reagent/blood = 15)
 	material_type = /datum/material/runedmetal
-	has_unique_girder = TRUE
+	unique_girder_type = /obj/structure/girder/cult
 	use_radial = TRUE
 
 /obj/item/stack/sheet/runed_metal/interact(mob/user)

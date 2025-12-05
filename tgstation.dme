@@ -1362,6 +1362,7 @@
 #include "code\datums\components\wet_floor.dm"
 #include "code\datums\components\wormborn.dm"
 #include "code\datums\components\complex_construction\complex_construction.dm"
+#include "code\datums\components\complex_construction\steps\_construction_controller.dm"
 #include "code\datums\components\complex_construction\steps\_construction_step.dm"
 #include "code\datums\components\complex_construction\steps\girders.dm"
 #include "code\datums\components\container_item\container_item.dm"

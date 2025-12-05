@@ -73,8 +73,8 @@
 
 	/// Can this stack be used for contruction of girders?
 	var/usable_for_construction = FALSE
-	/// Does this stack require a unique girder in order to make a wall?
-	var/has_unique_girder = FALSE
+	/// If this stack requires an unique girder type to make a wall, then what is it?
+	var/unique_girder_type = FALSE
 	///What type of wall does this sheet spawn
 	var/walltype
 
