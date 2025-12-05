@@ -40,8 +40,6 @@
  * 2. ITEM_INTERACT_BLOCKING - The step is valid, but has failed for other reasons.
  * 3. ITEM_INTERACT_SUCCESS - The step is valid and was able to start successfully.
  */
-/// Runs a list of construction steps, and returns ITEM_INTERACT_X flags on what happened.
-/// A return of NONE implies the step is invalid, ITEM_INTERACT_BLOCKING implies it's valid but failed, ITEM_INTERACT_SUCCESS implies it was started successfully.
 /datum/construction_controller/proc/run_steps(list/step_types)
 	SHOULD_NOT_OVERRIDE(TRUE)
 
