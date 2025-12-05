@@ -302,6 +302,7 @@
 /datum/construction_step/proc/get_replacement_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	return replacement_type
 
+/// Returns the final target handling.
 /datum/construction_step/proc/get_target_handling(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, replacement_type)
 	if (!target_handling && replacement_type)
 		return CONSTRUCTION_DELETE_TARGET // We're replacing it, so delete it at the very least.
