@@ -31,14 +31,22 @@
 
 	/// An assoc list of the types of the result movables. Format is [type = amount]
 	/// You can use [proc/get_result_types] to dynamically override the final value.
-	/// Putting turf types here is fully supported.
+	/// Putting turf and stack types here is fully supported.
 	var/result_types = list()
+
+	/// The type the target is replaced with when the step succeeds.
+	/// You can use [proc/get_replacement_type] to dynamically override the final value.
+	/// Putting turf types here is fully supported, but stacks or multiple items are not.
+	/// A non-null value implies a default [var/target_handling] of CONSTRUCTION_DELETE_TARGET.
+	/// If [var/target_handling] is set to something other than NONE, then that will overtake this.
+	var/replacement_type = null
 
 	/// Construction flags, the default is always NONE.
 	/// Defined in _DEFINES/complex_construction.dm
 	var/construction_flags = NONE
 
 	/// Target handling type, such as deletion, destruction or disassembly.
+	/// You can use [proc/get_target_handling] to dynamically override the final value.
 	/// Defined in _DEFINES/complex_construction.dm
 	var/target_handling = NONE
 
@@ -67,7 +75,25 @@
 
 	var/list/results = get_results(user, used_item, target, modifiers)
 
+	var/replacement_type = get_replacement_type(user, used_item, target, modifiers)
+
+	if (replacement_type)
+		var/atom/replacement = get_replacement_of_type(user, used_item, target, modifiers, replacement_type)
+		if (!QDELETED(replacement))
+			target.transfer_fingerprints_to(replacement)
+			results += replacement // Such that the replacement still gets [proc/on_completed] post-processing done to it.
+
 	on_completed(user, used_item, target, modifiers, reqs, results)
+
+	var/target_handling = get_target_handling(user, used_item, target, modifiers, replacement_type)
+
+	switch (target_handling)
+		if (CONSTRUCTION_DELETE_TARGET)
+			qdel(target)
+		if (CONSTRUCTION_DESTROY_TARGET)
+			astype(target, /obj)?.deconstruct(disassembled = FALSE)
+		if (CONSTRUCTION_DISASSEMBLE_TARGET)
+			astype(target, /obj)?.deconstruct(disassembled = TRUE)
 
 	return TRUE
 
@@ -125,6 +151,8 @@
 /// You can put failure feedback in here as long as there are no other construction steps on the same target with conflicting valid items.
 /// To solve such conflicts, use a [datum/construction_controller] type.
 /datum/construction_step/proc/can_complete(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
+	SHOULD_CALL_PARENT(TRUE)
+
 	return TRUE
 
 /// Called when the step is started. Can be used for feedback.
@@ -144,8 +172,8 @@
 	SHOULD_NOT_OVERRIDE(TRUE)
 
 	var/list/results = list()
-	var/list/result_types = get_result_types(user, used_item, target, modifiers)
 
+	var/list/result_types = get_result_types(user, used_item, target, modifiers)
 	for (var/result_type in result_types)
 		var/result_amount = result_types[result_type]
 		if (result_amount)
@@ -203,6 +231,16 @@
 			break
 		. += new result_type(drop_loc)
 
+/// Returns the replacement instance of the given type, if any.
+/// Can be overridden for custom replacement logic.
+/datum/construction_step/proc/get_replacement_of_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, replacement_type)
+	if (ispath(replacement_type, /turf))
+		return astype(get_turf(target), /turf)?.place_on_top(replacement_type)
+	if (ispath(replacement_type, /atom/movable))
+		return !target.loc ? null : new replacement_type(target.loc)
+
+	CRASH("Construction step of type \"[type]\" failed to create replacement of type \"[replacement_type]\".")
+
 /// Called after the step is completed. Can be used for feedback.
 /// Passes in the reqs and results of the step, indices are defined in _DEFINES/complex_construction.dm
 /datum/construction_step/proc/on_completed(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs, list/results)
@@ -217,14 +255,6 @@
 
 	if (construction_flags & CONSTRUCTION_APPLY_MATS)
 		apply_mats_to_results(user, used_item, target, modifiers, reqs, results)
-
-	switch (target_handling)
-		if (CONSTRUCTION_DELETE_TARGET)
-			qdel(target)
-		if (CONSTRUCTION_DESTROY_TARGET)
-			astype(target, /obj)?.deconstruct(disassembled = FALSE)
-		if (CONSTRUCTION_DISASSEMBLE_TARGET)
-			astype(target, /obj)?.deconstruct(disassembled = TRUE)
 
 /// Applies the materials of the used item to the results. Used if CONSTRUCTION_APPLY_MATS is set.
 /datum/construction_step/proc/apply_mats_to_results(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs, list/results)
@@ -267,3 +297,12 @@
 /// Returns the final list of the result types.
 /datum/construction_step/proc/get_result_types(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	return result_types
+
+/// Returns the final replacement type.
+/datum/construction_step/proc/get_replacement_type(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
+	return replacement_type
+
+/datum/construction_step/proc/get_target_handling(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, replacement_type)
+	if (!target_handling && replacement_type)
+		return CONSTRUCTION_DELETE_TARGET // We're replacing it, so delete it at the very least.
+	return target_handling

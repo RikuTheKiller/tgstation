@@ -32,7 +32,16 @@
 /datum/construction_controller/proc/run_controller(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers)
 	SHOULD_NOT_SLEEP(TRUE)
 
+/**
+ * Runs a list of construction steps, and returns ITEM_INTERACT_X flags on what happened.
+ *
+ * Possible return values:
+ * 1. NONE/FALSE/0 - The step is invalid and has failed.
+ * 2. ITEM_INTERACT_BLOCKING - The step is valid, but has failed for other reasons.
+ * 3. ITEM_INTERACT_SUCCESS - The step is valid and was able to start successfully.
+ */
 /// Runs a list of construction steps, and returns ITEM_INTERACT_X flags on what happened.
+/// A return of NONE implies the step is invalid, ITEM_INTERACT_BLOCKING implies it's valid but failed, ITEM_INTERACT_SUCCESS implies it was started successfully.
 /datum/construction_controller/proc/run_steps(list/step_types)
 	SHOULD_NOT_OVERRIDE(TRUE)
 
@@ -41,7 +50,14 @@
 		if (. & ITEM_INTERACT_SUCCESS)
 			return // The step was able to start, so we stop here.
 
-/// Runs a construction step, and returns ITEM_INTERACT_X flags on what happened.
+/**
+ * Runs a construction step, and returns ITEM_INTERACT_X flags on what happened.
+ *
+ * Possible return values:
+ * 1. NONE/FALSE/0 - The step is invalid and has failed.
+ * 2. ITEM_INTERACT_BLOCKING - The step is valid, but has failed for other reasons.
+ * 3. ITEM_INTERACT_SUCCESS - The step is valid and was able to start successfully.
+ */
 /datum/construction_controller/proc/run_step(step_type)
 	SHOULD_NOT_OVERRIDE(TRUE)
 

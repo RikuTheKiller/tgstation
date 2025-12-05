@@ -2,6 +2,12 @@
 	var/list/base_steps = list(
 		/datum/construction_step/girder/slice_apart,
 		/datum/construction_step/girder/reinforce_frame,
+		/datum/construction_step/girder/disassemble_frame,
+		/datum/construction_step/girder/secure_struts,
+		/datum/construction_step/girder/unsecure_struts,
+		/datum/construction_step/girder/remove_grille,
+		/datum/construction_step/girder/secure_frame,
+		/datum/construction_step/girder/unsecure_frame,
 	)
 
 	var/list/base_wall_steps = list(
@@ -66,6 +72,8 @@
 
 	/// The required state of the girder, if any.
 	var/req_girder_state = null
+	/// The resulting state of the girder, if any.
+	var/result_girder_state = null
 
 // Makes it such that if the girder state is invalid, this doesn't block material wall steps.
 /datum/construction_step/girder/check_is_valid(mob/living/user, obj/item/used_item, atom/movable/target, list/modifiers, list/reqs)
@@ -77,6 +85,11 @@
 
 /datum/construction_step/girder/proc/is_valid_girder(obj/structure/girder/girder)
 	return isnull(req_girder_state) || girder.state == req_girder_state
+
+/datum/construction_step/girder/on_completed(mob/living/user, obj/item/used_item, obj/structure/girder/girder, list/modifiers, list/reqs, list/results)
+	. = ..()
+	if (!isnull(result_girder_state))
+		girder.state = result_girder_state
 
 /datum/construction_step/girder/slice_apart
 	duration = 4 SECONDS
@@ -90,10 +103,57 @@
 	req_item_type = /obj/item/stack/sheet/plasteel
 	req_item_amount = 1
 	req_girder_state = GIRDER_NORMAL
-	result_types = list(/obj/structure/girder/reinforced = 1)
+	replacement_type = /obj/structure/girder/reinforced
 	construction_flags = CONSTRUCTION_APPLY_SPEED_MODS
-	target_handling = CONSTRUCTION_DELETE_TARGET
 	starting_alert_text = "reinforcing frame..."
+
+/datum/construction_step/girder/disassemble_frame
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_SCREWDRIVER
+	target_handling = CONSTRUCTION_DISASSEMBLE_TARGET
+	starting_alert_text = "disassembling frame..."
+
+/datum/construction_step/girder/disassemble_frame/is_valid_girder(obj/structure/girder/girder)
+	return ..() && (girder.state == GIRDER_DISPLACED || girder.state == GIRDER_TRAM)
+
+/datum/construction_step/girder/secure_struts
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_SCREWDRIVER
+	req_girder_state = GIRDER_REINF_STRUTS
+	result_girder_state = GIRDER_REINF
+	starting_alert_text = "securing support struts..."
+
+/datum/construction_step/girder/unsecure_struts
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_SCREWDRIVER
+	req_girder_state = GIRDER_REINF
+	result_girder_state = GIRDER_REINF_STRUTS
+	starting_alert_text = "unsecuring support struts..."
+
+/datum/construction_step/girder/remove_grille
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_WIRECUTTER
+	req_girder_state = GIRDER_REINF_STRUTS
+	result_types = list(/obj/item/stack/sheet/plasteel = 1)
+	replacement_type = /obj/structure/girder
+	starting_alert_text = "removing inner grille..."
+
+/datum/construction_step/girder/secure_frame
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_WRENCH
+	req_girder_state = GIRDER_DISPLACED
+	replacement_type = /obj/structure/girder
+	starting_alert_text = "securing frame..."
+
+/datum/construction_step/girder/unsecure_frame
+	duration = 4 SECONDS
+	req_tool_behaviour = TOOL_WRENCH
+	req_girder_state = GIRDER_NORMAL
+	replacement_type = /obj/structure/girder/displaced
+	starting_alert_text = "unsecuring frame..."
+
+/datum/construction_step/girder/unsecure_frame/is_valid_girder(obj/structure/girder/girder)
+	return ..() && girder.can_displace
 
 /datum/construction_step/girder/make_wall
 	abstract_type = /datum/construction_step/girder/make_wall
@@ -101,7 +161,6 @@
 	req_item_type = /obj/item/stack
 	req_girder_state = GIRDER_NORMAL
 	construction_flags = CONSTRUCTION_APPLY_SPEED_MODS
-	target_handling = CONSTRUCTION_DELETE_TARGET
 	starting_alert_text = "adding plating..."
 
 /datum/construction_step/girder/make_wall/false
@@ -118,27 +177,27 @@
 /datum/construction_step/girder/make_wall/iron
 	req_item_type = /obj/item/stack/sheet/iron
 	req_item_amount = 2
-	result_types = list(/turf/closed/wall = 1)
+	replacement_type = /turf/closed/wall
 
 /datum/construction_step/girder/make_wall/false/iron
 	req_item_type = /obj/item/stack/sheet/iron
 	req_item_amount = 2
-	result_types = list(/obj/structure/falsewall = 1)
+	replacement_type = /obj/structure/falsewall
 
 /datum/construction_step/girder/make_wall/rods
 	req_item_type = /obj/item/stack/rods
 	req_item_amount = 5
-	result_types = list(/turf/closed/wall/mineral/iron = 1)
+	replacement_type = /turf/closed/wall/mineral/iron
 
 /datum/construction_step/girder/make_wall/false/rods
 	req_item_type = /obj/item/stack/rods
 	req_item_amount = 5
-	result_types = list(/obj/structure/falsewall/iron = 1)
+	replacement_type = /obj/structure/falsewall/iron
 
 /datum/construction_step/girder/make_wall/tram/titaniumglass
 	req_item_type = /obj/item/stack/sheet/titaniumglass
 	req_item_amount = 2
-	result_types = list(/obj/structure/tram = 1)
+	replacement_type = /obj/structure/tram
 	starting_alert_text = "adding panel..."
 
 /datum/construction_step/girder/make_wall/plasteel
@@ -146,26 +205,26 @@
 	req_item_type = /obj/item/stack/sheet/plasteel
 	req_item_amount = 1
 	req_girder_state = GIRDER_REINF
-	result_types = list(/turf/closed/wall/r_wall = 1)
+	replacement_type = /turf/closed/wall/r_wall
 
 /datum/construction_step/girder/make_wall/false/plasteel
 	req_item_type = /obj/item/stack/sheet/plasteel
 	req_item_amount = 1
-	result_types = list(/obj/structure/falsewall/reinforced = 1)
+	replacement_type = /obj/structure/falsewall/reinforced
 
 /datum/construction_step/girder/make_wall/plastitanium
 	duration = 5 SECONDS
 	req_item_type = /obj/item/stack/sheet/mineral/plastitanium
 	req_item_amount = 1
 	req_girder_state = GIRDER_REINF
-	result_types = list(/turf/closed/wall/r_wall/plastitanium = 1)
+	replacement_type = /turf/closed/wall/r_wall/plastitanium
 
 // For runed girders only.
 /datum/construction_step/girder/make_wall/runed_metal
 	duration = 5 SECONDS
 	req_item_type = /obj/item/stack/sheet/runed_metal
 	req_item_amount = 1
-	result_types = list(/turf/closed/wall/mineral/cult = 1)
+	replacement_type = /turf/closed/wall/mineral/cult
 
 /datum/construction_step/girder/make_wall/runed_metal/is_valid_girder(obj/structure/girder/girder)
 	return ..() && istype(girder, /obj/structure/girder/bronze)
@@ -175,7 +234,7 @@
 	duration = 5 SECONDS
 	req_item_type = /obj/item/stack/sheet/bronze
 	req_item_amount = 2
-	result_types = list(/turf/closed/wall/mineral/bronze = 1)
+	replacement_type = /turf/closed/wall/mineral/bronze
 
 /datum/construction_step/girder/make_wall/bronze/is_valid_girder(obj/structure/girder/girder)
 	return ..() && istype(girder, /obj/structure/girder/bronze)
@@ -189,31 +248,31 @@
 
 /datum/construction_step/girder/make_wall/material/normal
 	req_girder_state = GIRDER_NORMAL
-	result_types = list(/turf/closed/wall/material = 1)
+	replacement_type = /turf/closed/wall/material
 
 // Having the wall types on the sheets is okay, but not great.
-/datum/construction_step/girder/make_wall/material/normal/get_result_types(mob/living/user, obj/item/stack/sheet/used_sheets, atom/movable/target, list/modifiers)
-	return used_sheets.walltype ? list(used_sheets.walltype = 1) : ..()
+/datum/construction_step/girder/make_wall/material/normal/get_replacement_type(mob/living/user, obj/item/stack/sheet/used_sheets, atom/movable/target, list/modifiers)
+	return used_sheets.walltype || ..()
 
 /datum/construction_step/girder/make_wall/material/concat
 	abstract_type = /datum/construction_step/girder/make_wall/material/concat
 
 	/// The base type of the resulting wall for sheets with unique wall types. This is then string concatenated into the final type.
-	/// If the sheet's construction path is null, then the default [var/result_types] will be used instead.
-	var/result_type_base = null
+	/// If the sheet's construction path is null, then the default [var/replacement_type] will be used instead.
+	var/replacement_type_base = null
 
 // This one is dynamic string concatenation, and it fucking sucks.
-/datum/construction_step/girder/make_wall/material/concat/get_result_types(mob/living/user, obj/item/stack/sheet/used_sheets, atom/movable/target, list/modifiers)
-	return used_sheets.construction_path_type ? list(text2path("[result_type_base]/[used_sheets.construction_path_type]") = 1) : ..()
+/datum/construction_step/girder/make_wall/material/concat/get_replacement_type(mob/living/user, obj/item/stack/sheet/used_sheets, atom/movable/target, list/modifiers)
+	return used_sheets.construction_path_type ? text2path("[replacement_type_base]/[used_sheets.construction_path_type]") : ..()
 
 /datum/construction_step/girder/make_wall/material/concat/false
 	duration = 2 SECONDS
 	req_girder_state = GIRDER_DISPLACED
-	result_types = list(/obj/structure/falsewall/material = 1)
-	result_type_base = /obj/structure/falsewall
+	replacement_type = /obj/structure/falsewall/material
+	replacement_type_base = /obj/structure/falsewall
 	starting_alert_text = "concealing entrance..."
 
 /datum/construction_step/girder/make_wall/material/concat/tram
 	req_girder_state = GIRDER_TRAM
-	result_types = list(/obj/structure/tram = 1)
-	result_type_base = /obj/structure/tram/alt
+	replacement_type = /obj/structure/tram
+	replacement_type_base = /obj/structure/tram/alt

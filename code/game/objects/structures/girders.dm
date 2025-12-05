@@ -31,8 +31,6 @@
 				. += span_notice("The bolts are <b>wrenched</b> in place.")
 		if(GIRDER_DISPLACED)
 			. += span_notice("The bolts are <i>loosened</i>, but the <b>screws</b> are holding [src] together.")
-		if(GIRDER_DISASSEMBLED)
-			. += span_notice("[src] is disassembled! You probably shouldn't be able to see this examine message.")
 		if(GIRDER_TRAM)
 			. += span_notice("[src] is designed for tram usage. Deconstructed with a screwdriver!")
 
@@ -48,84 +46,6 @@
 		return
 
 	return ..()
-
-// Screwdriver behavior for girders
-/obj/structure/girder/screwdriver_act(mob/user, obj/item/tool)
-	if(..())
-		return TRUE
-
-	. = FALSE
-	if(state == GIRDER_TRAM)
-		balloon_alert(user, "disassembling frame...")
-		if(tool.use_tool(src, user, 4 SECONDS, volume=100))
-			if(state != GIRDER_TRAM)
-				return
-			state = GIRDER_DISASSEMBLED
-			var/obj/item/stack/sheet/mineral/titanium/material = new (user.loc, 2)
-			if (!QDELETED(material))
-				material.add_fingerprint(user)
-			qdel(src)
-		return TRUE
-
-	if(state == GIRDER_DISPLACED)
-		balloon_alert(user, "disassembling frame...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			if(state != GIRDER_DISPLACED)
-				return
-			state = GIRDER_DISASSEMBLED
-			var/obj/item/stack/sheet/iron/M = new (loc, 2)
-			if (!QDELETED(M))
-				M.add_fingerprint(user)
-			qdel(src)
-		return TRUE
-
-	else if(state == GIRDER_REINF)
-		balloon_alert(user, "unsecuring support struts...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			if(state != GIRDER_REINF)
-				return
-			state = GIRDER_REINF_STRUTS
-		return TRUE
-
-	else if(state == GIRDER_REINF_STRUTS)
-		balloon_alert(user, "securing support struts...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			if(state != GIRDER_REINF_STRUTS)
-				return
-			state = GIRDER_REINF
-		return TRUE
-
-// Wirecutter behavior for girders
-/obj/structure/girder/wirecutter_act(mob/user, obj/item/tool)
-	. = ..()
-	if(state == GIRDER_REINF_STRUTS)
-		balloon_alert(user, "removing inner grille...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			new /obj/item/stack/sheet/plasteel(get_turf(src))
-			var/obj/structure/girder/G = new (loc)
-			transfer_fingerprints_to(G)
-			qdel(src)
-		return TRUE
-
-/obj/structure/girder/wrench_act(mob/user, obj/item/tool)
-	. = ..()
-	if(state == GIRDER_DISPLACED)
-		if(!isfloorturf(loc))
-			balloon_alert(user, "needs floor!")
-
-		balloon_alert(user, "securing frame...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			var/obj/structure/girder/G = new (loc)
-			transfer_fingerprints_to(G)
-			qdel(src)
-		return TRUE
-	else if(state == GIRDER_NORMAL && can_displace)
-		balloon_alert(user, "unsecuring frame...")
-		if(tool.use_tool(src, user, 40, volume=100))
-			var/obj/structure/girder/displaced/D = new (loc)
-			transfer_fingerprints_to(D)
-			qdel(src)
-		return TRUE
 
 /obj/structure/girder/CanAllowThrough(atom/movable/mover, border_dir)
 	. = ..()

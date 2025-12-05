@@ -24,10 +24,10 @@
 		CRASH("Attempted to set the construction controller of a complex construction controller to invalid type or instance \"[controller_or_type]\".")
 
 /datum/component/complex_construction/RegisterWithParent()
-	RegisterSignal(parent, COMSIG_ATOM_ITEM_INTERACTION, PROC_REF(on_item_interaction))
+	RegisterSignals(parent, list(COMSIG_ATOM_ITEM_INTERACTION, COMSIG_ATOM_ITEM_INTERACTION_SECONDARY), PROC_REF(on_item_interaction))
 
 /datum/component/complex_construction/UnregisterFromParent()
-	UnregisterSignal(parent, COMSIG_ATOM_ITEM_INTERACTION)
+	UnregisterSignal(parent, list(COMSIG_ATOM_ITEM_INTERACTION, COMSIG_ATOM_ITEM_INTERACTION_SECONDARY))
 
 /datum/component/complex_construction/proc/on_item_interaction(atom/movable/target, mob/living/user, obj/item/used_item, list/modifiers)
 	SIGNAL_HANDLER
