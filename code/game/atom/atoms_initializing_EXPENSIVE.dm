@@ -45,9 +45,7 @@
 		SEND_SIGNAL(A, COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZE)
 		SEND_GLOBAL_SIGNAL(COMSIG_GLOB_ATOM_AFTER_POST_INIT, A)
 		var/atom/location = A.loc
-		if(location)
-			/// Sends a signal that the new atom `src`, has been created at `loc`
-			SEND_SIGNAL(location, COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZED_ON, A, arguments[1])
+		location?.InitializedOn(A, arguments[1])
 		if(created_atoms && from_template && ispath(the_type, /atom/movable))//we only want to populate the list with movables
 			created_atoms += A.get_all_contents()
 
@@ -168,3 +166,9 @@
 	set waitfor = FALSE
 	SHOULD_CALL_PARENT(FALSE)
 	stack_trace("[src] ([type]) called LateInitialize but has nothing on it!")
+
+/// Called when an atom successfully initializes within this atom's contents.
+/atom/proc/InitializedOn(atom/new_atom, mapload)
+	set waitfor = FALSE
+	SHOULD_CALL_PARENT(TRUE)
+	SEND_SIGNAL(src, COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZED_ON, new_atom, mapload)

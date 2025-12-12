@@ -64,3 +64,6 @@
 
 // The alpha value of transperent slime types
 #define SLIME_TRANSPARENCY_ALPHA 180
+
+/// How much power a slime corral drains per pylon in cell units per second.
+#define SLIME_CORRAL_POWER_PER_PYLON 200 // Lasts for 50 seconds after power loss with high-capacity power cells.

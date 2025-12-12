@@ -4,6 +4,12 @@
 /// A corral range of 4 lets you create a 5x5 corral without in-betweens.
 #define CORRAL_MAX_RANGE 4
 
+/obj/effect/overlay/slime_corral_pylon
+	icon = 'icons/obj/science/slime_corral.dmi'
+	icon_state = "pylon_active_overlay"
+	vis_flags = VIS_INHERIT_DIR | VIS_INHERIT_LAYER | VIS_INHERIT_PLANE | VIS_INHERIT_ID
+	alpha = 0
+
 /// Used for creating xenobiology slime corrals that can contain slimes within a perimeter.
 /obj/machinery/slime_corral_pylon
 	name = "slime corral pylon"
@@ -14,7 +20,7 @@
 
 	circuit = /obj/item/circuitboard/machine/slime_corral_pylon
 
-	anchored = TRUE
+	anchored = FALSE
 	density = FALSE
 	opacity = FALSE
 
@@ -28,25 +34,51 @@
 
 	/// The direction from which this pylon accepts incoming walls.
 	/// This is the direction towards which the propagation is going.
-	var/in_dir = WEST
+	var/in_dir = null
 	/// The direction to which this pylon generates walls.
-	var/out_dir = WEST
+	var/out_dir = null
 
-	COOLDOWN_DECLARE(interact_cooldown)
+	/// The slime corral this pylon is a part of, if any.
+	var/datum/slime_corral/corral = null
+
+	var/obj/effect/overlay/slime_corral_pylon/active_overlay = null
+
+	COOLDOWN_DECLARE(toggle_cooldown)
+
+/obj/machinery/slime_corral_pylon/Initialize(mapload)
+	. = ..()
+	update_dir()
+
+	active_overlay = new()
+	vis_contents += active_overlay
+
+/obj/machinery/slime_corral_pylon/Destroy(force)
+	QDEL_NULL(active_overlay)
+	return ..()
+
+/obj/machinery/slime_corral_pylon/InitializedOn(atom/new_atom, mapload)
+	. = ..()
+	try_register_cell(new_atom)
 
 /obj/machinery/slime_corral_pylon/Entered(atom/movable/arrived, atom/old_loc, list/atom/old_locs)
 	. = ..()
-	if (istype(arrived, /obj/item/stock_parts/power_store/cell))
-		cell?.forceMove(drop_location())
-		cell = arrived
+	try_register_cell(arrived)
 
 /obj/machinery/slime_corral_pylon/Exited(atom/movable/gone, direction)
 	. = ..()
 	if (gone == cell)
 		cell = null
 
+/obj/machinery/slime_corral_pylon/proc/try_register_cell(atom/movable/potential_cell)
+	if (potential_cell != cell && istype(potential_cell, /obj/item/stock_parts/power_store/cell))
+		cell?.forceMove(drop_location())
+		cell = potential_cell
+
 /obj/machinery/slime_corral_pylon/setDir(newdir)
 	. = ..()
+	update_dir()
+
+/obj/machinery/slime_corral_pylon/proc/update_dir()
 	// The pylons use a clockwise propagation order.
 
 	// [var/in_dir] should be the clockwise direction from which the pylon accepts incoming walls.
@@ -54,7 +86,7 @@
 
 	// For straight segments [var/in_dir] and [var/out_dir] should be the same.
 	// For corner segments [var/out_dir] should be a 90 degree clockwise turn from [var/in_dir].
-	switch (newdir)
+	switch (dir)
 		if (SOUTH)
 			in_dir = WEST
 			out_dir = WEST
@@ -80,6 +112,19 @@
 			in_dir = NORTH
 			out_dir = EAST
 
+/obj/machinery/slime_corral_pylon/examine(mob/user)
+	. = ..()
+	. += span_notice("It could be [anchored ? "unsecured" : "secured"] with a <b>wrench</b>.")
+	if (panel_open)
+		if (cell)
+			. += span_notice("Its cell could be removed with a <b>screwdriver</b>.")
+		else
+			. += span_notice("It has an empty slot for a <b>power cell</b>.")
+	if (!anchored)
+		. += span_notice("It could be reoriented with an empty hand.")
+	else
+		. += span_notice("It could be [corral ? "deactivated" : "activated"] with an empty hand.")
+
 /obj/machinery/slime_corral_pylon/item_interaction(mob/living/user, obj/item/tool, list/modifiers)
 	if (istype(tool, /obj/item/stock_parts/power_store/cell) && panel_open)
 		if (cell)
@@ -89,29 +134,77 @@
 		tool.forceMove(src)
 		return ITEM_INTERACT_SUCCESS
 
-/obj/machinery/slime_corral_pylon/interact(mob/user)
-	. = ..()
-	if (. || panel_open)
-		return
-	. = TRUE
+/obj/machinery/slime_corral_pylon/wrench_act(mob/living/user, obj/item/tool)
+	. = ITEM_INTERACT_BLOCKING
 
-	if (!COOLDOWN_FINISHED(src, interact_cooldown))
-		balloon_alert(user, "on cooldown!")
+	if (!tool.tool_start_check(user))
 		return
 
-	try_propagate_corral(feedback = TRUE)
-	COOLDOWN_START(src, interact_cooldown, 1 SECONDS)
+	var/securing = !anchored
 
-/obj/machinery/slime_corral_pylon/attack_hand(mob/living/user, list/modifiers)
-	. = ..()
-	if (. || !panel_open)
+	user.visible_message(
+		message = span_notice("\The [user] start[user.p_s()] [securing ? "securing" : "unsecuring"] \the [src]."),
+		self_message = span_notice("You start [securing ? "securing" : "unsecuring"] \the [src]."),
+		blind_message = span_hear("You hear wrenching."),
+	)
+
+	if (!tool.use_tool(src, user, 3 SECONDS, volume = 80))
 		return
-	. = TRUE
+	if (securing == anchored)
+		balloon_alert(user, "already [securing ? "secured" : "unsecured"]!")
+		return
+
+	user.visible_message(
+		message = span_notice("\The [user] [securing ? "secure" : "unsecure"][user.p_s()] \the [src]."),
+		self_message = span_notice("You [securing ? "secure" : "unsecure"] \the [src]."),
+	)
+
+	set_anchored(securing)
+	return ITEM_INTERACT_SUCCESS
+
+/obj/machinery/slime_corral_pylon/screwdriver_act(mob/living/user, obj/item/tool)
+	. = ITEM_INTERACT_BLOCKING
+
+	if (!panel_open)
+		balloon_alert(user, "open the panel first!")
+		return
 	if (!cell)
 		balloon_alert(user, "no cell!")
 		return
+	if (!tool.use_tool(src, user, volume = 80))
+		return
+
 	user.put_in_hands(cell)
 	balloon_alert(user, "cell removed")
+	return ITEM_INTERACT_SUCCESS
+
+/obj/machinery/slime_corral_pylon/interact(mob/user)
+	. = ..()
+	if (. || !anchored)
+		return
+	. = TRUE
+
+	if (!COOLDOWN_FINISHED(src, toggle_cooldown))
+		balloon_alert(user, "on cooldown!")
+		return
+
+	if (corral)
+		deactivate_corral(feedback = TRUE)
+	else
+		try_propagate_corral(feedback = TRUE)
+
+	COOLDOWN_START(src, toggle_cooldown, 1 SECONDS)
+
+/obj/machinery/slime_corral_pylon/attack_hand(mob/living/user, list/modifiers)
+	. = ..()
+	if (. || anchored)
+		return
+	. = TRUE
+
+	var/picked_dir_string = show_radial_menu(user, src, GLOB.all_radial_directions, require_near = TRUE)
+
+	if (!isnull(picked_dir_string))
+		setDir(text2dir(picked_dir_string))
 
 /obj/machinery/slime_corral_pylon/RefreshParts()
 	. = ..()
@@ -141,6 +234,8 @@
 	var/turf/current_turf = get_turf(current_pylon)
 
 	for (var/pylon_index in 1 to CORRAL_MAX_PYLONS)
+		if (current_pylon.corral)
+			CORRAL_ERROR("The perimeter intersects with an active corral.")
 		if (!current_pylon.anchored)
 			CORRAL_ERROR("All pylons must be secured.")
 		if (!isfloorturf(current_turf))
@@ -159,6 +254,8 @@
 			current_turf = get_step(current_turf, current_pylon.out_dir)
 			if (!isopenturf(current_turf))
 				CORRAL_ERROR("The perimeter is blocked.")
+			if (locate(/obj/structure/slime_corral_wall) in current_turf)
+				CORRAL_ERROR("The perimeter intersects with an active corral.")
 			for (var/obj/machinery/slime_corral_pylon/candidate_pylon in current_turf)
 				if (candidate_pylon.in_dir == current_pylon.out_dir)
 					next_pylon = candidate_pylon
@@ -181,8 +278,8 @@
 	for (var/obj/machinery/slime_corral_pylon/pylon as anything in pylons)
 		total_charge += pylon.cell?.charge
 
-	if (!total_charge)
-		CORRAL_ERROR("At least one pylon must be powered.")
+	if (total_charge < length(pylons) * SLIME_CORRAL_POWER_PER_PYLON)
+		CORRAL_ERROR("Not enough power.")
 
 	if (feedback)
 		say("Generating perimeter shield wall...")
@@ -198,8 +295,17 @@
 
 #undef CORRAL_ERROR
 
-/// A subtype of the slime corral pylon that spawns loaded with a power cell for mapping and admin purposes.
+/obj/machinery/slime_corral_pylon/proc/deactivate_corral(feedback = FALSE)
+	if (!corral)
+		return
+
+	if (feedback)
+		say("Deactivating perimeter shield wall...")
+	corral.deactivate()
+
+/// A subtype of the slime corral pylon that spawns anchored and loaded with a power cell for mapping and admin purposes.
 /obj/machinery/slime_corral_pylon/loaded
+	anchored = TRUE
 
 /obj/machinery/slime_corral_pylon/loaded/Initialize(mapload)
 	. = ..()
@@ -214,3 +320,12 @@
 
 #undef CORRAL_MAX_PYLONS
 #undef CORRAL_MAX_RANGE
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/slime_corral_pylon, 0)
+MAPPING_DIAGONAL_HELPERS(/obj/machinery/slime_corral_pylon, 0)
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/slime_corral_pylon/loaded, 0)
+MAPPING_DIAGONAL_HELPERS(/obj/machinery/slime_corral_pylon/loaded, 0)
+
+MAPPING_DIRECTIONAL_HELPERS(/obj/machinery/slime_corral_pylon/loaded/propagator, 0)
+MAPPING_DIAGONAL_HELPERS(/obj/machinery/slime_corral_pylon/loaded/propagator, 0)

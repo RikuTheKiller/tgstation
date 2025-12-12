@@ -8,3 +8,8 @@
 	anchored = TRUE
 	density = FALSE
 	opacity = FALSE
+
+	alpha = 0
+
+	/// The slime corral this wall is a part of.
+	var/datum/slime_corral/corral = null
