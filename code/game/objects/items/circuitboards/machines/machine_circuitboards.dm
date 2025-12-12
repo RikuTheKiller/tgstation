@@ -1886,3 +1886,12 @@
 	req_components = list(
 		/datum/stock_part/micro_laser = 1,
 	)
+
+/obj/item/circuitboard/machine/slime_corral_pylon
+	name = "Slime Corral Pylon"
+	greyscale_colors = CIRCUIT_COLOR_SCIENCE
+	build_path = /obj/machinery/slime_corral_pylon
+	req_components = list(
+		/datum/stock_part/micro_laser = 1,
+		/datum/stock_part/capacitor = 1,
+	)
