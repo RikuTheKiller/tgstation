@@ -123,7 +123,7 @@
 	var/obj/machinery/slime_corral_pylon/current_pylon = src
 	var/turf/current_turf = get_turf(current_pylon)
 
-	for (var/i in 1 to CORRAL_MAX_PYLONS)
+	for (var/pylon_index in 1 to CORRAL_MAX_PYLONS)
 		if (!current_pylon.anchored)
 			if (!silent)
 				say("ERROR: All pylons must be secured.")
@@ -146,7 +146,7 @@
 
 		var/obj/machinery/slime_corral_pylon/next_pylon = null
 
-		for (var/i in 1 to CORRAL_MAX_RANGE)
+		for (var/turf_index in 1 to CORRAL_MAX_RANGE)
 			current_turf = get_step(current_turf, current_pylon.out_dir)
 			if (!isopenturf(current_turf))
 				if (!silent)
