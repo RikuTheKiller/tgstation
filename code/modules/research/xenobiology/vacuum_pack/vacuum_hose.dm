@@ -24,3 +24,13 @@
 /obj/item/vacuum_hose/Destroy()
 	vac_pack = null
 	return ..()
+
+/obj/item/vacuum_hose/attack_secondary(mob/living/carbon/victim, mob/living/user, params)
+	if(!vac_pack?.loaded_tank)
+		return SECONDARY_ATTACK_CALL_NORMAL
+
+	vac_pack.loaded_tank.load_mob(victim, user)
+
+	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
+
+

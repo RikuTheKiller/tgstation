@@ -81,6 +81,7 @@
 
 	if(loaded_tank)
 		. += "It is holding \a [loaded_tank]."
+		. += loaded_tank.expand_examine()
 
 /obj/item/vacuum_pack/attack_hand_secondary(mob/user, list/modifiers)
 	. = ..()
