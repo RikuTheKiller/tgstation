@@ -26,11 +26,22 @@
 	hose = new /obj/item/vacuum_hose(src)
 	RegisterSignal(hose, COMSIG_MOVABLE_MOVED, PROC_REF(hose_moved))
 	AddElement(/datum/element/drag_pickup)
+	register_context()
 
 /obj/item/vacuum_pack/Destroy()
 	QDEL_NULL(hose)
 	QDEL_NULL(loaded_tank)
 	return ..()
+
+/obj/item/vacuum_pack/add_context(atom/source, list/context, obj/item/held_item, mob/user)
+	. = ..()
+
+	if(!loaded_tank)
+		return NONE
+
+	context[SCREENTIP_CONTEXT_RMB] = "Remove tank"
+
+	return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/vacuum_pack/atom_deconstruct(disassembled = TRUE)
 	if(loaded_tank)
@@ -44,6 +55,12 @@
 		return ..()
 
 /obj/item/vacuum_pack/attackby(obj/item/attacking_item, mob/user, list/modifiers, list/attack_modifiers)
+	if(istype(attacking_item, /obj/item/bio_tank) && !loaded_tank)
+		loaded_tank = attacking_item
+		attacking_item.forceMove(src)
+		playsound(loc, 'sound/effects/spray.ogg', 10, TRUE, -3)
+		return TRUE
+
 	if(attacking_item == hose)
 		remove_hose()
 		return TRUE
@@ -58,6 +75,25 @@
 	..()
 	if(!(slot & ITEM_SLOT_BACK))
 		remove_hose()
+
+/obj/item/vacuum_pack/examine(mob/user)
+	. = ..()
+
+	if(loaded_tank)
+		. += "It is holding \a [loaded_tank]."
+
+/obj/item/vacuum_pack/attack_hand_secondary(mob/user, list/modifiers)
+	. = ..()
+	if(. == SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN || !loaded_tank)
+		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
+
+	if(!user.put_in_hands(loaded_tank))
+		loaded_tank.forceMove(get_turf(src))
+
+	loaded_tank = null
+	playsound(loc, 'sound/effects/spray.ogg', 10, TRUE, -3)
+
+	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 /obj/item/vacuum_pack/ui_action_click(mob/user)
 	toggle_hose(user)
