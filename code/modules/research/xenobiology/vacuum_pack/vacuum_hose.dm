@@ -25,12 +25,34 @@
 	vac_pack = null
 	return ..()
 
-/obj/item/vacuum_hose/attack_secondary(mob/living/carbon/victim, mob/living/user, params)
+/obj/item/vacuum_hose/interact_with_atom_secondary(atom/interacting_with, mob/living/user, list/modifiers)
+	if(!vac_pack?.loaded_tank || !ismob(interacting_with))
+		return ITEM_INTERACT_BLOCKING
+
+	vac_pack.loaded_tank.load_mob(interacting_with, user)
+
+	return ITEM_INTERACT_SUCCESS
+
+/obj/item/vacuum_hose/ranged_interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	launch_content(interacting_with, user)
+	return ITEM_INTERACT_SUCCESS
+
+/obj/item/vacuum_hose/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
+	return ranged_interact_with_atom(interacting_with, user, modifiers)
+
+///Launches something from the attached container
+/obj/item/vacuum_hose/proc/launch_content(atom/target, mob/user)
 	if(!vac_pack?.loaded_tank)
-		return SECONDARY_ATTACK_CALL_NORMAL
+		balloon_alert(user, "No tank!")
+		playsound(get_turf(src), 'sound/items/syringeproj.ogg', 30, TRUE, -3)
+		return
 
-	vac_pack.loaded_tank.load_mob(victim, user)
+	var/atom/movable/flying_item = vac_pack.loaded_tank.fire_content(user)
+	if(flying_item)
+		playsound(get_turf(src), 'sound/items/syringeproj.ogg', 30, TRUE, -3)
+		flying_item.throw_at(target, 3, 2)
+	else
+		playsound(get_turf(src), 'sound/machines/click.ogg', 30, TRUE, -3)
 
-	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 

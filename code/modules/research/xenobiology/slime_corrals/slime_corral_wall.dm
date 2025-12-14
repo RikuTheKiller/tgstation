@@ -13,3 +13,9 @@
 
 	/// The slime corral this wall is a part of.
 	var/datum/slime_corral/corral = null
+
+/obj/structure/slime_corral_wall/CanAllowThrough(atom/movable/mover, border_dir)
+	. = ..()
+	if((ismonkey(mover) || isslime(mover)) && !mover.throwing)
+		return FALSE
+	return .

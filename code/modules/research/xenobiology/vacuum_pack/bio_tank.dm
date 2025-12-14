@@ -11,10 +11,13 @@
 	. = ..()
 	AddComponent(/datum/component/two_handed, require_twohands = TRUE)
 
-/obj/item/bio_tank/proc/load_mob(mob/living/carbon/victim, mob/living/user)
+/obj/item/bio_tank/proc/expand_examine()
 	return
 
-/obj/item/bio_tank/proc/expand_examine()
+/obj/item/bio_tank/proc/fire_content(mob/user)
+	return
+
+/obj/item/bio_tank/proc/load_mob(mob/living/carbon/victim, mob/living/user)
 	return
 
 /obj/item/bio_tank/examine(mob/user)
@@ -26,18 +29,36 @@
 	desc = "A cylindrical tank that can keep a slime in stasis. Fits in a vacuum pack."
 	var/mob/living/basic/slime/prisoner
 
+/obj/item/bio_tank/slime/Destroy()
+	QDEL_NULL(prisoner)
+	return ..()
+
+/obj/item/bio_tank/slime/atom_break()
+	if(prisoner)
+		prisoner.forceMove(get_turf(src))
+	return ..()
+
 /obj/item/bio_tank/slime/expand_examine()
 	return prisoner ? "The tank contains \a [prisoner]." : "The tank is empty"
 
-/obj/item/bio_tank/slime/load_mob(mob/living/carbon/victim, mob/living/user)
+/obj/item/bio_tank/slime/fire_content(mob/user)
+	if(!prisoner)
+		balloon_alert(user, "no slime!")
+		return
 
+	var/free_slime = prisoner
+	prisoner.forceMove(get_turf(src))
+	prisoner = null
+	return free_slime
+
+/obj/item/bio_tank/slime/load_mob(mob/living/carbon/victim, mob/living/user)
 	if(prisoner)
-		user.balloon_alert("tank full!")
+		balloon_alert(user, "tank full!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
 	if(!isslime(victim))
-		user.balloon_alert("not slime!")
+		balloon_alert(user, "not slime!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
@@ -56,6 +77,8 @@
 	var/max_biomass = 10
 	///biomass gain per monkey
 	var/biomass_gain = 0.25
+	///cost for spawning a monkey
+	var/monkey_cost = 1
 
 /obj/item/bio_tank/monkey/expand_examine()
 	return "The tank contains [current_biomass] units of biomass, out of [max_biomass] units."
@@ -63,17 +86,17 @@
 /obj/item/bio_tank/monkey/load_mob(mob/living/carbon/victim, mob/living/user)
 
 	if(current_biomass >= max_biomass)
-		user.balloon_alert("tank full!")
+		balloon_alert(user, "tank full!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
 	if(!ismonkey(victim))
-		user.balloon_alert("not monkey!")
+		balloon_alert(user, "not monkey!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
 	if(victim.stat != DEAD)
-		user.balloon_alert("monkey alive!")
+		balloon_alert(user, "monkey alive!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
@@ -81,3 +104,16 @@
 	qdel(victim)
 	current_biomass = min(max_biomass, current_biomass + biomass_gain)
 
+/obj/item/bio_tank/monkey/fire_content(mob/user)
+	if(current_biomass < monkey_cost)
+		balloon_alert(user, "not enough biomass!")
+		return
+
+	current_biomass -= monkey_cost
+	var/mob/living/monkey_to_fire = new /mob/living/carbon/human/species/monkey(get_turf(src), TRUE, user)
+	if(QDELETED(monkey_to_fire))
+		return
+
+	ADD_TRAIT(monkey_to_fire, TRAIT_SPAWNED_MOB, INNATE_TRAIT)
+	monkey_to_fire.apply_status_effect(/datum/status_effect/slime_food, user)
+	return monkey_to_fire

@@ -43,7 +43,7 @@
 
 	return CONTEXTUAL_SCREENTIP_SET
 
-/obj/item/vacuum_pack/atom_deconstruct(disassembled = TRUE)
+/obj/item/vacuum_pack/atom_break()
 	if(loaded_tank)
 		loaded_tank.forceMove(get_turf(src))
 	return ..()
