@@ -52,6 +52,11 @@
 	active_overlay = new()
 	vis_contents += active_overlay
 
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_EXIT = PROC_REF(on_exit),
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
+
 /obj/machinery/slime_corral_pylon/Destroy(force)
 	QDEL_NULL(active_overlay)
 	return ..()
@@ -317,6 +322,29 @@
 /obj/machinery/slime_corral_pylon/loaded/propagator/post_machine_initialize()
 	. = ..()
 	try_propagate_corral()
+
+
+/obj/machinery/slime_corral_pylon/CanAllowThrough(atom/movable/mover, border_dir)
+	. = ..()
+	if(!corral)
+		return .
+
+	if((border_dir & dir) && (ismonkey(mover) || isslime(mover)) && !mover.throwing)
+		return FALSE
+	return .
+
+/obj/machinery/slime_corral_pylon/proc/on_exit(datum/source, atom/movable/leaving, direction)
+	SIGNAL_HANDLER
+
+	if(leaving == src)
+		return
+
+	if(!corral)
+		return
+
+	if((direction & dir) && (ismonkey(leaving) || isslime(leaving)) && !leaving.throwing)
+		leaving.Bump(src)
+		return COMPONENT_ATOM_BLOCK_EXIT
 
 #undef CORRAL_MAX_PYLONS
 #undef CORRAL_MAX_RANGE
