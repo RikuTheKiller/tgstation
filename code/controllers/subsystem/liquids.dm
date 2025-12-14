@@ -1,16 +1,22 @@
-#define ADD_TURF_TO_GROUP(group, turf) \
-	group.turfs[turf] = TRUE; \
-	group.edges[turf] = TRUE; \
+#define ADD_TURF_TO_GROUP(group, to_add) \
+	group.turfs[to_add] = TRUE; \
+	group.edges[to_add] = TRUE; \
 	group.needs_edge_update = TRUE; \
-	turf.liquid_group = group; \
-	turf.liquid_effect = new(turf);
+	to_add.liquid_group = group; \
+	to_add.liquid_effect = new(to_add);
 
-#define REMOVE_TURF_FROM_GROUP(group, turf) \
-	group.turfs -= turf; \
-	group.edges -= turf; \
+#define REMOVE_TURF_FROM_GROUP(group, to_remove) \
+	group.turfs -= to_remove; \
+	group.edges -= to_remove; \
 	group.needs_edge_update = TRUE; \
-	turf.liquid_group = null; \
-	QDEL_NULL(turf.liquid_effect);
+	to_remove.liquid_group = null; \
+	QDEL_NULL(to_remove.liquid_effect); \
+	for (var/cardinal in GLOB.cardinals) { \
+		var/turf/open/adjacent = get_step(to_remove, cardinal); \
+		if (group.turfs[adjacent]) { \
+			group.edges[adjacent] = TRUE; \
+		}; \
+	};
 
 #define MERGE_GROUPS(to, from) \
 	for (var/turf/open/turf as anything in from.turfs) { \
@@ -124,6 +130,9 @@ SUBSYSTEM_DEF(liquids)
 			REMOVE_TURF_FROM_GROUP(group, to_remove)
 
 		group.to_remove.Cut()
+
+		if (!length(group.turfs))
+			qdel(group)
 
 /datum/controller/subsystem/liquids/proc/queue_add()
 	for (var/datum/liquid_group/group as anything in groups)
