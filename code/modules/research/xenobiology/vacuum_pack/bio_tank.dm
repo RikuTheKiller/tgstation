@@ -85,8 +85,8 @@
 
 /obj/item/bio_tank/monkey/load_mob(mob/living/carbon/victim, mob/living/user)
 
-	if(current_biomass >= max_biomass)
-		balloon_alert(user, "tank full!")
+	if(current_biomass + biomass_gain > max_biomass)
+		balloon_alert(user, "no space!")
 		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
 		return
 
@@ -117,3 +117,18 @@
 	ADD_TRAIT(monkey_to_fire, TRAIT_SPAWNED_MOB, INNATE_TRAIT)
 	monkey_to_fire.apply_status_effect(/datum/status_effect/slime_food, user)
 	return monkey_to_fire
+
+
+/obj/item/bio_tank/monkey/attackby(obj/item/attacking_item, mob/user, list/modifiers, list/attack_modifiers)
+
+	if(!istype(attacking_item, /obj/item/food/monkeycube))
+		return ..()
+
+	if(current_biomass + monkey_cost > max_biomass)
+		balloon_alert(user, "no space!")
+		playsound(src, 'sound/machines/buzz/buzz-sigh.ogg', 50, TRUE)
+		return
+
+	playsound(src, 'sound/items/pshoom/pshoom.ogg', 50, TRUE)
+	qdel(attacking_item)
+	current_biomass = min(max_biomass, current_biomass + monkey_cost)

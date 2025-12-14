@@ -83,6 +83,13 @@
 		. += "It is holding \a [loaded_tank]."
 		. += loaded_tank.expand_examine()
 
+/obj/item/vacuum_pack/attackby(obj/item/attacking_item, mob/user, list/modifiers, list/attack_modifiers)
+
+	if(loaded_tank && loaded_tank.attackby(attacking_item, user, modifiers, attack_modifiers))
+		return
+
+	return ..()
+
 /obj/item/vacuum_pack/attack_hand_secondary(mob/user, list/modifiers)
 	. = ..()
 	if(. == SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN || !loaded_tank)
