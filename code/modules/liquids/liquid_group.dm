@@ -11,7 +11,8 @@
 	/// Associative list of turfs to remove from this group. (list[turf] = TRUE)
 	var/list/to_remove = list()
 
-	var/needs_edge_update = FALSE
+	/// Associative list of turfs to smooth in this group. (list[turf] = TRUE)
+	var/list/to_smooth = list()
 
 	/// The reagents holder of this group.
 	var/datum/reagents/reagents = null
@@ -25,6 +26,7 @@
 	edges.Cut()
 	to_add.Cut()
 	to_remove.Cut()
+	to_smooth.Cut()
 	SSliquids.groups -= src
 	SSliquids.queue -= src
 	return ..()

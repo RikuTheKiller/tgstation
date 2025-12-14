@@ -93,6 +93,28 @@ GLOBAL_LIST_INIT(alldirs, list(
 	SOUTHWEST,
 ))
 
+/// All junctions, i.e. directions but 8 flags instead of 4 flags.
+/// In the same order as [GLOB.alldirs], for cross-indexing.
+GLOBAL_LIST_INIT(all_junctions, list(
+	NORTH_JUNCTION,
+	SOUTH_JUNCTION,
+	EAST_JUNCTION,
+	WEST_JUNCTION,
+	NORTHEAST_JUNCTION,
+	NORTHWEST_JUNCTION,
+	SOUTHEAST_JUNCTION,
+	SOUTHWEST_JUNCTION,
+))
+
+/// Diagonal junctions, i.e. directions but 8 flags instead of 4 flags.
+/// In the same order as [GLOB.diagonals], for cross-indexing.
+GLOBAL_LIST_INIT(diagonal_junctions, list(
+	NORTHEAST_JUNCTION,
+	NORTHWEST_JUNCTION,
+	SOUTHEAST_JUNCTION,
+	SOUTHWEST_JUNCTION,
+))
+
 GLOBAL_LIST_INIT(cardinal_angles, list(
 	"[NORTH]" = 0,
 	"[SOUTH]" = 180,

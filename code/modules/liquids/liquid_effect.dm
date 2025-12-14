@@ -4,6 +4,7 @@
 
 	icon = 'icons/effects/liquids/liquid.dmi'
 	icon_state = "water-0"
+	base_icon_state = "water"
 
 	gender = PLURAL
 	layer = CLEANABLE_OBJECT_LAYER

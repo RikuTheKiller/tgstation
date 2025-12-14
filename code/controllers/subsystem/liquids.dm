@@ -1,21 +1,42 @@
+#define UPDATE_EDGE(group, edge) \
+	var/edge_dirs = NONE; \
+	for (var/i in 1 to length(GLOB.alldirs)) { \
+		var/turf/adjacent = get_step(edge, GLOB.alldirs[i]); \
+		if (!group.turfs[adjacent]) { \
+			edge_dirs |= GLOB.all_junctions[i]; \
+		} \
+	} \
+	if (edge_dirs) { \
+		group.edges[edge] = edge_dirs; \
+	} else if (group.edges[edge]) { \
+		group.edges -= edge; \
+	} \
+
+// By the way you could totally squeeze out more performance here by doing edge updates incrementally.
 #define ADD_TURF_TO_GROUP(group, to_add) \
 	group.turfs[to_add] = TRUE; \
-	group.edges[to_add] = TRUE; \
-	group.needs_edge_update = TRUE; \
 	to_add.liquid_group = group; \
-	to_add.liquid_effect = new(to_add);
+	to_add.liquid_effect = new(to_add); \
+	for (var/turf/updating as anything in RANGE_TURFS(1, to_add)) { \
+		if (group.turfs[updating]) { \
+			group.to_smooth[updating] = TRUE; \
+			UPDATE_EDGE(group, updating); \
+		} \
+	};
 
+// Same here, could just do it incrementally.
 #define REMOVE_TURF_FROM_GROUP(group, to_remove) \
 	group.turfs -= to_remove; \
 	group.edges -= to_remove; \
-	group.needs_edge_update = TRUE; \
+	group.to_smooth -= to_remove; \
 	to_remove.liquid_group = null; \
 	QDEL_NULL(to_remove.liquid_effect); \
-	for (var/cardinal in GLOB.cardinals) { \
-		var/turf/open/adjacent = get_step(to_remove, cardinal); \
-		if (group.turfs[adjacent]) { \
-			group.edges[adjacent] = TRUE; \
-		}; \
+	for (var/dir in GLOB.alldirs) { \
+		var/turf/updating = get_step(to_remove, dir); \
+		if (group.turfs[updating]) { \
+			group.to_smooth[updating] = TRUE; \
+			UPDATE_EDGE(group, updating); \
+		} \
 	};
 
 #define MERGE_GROUPS(to, from) \
@@ -24,7 +45,7 @@
 		turf.liquid_group = to; \
 	}; \
 	for (var/turf/open/turf as anything in from.edges) { \
-		to.edges[turf] = TRUE; \
+		to.edges[turf] = from.edges[turf]; \
 	}; \
 	for (var/turf/open/turf as anything in from.to_add) { \
 		to.to_add[turf] = TRUE; \
@@ -32,14 +53,17 @@
 	for (var/turf/open/turf as anything in from.to_remove) { \
 		to.to_remove[turf] = TRUE; \
 	}; \
+	for (var/turf/open/turf as anything in from.to_smooth) { \
+		to.to_smooth[turf] = TRUE; \
+	}; \
 	from.reagents.trans_to(to.reagents, from.reagents.total_volume, no_react = TRUE); \
-	to.needs_edge_update = TRUE; \
 	qdel(from);
 
 SUBSYSTEM_DEF(liquids)
 	name = "Liquids"
 	wait = 0.2 SECONDS
 	priority = FIRE_PRIORITY_LIQUIDS
+	flags = SS_NO_INIT
 
 	/// The index of the current liquid subsystem stage.
 	var/stage = 0
@@ -49,9 +73,6 @@ SUBSYSTEM_DEF(liquids)
 
 	/// List of all liquid groups in queue for the current stage.
 	var/list/queue = list()
-
-/datum/controller/subsystem/liquids/Initialize()
-	return SS_INIT_SUCCESS
 
 #define RUN_STAGE(index, name) \
 	if (stage == index - 1) { \
@@ -76,7 +97,7 @@ SUBSYSTEM_DEF(liquids)
 	RUN_STAGE(1, spread)
 	RUN_STAGE(2, remove)
 	RUN_STAGE(3, add)
-	RUN_STAGE(4, edges)
+	RUN_STAGE(4, smooth)
 
 #undef RUN_STAGE
 
@@ -94,23 +115,27 @@ SUBSYSTEM_DEF(liquids)
 		// Spreading Start
 		if (group.reagents.total_volume / (length(group.turfs) + length(group.edges) * 4) >= LIQUIDS_TURF_MIN_VOLUME)
 			for (var/turf/open/edge as anything in group.edges)
-				for (var/cardinal in GLOB.cardinals)
-					var/turf/open/adjacent = get_step(edge, cardinal)
-
-					if (!isopenturf(adjacent))
-						continue
-					if (adjacent.liquid_group == group)
-						continue
-					if (!edge.atmos_adjacent_turfs?[adjacent])
+				for (var/spread_dir in GLOB.cardinals)
+					if (!(group.edges[edge] & spread_dir))
 						continue
 
-					group.to_add[adjacent] = TRUE
+					var/turf/open/spreading_to = get_step(edge, spread_dir)
+
+					if (!isopenturf(spreading_to))
+						continue
+					if (spreading_to.liquid_group == group)
+						continue
+					if (!edge.atmos_adjacent_turfs?[spreading_to])
+						continue
+
+					group.to_add[spreading_to] = TRUE
 		// Spreading End
 
 		// Receding Start
 		if (group.reagents.total_volume / length(group.turfs) < LIQUIDS_TURF_MIN_VOLUME)
 			for (var/turf/open/edge as anything in group.edges)
-				group.to_remove[edge] = TRUE
+				if (group.edges[edge] & ALL_CARDINALS)
+					group.to_remove[edge] = TRUE
 		// Receding End
 
 /datum/controller/subsystem/liquids/proc/queue_remove()
@@ -147,25 +172,31 @@ SUBSYSTEM_DEF(liquids)
 		var/datum/liquid_group/group = queue[length(queue)]
 		queue.Cut(length(queue))
 
+		var/list/add_queue = list()
+
+		// Merging Start
 		while (length(group.to_add))
 			var/turf/open/to_add = group.to_add[length(group.to_add)]
 			group.to_add.Cut(length(group.to_add))
+			add_queue += to_add
 
 			var/datum/liquid_group/other_group = to_add.liquid_group
 
-			if (other_group == group)
-				continue
-			if (other_group)
+			if (other_group && other_group != group)
 				MERGE_GROUPS(group, other_group)
+		// Merging End
 
+		// Adding Start
+		for (var/turf/open/to_add as anything in add_queue)
 			ADD_TURF_TO_GROUP(group, to_add)
+		// Adding End
 
-/datum/controller/subsystem/liquids/proc/queue_edges()
+/datum/controller/subsystem/liquids/proc/queue_smooth()
 	for (var/datum/liquid_group/group as anything in groups)
-		if (group.needs_edge_update)
+		if (length(group.to_smooth))
 			queue += group
 
-/datum/controller/subsystem/liquids/proc/run_edges()
+/datum/controller/subsystem/liquids/proc/run_smooth()
 	while (length(queue))
 		if (MC_TICK_CHECK)
 			return
@@ -173,23 +204,16 @@ SUBSYSTEM_DEF(liquids)
 		var/datum/liquid_group/group = queue[length(queue)]
 		queue.Cut(length(queue))
 
-		var/list/new_edges = list()
-		for (var/turf/open/turf as anything in group.edges)
-			var/is_edge = FALSE
+		for (var/turf/open/to_smooth as anything in group.to_smooth)
+			var/icon_index = group.edges[to_smooth] ^ ALL_SMOOTHING_JUNCTIONS // 255 possible states
 
-			for (var/cardinal in GLOB.cardinals)
-				var/turf/open/adjacent = get_step(turf, cardinal)
+			for (var/i in 1 to length(GLOB.diagonals))
+				if ((icon_index & GLOB.diagonals[i]) != GLOB.diagonals[i]) // 255 -> 47 possible states, as we only accept diagonal junctions for smoothing if they're adjacent to 2 cardinal junctions
+					icon_index &= ~GLOB.diagonal_junctions[i]
 
-				if (!isopenturf(adjacent) || adjacent.liquid_group != group)
-					is_edge = TRUE
-					break
+			to_smooth.liquid_effect.icon_state = "[to_smooth.liquid_effect.base_icon_state]-[icon_index]"
 
-			if (is_edge)
-				new_edges[turf] = TRUE
-
-		group.edges.Cut()
-		group.edges = new_edges
-		group.needs_edge_update = FALSE
+		group.to_smooth.Cut()
 
 /datum/controller/subsystem/liquids/proc/ensure_has_group(turf/open/target)
 	PRIVATE_PROC(TRUE)
