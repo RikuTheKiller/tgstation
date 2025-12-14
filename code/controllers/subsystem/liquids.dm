@@ -10,9 +10,8 @@
 		group.edges[edge] = edge_dirs; \
 	} else if (group.edges[edge]) { \
 		group.edges -= edge; \
-	} \
+	}
 
-// By the way you could totally squeeze out more performance here by doing edge updates incrementally.
 #define ADD_TURF_TO_GROUP(group, to_add) \
 	group.turfs[to_add] = TRUE; \
 	to_add.liquid_group = group; \
@@ -24,7 +23,6 @@
 		} \
 	};
 
-// Same here, could just do it incrementally.
 #define REMOVE_TURF_FROM_GROUP(group, to_remove) \
 	group.turfs -= to_remove; \
 	group.edges -= to_remove; \
