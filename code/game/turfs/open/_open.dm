@@ -26,6 +26,11 @@
 	/// Custom destination for mirages
 	var/destination_y
 
+	/// The liquid group on this turf, if any.
+	var/datum/liquid_group/liquid_group = null
+	/// The liquid effect on this turf, if any.
+	var/obj/effect/abstract/liquid/liquid_effect = null
+
 /// Returns a list of every turf state considered "broken".
 /// Will be randomly chosen if a turf breaks at runtime.
 /turf/open/proc/broken_states()
