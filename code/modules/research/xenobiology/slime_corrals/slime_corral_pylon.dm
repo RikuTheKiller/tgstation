@@ -21,8 +21,10 @@
 	circuit = /obj/item/circuitboard/machine/slime_corral_pylon
 
 	anchored = FALSE
+	can_atmos_pass = ATMOS_PASS_PROC
 	density = FALSE
 	opacity = FALSE
+	flags_1 = ON_BORDER_1
 
 	/// The power cell of this pylon, if any.
 	var/obj/item/stock_parts/power_store/cell/cell = null
@@ -52,8 +54,14 @@
 	active_overlay = new()
 	vis_contents += active_overlay
 
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_EXIT = PROC_REF(on_exit),
+	)
+	AddElement(/datum/element/connect_loc, loc_connections)
+
 /obj/machinery/slime_corral_pylon/Destroy(force)
 	QDEL_NULL(active_overlay)
+	air_update_turf(TRUE, FALSE)
 	return ..()
 
 /obj/machinery/slime_corral_pylon/InitializedOn(atom/new_atom, mapload)
@@ -287,8 +295,7 @@
 
 	var/list/walls = list()
 	for (var/turf/wall_turf as anything in wall_turfs)
-		var/obj/structure/slime_corral_wall/wall = new(wall_turf)
-		wall.setDir(wall_turfs[wall_turf])
+		var/obj/structure/slime_corral_wall/wall = new(wall_turf, wall_turfs[wall_turf])
 		walls += wall
 
 	return new /datum/slime_corral(pylons, walls)
@@ -317,6 +324,38 @@
 /obj/machinery/slime_corral_pylon/loaded/propagator/post_machine_initialize()
 	. = ..()
 	try_propagate_corral()
+
+
+/obj/machinery/slime_corral_pylon/CanAllowThrough(atom/movable/mover, border_dir)
+	. = ..()
+	if(!corral)
+		return .
+
+	if((border_dir & dir) && (ismonkey(mover) || isslime(mover)) && !mover.throwing)
+		return FALSE
+	return .
+
+/obj/machinery/slime_corral_pylon/proc/on_exit(datum/source, atom/movable/leaving, direction)
+	SIGNAL_HANDLER
+
+	if(leaving == src)
+		return
+
+	if(!corral)
+		return
+
+	if((direction & dir) && (ismonkey(leaving) || isslime(leaving)) && !leaving.throwing)
+		leaving.Bump(src)
+		return COMPONENT_ATOM_BLOCK_EXIT
+
+/obj/machinery/slime_corral_pylon/CanPass(atom/movable/mover, border_dir)
+	return !(corral && (border_dir & dir) && (ismonkey(mover) || isslime(mover))) ? ..() : TRUE
+
+/obj/machinery/slime_corral_pylon/can_atmos_pass(turf/T, vertical = FALSE)
+	if(QDELING(src) || !corral)
+		return TRUE
+
+	return !(dir & get_dir(loc, T))
 
 #undef CORRAL_MAX_PYLONS
 #undef CORRAL_MAX_RANGE

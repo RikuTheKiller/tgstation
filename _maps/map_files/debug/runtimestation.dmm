@@ -947,6 +947,10 @@
 /obj/machinery/status_display/supply,
 /turf/closed/wall/r_wall,
 /area/station/cargo/storage)
+"fG" = (
+/obj/item/vacuum_pack,
+/turf/open/floor/plating,
+/area/station/construction)
 "fI" = (
 /obj/machinery/door/airlock,
 /turf/open/floor/plating,
@@ -1126,6 +1130,10 @@
 	},
 /obj/machinery/light_switch/directional/west,
 /turf/open/floor/iron,
+/area/station/construction)
+"ik" = (
+/obj/item/bio_tank/slime,
+/turf/open/floor/plating,
 /area/station/construction)
 "io" = (
 /obj/machinery/door/airlock,
@@ -1914,6 +1922,10 @@
 	},
 /turf/open/floor/iron/white/corner,
 /area/station/medical/medbay)
+"Ee" = (
+/obj/item/bio_tank/monkey,
+/turf/open/floor/plating,
+/area/station/construction)
 "Ef" = (
 /obj/machinery/light/directional/north,
 /obj/effect/turf_decal/tile/blue{
@@ -6374,7 +6386,7 @@ dn
 dn
 dn
 dn
-dn
+fG
 dn
 dL
 cN
@@ -6466,7 +6478,7 @@ dn
 dn
 KF
 dn
-dn
+ik
 dn
 dL
 tE
@@ -6558,7 +6570,7 @@ dn
 dn
 dn
 dn
-dn
+Ee
 dn
 dL
 cN

@@ -12,6 +12,7 @@
 
 	for (var/obj/machinery/slime_corral_pylon/pylon as anything in pylons)
 		pylon.corral = src
+		pylon.air_update_turf(TRUE, TRUE)
 
 	for (var/obj/structure/slime_corral_wall/wall as anything in walls)
 		wall.corral = src
@@ -29,6 +30,7 @@
 	for (var/obj/machinery/slime_corral_pylon/pylon as anything in pylons)
 		pylon.corral = null
 		pylon.active_overlay.alpha = 0
+		pylon.air_update_turf(TRUE, FALSE)
 
 	for (var/obj/structure/slime_corral_wall/wall as anything in walls)
 		wall.corral = null
