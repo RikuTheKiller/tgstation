@@ -115,6 +115,19 @@ GLOBAL_LIST_INIT(diagonal_junctions, list(
 	SOUTHWEST_JUNCTION,
 ))
 
+/// All junctions, i.e. directions but 8 flags instead of 4 flags.
+/// Every [GLOB.all_junctions] and [GLOB.alldirs] index corresponds to a reversed direction in this list, for cross-indexing.
+GLOBAL_LIST_INIT(reversed_junctions, list(
+	SOUTH_JUNCTION,
+	NORTH_JUNCTION,
+	WEST_JUNCTION,
+	EAST_JUNCTION,
+	SOUTHWEST_JUNCTION,
+	SOUTHEAST_JUNCTION,
+	NORTHWEST_JUNCTION,
+	NORTHEAST_JUNCTION,
+))
+
 GLOBAL_LIST_INIT(cardinal_angles, list(
 	"[NORTH]" = 0,
 	"[SOUTH]" = 180,
