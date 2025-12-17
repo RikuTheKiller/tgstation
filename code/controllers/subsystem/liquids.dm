@@ -1,54 +1,3 @@
-#define UPDATE_MAX_VOLUME(group) \
-	group.reagents.maximum_volume = length(group.turfs) * LIQUID_HEIGHT_FULL; \
-	group.needs_reagent_update = TRUE; \
-
-#define ADD_TURFS_TO_GROUP(group, to_add_list) \
-	for (var/turf/open/to_add as anything in to_add_list) { \
-		group.turfs[to_add] = TRUE; \
-		group.to_smooth[to_add] = TRUE; \
-		to_add.liquid_group = group; \
-		to_add.liquid_effect = new(to_add); \
-		to_add.liquid_effect.color = group.color; \
-		to_add.liquid_effect.alpha = group.alpha; \
-		var/edge_dirs = NONE; \
-		for (var/i in 1 to 8) { \
-			var/turf/adjacent = get_step(to_add, GLOB.alldirs[i]); \
-			if (group.turfs[adjacent]) { \
-				group.to_smooth[adjacent] = TRUE; \
-				group.edges[adjacent] &= ~GLOB.reversed_junctions[i]; \
-				if (!group.edges[adjacent]) { \
-					group.edges -= adjacent; \
-				} \
-			} else { \
-				edge_dirs |= GLOB.all_junctions[i]; \
-			} \
-		} \
-		if (edge_dirs) { \
-			group.edges[to_add] = edge_dirs; \
-		} \
-	}; \
-	UPDATE_MAX_VOLUME(group);
-
-#define REMOVE_TURFS_FROM_GROUP(group, to_remove_list) \
-	for (var/turf/open/to_remove as anything in to_remove_list) { \
-		group.turfs -= to_remove; \
-		group.edges -= to_remove; \
-		group.to_smooth -= to_remove; \
-		to_remove.liquid_group = null; \
-		QDEL_NULL(to_remove.liquid_effect); \
-		for (var/i in 1 to 8) { \
-			var/turf/adjacent = get_step(to_remove, GLOB.alldirs[i]); \
-			if (group.turfs[adjacent]) { \
-				group.to_smooth[adjacent] = TRUE; \
-				group.edges[adjacent] |= GLOB.reversed_junctions[i]; \
-			} \
-		} \
-	}; \
-	UPDATE_MAX_VOLUME(group); \
-	if (!length(group.turfs)) { \
-		qdel(group); \
-	};
-
 SUBSYSTEM_DEF(liquids)
 	name = "Liquids"
 	wait = 0.2 SECONDS
@@ -56,7 +5,7 @@ SUBSYSTEM_DEF(liquids)
 	flags = SS_NO_INIT
 
 	/// The index of the current liquid subsystem stage.
-	var/stage = 0
+	var/stage = NONE
 
 	/// List of all liquid groups.
 	var/list/groups = list()
@@ -64,33 +13,60 @@ SUBSYSTEM_DEF(liquids)
 	/// List of all liquid groups in queue for the current stage.
 	var/list/queue = list()
 
-#define RUN_STAGE(index, name) \
-	if (stage == index - 1) { \
-		stage = index; \
-		queue.Cut(); \
-		queue_##name(); \
-	}; \
-	if (stage == index) { \
-		if (MC_TICK_CHECK) { \
-			return; \
-		}; \
-		run_##name(); \
-		if (state != SS_RUNNING) { \
-			return; \
-		}; \
-	};
+#define STAGE_SPREAD 1 // Spreading and receding
+#define STAGE_REMOVE 2 // Removing turfs
+#define STAGE_ADD 3 // Adding turfs and merging groups
+#define STAGE_REAGENTS 4 // Reagent visuals
+#define STAGE_SMOOTHING 5 // Icon smoothing
 
 /datum/controller/subsystem/liquids/fire(resumed)
-	if (!resumed)
-		stage = 0
+	if (stage == NONE)
+		stage = STAGE_SPREAD
+		queue.Cut()
+		queue_spread()
 
-	RUN_STAGE(1, spread) // Spreading and receding
-	RUN_STAGE(2, remove) // Removing turfs
-	RUN_STAGE(3, add) // Adding turfs and merging groups
-	RUN_STAGE(4, reagents) // Reagent visuals, reactions and exposures
-	RUN_STAGE(5, smoothing) // Icon smoothing
+	if (stage == STAGE_SPREAD)
+		run_spread()
+		if (state != SS_RUNNING)
+			return
+		stage = STAGE_REMOVE
+		queue.Cut()
+		queue_remove()
 
-#undef RUN_STAGE
+	if (stage == STAGE_REMOVE)
+		run_remove()
+		if (state != SS_RUNNING)
+			return
+		stage = STAGE_ADD
+		queue.Cut()
+		queue_add()
+
+	if (stage == STAGE_ADD)
+		run_add()
+		if (state != SS_RUNNING)
+			return
+		stage = STAGE_REAGENTS
+		queue.Cut()
+		queue_reagents()
+
+	if (stage == STAGE_REAGENTS)
+		run_reagents()
+		if (state != SS_RUNNING)
+			return
+		stage = STAGE_SMOOTHING
+		queue.Cut()
+		queue_smoothing()
+
+	if (stage == STAGE_SMOOTHING)
+		run_smoothing()
+		stage = NONE
+		queue.Cut()
+
+#undef STAGE_SPREAD
+#undef STAGE_REMOVE
+#undef STAGE_ADD
+#undef STAGE_REAGENTS
+#undef STAGE_SMOOTHING
 
 /datum/controller/subsystem/liquids/proc/queue_spread()
 	queue += groups
@@ -129,7 +105,7 @@ SUBSYSTEM_DEF(liquids)
 		// Spreading End
 
 		// Receding Start
-		if (GET_GROUP_LIQUID_HEIGHT(group) < LIQUID_HEIGHT_SPREAD)
+		if (GET_LIQUID_GROUP_HEIGHT(group) < LIQUID_HEIGHT_SPREAD)
 			for (var/turf/open/edge as anything in group.edges)
 				if (group.edges[edge] & ALL_CARDINALS)
 					group.to_remove[edge] = TRUE
@@ -148,7 +124,7 @@ SUBSYSTEM_DEF(liquids)
 		var/datum/liquid_group/group = queue[length(queue)]
 		queue.Cut(length(queue))
 
-		REMOVE_TURFS_FROM_GROUP(group, group.to_remove)
+		remove_turfs_from_group(group, group.to_remove)
 
 		group.to_remove.Cut()
 
@@ -223,12 +199,15 @@ SUBSYSTEM_DEF(liquids)
 				for (var/turf/open/turf as anything in other.turfs)
 					turf.liquid_effect.alpha = group.alpha
 
-			UPDATE_MAX_VOLUME(group) // Do this prior to transfer so that the group has enough space.
+			group.reagents.maximum_volume = length(group.turfs) * LIQUID_HEIGHT_FULL
 			other.reagents.trans_to(group.reagents, other.reagents.total_volume, no_react = TRUE)
+			group.needs_reagent_update = TRUE
+
 			qdel(other)
 		// Merging End
 
-		ADD_TURFS_TO_GROUP(group, add_queue)
+		if (length(add_queue))
+			add_turfs_to_group(group, add_queue)
 
 /datum/controller/subsystem/liquids/proc/queue_reagents()
 	for (var/datum/liquid_group/group as anything in groups)
@@ -245,19 +224,18 @@ SUBSYSTEM_DEF(liquids)
 
 		group.needs_reagent_update = FALSE
 
-		var/color = mix_color_from_reagents(group.reagents.reagent_list)
+		var/color = GET_LIQUID_GROUP_COLOR(group)
 		if (group.color != color)
 			for (var/turf/open/turf as anything in group.turfs)
 				turf.liquid_effect.color = color
 
-		// alpha 102-230 from height 0-900
-		var/alpha = min(round((255 * 0.4) + GET_GROUP_LIQUID_HEIGHT(group) / LIQUID_HEIGHT_HIGH * (255 * 0.5), 1), 230)
+		var/alpha = GET_LIQUID_GROUP_ALPHA(group)
 		if (group.alpha != alpha)
 			group.alpha = alpha
 			for (var/turf/open/turf as anything in group.turfs)
 				turf.liquid_effect.alpha = alpha
 
-		var/smooth = GET_GROUP_LIQUID_HEIGHT(group) < LIQUID_HEIGHT_LOW
+		var/smooth = GET_LIQUID_GROUP_SMOOTH(group)
 		if (group.smooth != smooth)
 			group.smooth = smooth
 			for (var/turf/open/turf as anything in group.turfs)
@@ -289,26 +267,100 @@ SUBSYSTEM_DEF(liquids)
 		else
 			// Fulltile smoothing
 			for (var/turf/open/to_smooth as anything in group.to_smooth)
-				to_smooth.liquid_effect.icon_state = "[to_smooth.liquid_effect.base_icon_state]-255"
+				to_smooth.liquid_effect.icon_state = "[to_smooth.liquid_effect.base_icon_state]-[ALL_SMOOTHING_JUNCTIONS]"
 
 		group.to_smooth.Cut()
 
-/datum/controller/subsystem/liquids/proc/ensure_has_group(turf/open/target)
-	PRIVATE_PROC(TRUE)
-	if (target.liquid_group)
-		return TRUE
+/datum/controller/subsystem/liquids/proc/add_reagent_to_turf(turf/target, reagent_type, volume)
+	return add_reagent_to_turfs(list(target), reagent_type, volume)
 
-	var/datum/liquid_group/group = new()
-	ADD_TURFS_TO_GROUP(group, list(target))
-	return TRUE
+/datum/controller/subsystem/liquids/proc/add_reagent_to_turfs(list/turfs, reagent_type, volume)
+	. = 0
+	for (var/turf/open/target in turfs)
+		if (!target.liquid_group)
+			var/datum/liquid_group/group = new()
+			add_turfs_to_group(group, list(target))
 
-/datum/controller/subsystem/liquids/proc/add_reagent_to_turf(turf/open/target, reagent_type, volume)
-	return ensure_has_group(target) ? add_reagent_to_group(target.liquid_group, reagent_type, volume) : 0
+			. += group.reagents.add_reagent(reagent_type, volume, no_react = TRUE)
+			group.needs_reagent_update = TRUE
 
-/datum/controller/subsystem/liquids/proc/add_reagent_to_group(datum/liquid_group/group, reagent_type, volume)
+			group.color = GET_LIQUID_GROUP_COLOR(group)
+			group.alpha = GET_LIQUID_GROUP_ALPHA(group)
+			group.smooth = GET_LIQUID_GROUP_SMOOTH(group)
+
+			target.liquid_effect.color = group.color
+			target.liquid_effect.alpha = group.alpha
+			target.liquid_effect.icon_state = "[target.liquid_effect.base_icon_state]-[group.smooth ? NONE : ALL_SMOOTHING_JUNCTIONS]"
+		else
+			. += target.liquid_group.reagents.add_reagent(reagent_type, volume, no_react = TRUE)
+			target.liquid_group.needs_reagent_update = TRUE
+
+/datum/controller/subsystem/liquids/proc/remove_reagent_from_turf(turf/target, volume)
+	return remove_reagents_from_turfs(list(target), volume)
+
+/datum/controller/subsystem/liquids/proc/remove_reagents_from_turfs(list/turfs, volume)
+	. = 0
+	for (var/turf/open/target in turfs)
+		if (!target.liquid_group)
+			continue
+
+		. += target.liquid_group.reagents.remove_all(volume)
+		target.liquid_group.needs_reagent_update = TRUE
+
+/datum/controller/subsystem/liquids/proc/add_turf_to_group(datum/liquid_group/group, turf/target)
+	return add_turfs_to_group(group, list(target))
+
+/datum/controller/subsystem/liquids/proc/add_turfs_to_group(datum/liquid_group/group, list/turfs)
+	for (var/turf/open/to_add as anything in turfs)
+		group.turfs[to_add] = TRUE
+		group.to_smooth[to_add] = TRUE
+
+		to_add.liquid_group = group
+		to_add.liquid_effect = new(to_add)
+		to_add.liquid_effect.color = group.color
+		to_add.liquid_effect.alpha = group.alpha
+
+		var/edge_dirs = NONE
+
+		for (var/i in 1 to 8)
+			var/turf/adjacent = get_step(to_add, GLOB.alldirs[i])
+
+			if (group.turfs[adjacent])
+				group.to_smooth[adjacent] = TRUE
+
+				group.edges[adjacent] &= ~GLOB.reversed_junctions[i]
+				if (!group.edges[adjacent])
+					group.edges -= adjacent
+			else
+				edge_dirs |= GLOB.all_junctions[i]
+
+		if (edge_dirs)
+			group.edges[to_add] = edge_dirs
+
+	group.reagents.maximum_volume = length(group.turfs) * LIQUID_HEIGHT_FULL
 	group.needs_reagent_update = TRUE
-	return group.reagents.add_reagent(reagent_type, volume, no_react = TRUE)
 
-#undef UPDATE_MAX_VOLUME
-#undef ADD_TURFS_TO_GROUP
-#undef REMOVE_TURFS_FROM_GROUP
+/datum/controller/subsystem/liquids/proc/remove_turf_from_group(datum/liquid_group/group, turf/target)
+	return remove_turfs_from_group(group, list(target))
+
+/datum/controller/subsystem/liquids/proc/remove_turfs_from_group(datum/liquid_group/group, list/turfs)
+	for (var/turf/open/to_remove as anything in turfs)
+		group.turfs -= to_remove
+		group.edges -= to_remove
+		group.to_smooth -= to_remove
+
+		to_remove.liquid_group = null
+		QDEL_NULL(to_remove.liquid_effect)
+
+		for (var/i in 1 to 8)
+			var/turf/adjacent = get_step(to_remove, GLOB.alldirs[i])
+
+			if (group.turfs[adjacent])
+				group.to_smooth[adjacent] = TRUE
+				group.edges[adjacent] |= GLOB.reversed_junctions[i]
+
+	group.reagents.maximum_volume = length(group.turfs) * LIQUID_HEIGHT_FULL
+	group.needs_reagent_update = TRUE
+
+	if (!length(group.turfs))
+		qdel(group)
